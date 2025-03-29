@@ -9,6 +9,10 @@ from agentless.util.api_requests import (
     request_chatgpt_engine,
 )
 
+import google.generativeai as genai
+from google.api_core import retry
+import os
+
 
 class DecoderBase(ABC):
     def __init__(
@@ -382,6 +386,64 @@ class DeepSeekChatDecoder(DecoderBase):
 
     def is_direct_completion(self) -> bool:
         return False
+    
+class GeminiChatDecoder(DecoderBase):
+    def __init__(self, name: str, logger, **kwargs) -> None:
+        super().__init__(name, logger, **kwargs)
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        self.model = genai.GenerativeModel(name.split("-")[0])  
+
+    @retry.Retry(initial=1.0, maximum=10.0, multiplier=2.0)
+    def _generate_with_retry(self, prompt: str) -> str:
+        response = self.model.generate_content(
+            prompt,
+            generation_config={
+                "temperature": self.temperature,
+                "max_output_tokens": self.max_new_tokens,
+            }
+        )
+        if not response.text:
+            raise ValueError("Gemini returned empty response")
+        return response.text
+
+    def codegen(self, message: str, num_samples: int = 1, prompt_cache: bool = False) -> List[dict]:
+        if self.temperature == 0:
+            assert num_samples == 1
+        
+        trajs = []
+        for _ in range(num_samples):
+            try:
+                response = self._generate_with_retry(message)
+                trajs.append({
+                    "response": response,
+                    "usage": {
+                        "completion_tokens": len(response.split()),  
+                        "prompt_tokens": len(message.split()), 
+                    },
+                })
+            except Exception as e:
+                self.logger.error(f"Gemini error: {e}")
+                trajs.append({
+                    "response": "",
+                    "usage": {"completion_tokens": 0, "prompt_tokens": 0},
+                })
+        return trajs
+
+    def codegen_w_tool(self, message: str, num_samples: int = 1, prompt_cache: bool = False) -> List[dict]:
+        tool_prompt = f"""
+        You are a code repair assistant with access to a file editor. 
+        Use this format for edits:
+        ```python
+        str_replace(path="file.py", old_str="...", new_str="...")
+        ```
+        
+        Task:
+        {message}
+        """
+        return self.codegen(tool_prompt, num_samples, prompt_cache)
+
+    def is_direct_completion(self) -> bool:
+        return False
 
 
 def make_model(
@@ -410,6 +472,14 @@ def make_model(
         )
     elif backend == "deepseek":
         return DeepSeekChatDecoder(
+            name=model,
+            logger=logger,
+            batch_size=batch_size,
+            max_new_tokens=max_tokens,
+            temperature=temperature,
+        )
+    elif backend == "gemini":
+        return GeminiChatDecoder(
             name=model,
             logger=logger,
             batch_size=batch_size,

@@ -760,6 +760,24 @@ def main():
         default="openai",
         choices=["openai", "deepseek", "anthropic"],
     )
+    parser.add_argument(
+        "--backend",
+        type=str,
+        default="gemini",
+        choices=["openai", "deepseek", "anthropic", "gemini"]
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="gemini-2.5-pro-exp-03-25",
+        choices=[
+            "gpt-4o-2024-05-13",
+            "deepseek-coder",
+            "gpt-4o-mini-2024-07-18",
+            "claude-3-5-sonnet-20241022",
+            "gemini-2.5-pro-exp-03-25",
+        ],
+    )
     parser.add_argument("--output_folder", type=str, required=True)
     parser.add_argument("--post_process", action="store_true")
     parser.add_argument("--add_space", action="store_true")
