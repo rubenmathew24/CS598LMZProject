@@ -12,6 +12,7 @@ from agentless.util.api_requests import (
 from google import genai
 from google.genai import types
 import os
+import asyncio
 
 
 class DecoderBase(ABC):
@@ -401,7 +402,7 @@ class GeminiChatDecoder(DecoderBase):
         
         # Map the user-facing model name to the actual Gemini model ID if needed
         if self.name == "gemini-2.5":
-            self.real_model = "gemini-2.5-pro-exp-03-25"
+            self.real_model = "gemini-2.0-flash-lite"
         else:
             self.real_model = self.name
 
@@ -432,7 +433,7 @@ class GeminiChatDecoder(DecoderBase):
             self.logger.info(f"Gemini generation {i+1}/{num_samples}")
             # Here, chat.send_message([message]) might be asynchronous.
             # If needed, wrap it with asyncio.run() or use the synchronous API.
-            reply = chat.send_message([message])
+            reply = asyncio.run(chat.send_message([message]))
             text_out = reply.text if reply else ""
             responses.append(text_out)
 
