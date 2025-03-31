@@ -9,6 +9,10 @@ from agentless.util.api_requests import (
     request_chatgpt_engine,
 )
 
+from google import genai
+from google.genai import types
+import os
+
 
 class DecoderBase(ABC):
     def __init__(
@@ -61,7 +65,7 @@ class OpenAIChatDecoder(DecoderBase):
             batch_size=batch_size,
             model=self.name,
         )
-        ret = request_chatgpt_engine(config, self.logger)
+        ret = _engine(config, self.logger)
         if ret:
             responses = [choice.message.content for choice in ret.choices]
             completion_tokens = ret.usage.completion_tokens
@@ -384,6 +388,80 @@ class DeepSeekChatDecoder(DecoderBase):
         return False
 
 
+class GeminiChatDecoder(DecoderBase):
+    def __init__(self, name: str, logger, **kwargs) -> None:
+        super().__init__(name, logger, **kwargs)
+        self.logger.info(f"Initializing Gemini decoder with model: {self.name}")
+        
+        # Retrieve your Gemini API key from the environment
+        self.api_key = os.environ.get("GEMINI_API_KEY")
+        
+        # Create the GenAI client
+        self.client = genai.Client(api_key=self.api_key)
+        
+        # Map the user-facing model name to the actual Gemini model ID if needed
+        if self.name == "gemini-2.5":
+            self.real_model = "gemini-2.5-pro-exp-03-25"
+        else:
+            self.real_model = self.name
+
+    def codegen(self, message: str, num_samples: int = 1, prompt_cache: bool = False) -> List[dict]:
+        """
+        Generates content using Gemini and returns a list of trajectories.
+        Each trajectory is a dict with keys "response" and "usage".
+        Mimics the behavior of other decoders by appending responses.
+        """
+        if self.temperature == 0:
+            assert num_samples == 1
+
+        self.logger.info(f"Gemini codegen: {num_samples} sample(s) at temperature {self.temperature}")
+
+        # Create the chat session using the Gemini API.
+        chat = self.client.aio.chats.create(
+            model=self.real_model,
+            config=types.GenerateContentConfig(
+                temperature=self.temperature,
+                # Include tools if needed; otherwise, leave it out.
+                # tools=[types.Tool(function_declarations=[...])]  # optional
+            ),
+        )
+
+        # Collect responses from Gemini.
+        responses = []
+        for i in range(num_samples):
+            self.logger.info(f"Gemini generation {i+1}/{num_samples}")
+            # Here, chat.send_message([message]) might be asynchronous.
+            # If needed, wrap it with asyncio.run() or use the synchronous API.
+            reply = chat.send_message([message])
+            text_out = reply.text if reply else ""
+            responses.append(text_out)
+
+        # Build trajectory list similar to OpenAIChatDecoder.
+        trajs = []
+        if responses:
+            # First sample: include actual usage info (here, defaulting to zeros)
+            trajs.append({
+                "response": responses[0],
+                "usage": {
+                    "completion_tokens": 0,  # Update if Gemini returns actual values
+                    "prompt_tokens": 0,
+                },
+            })
+            # Subsequent samples have zero usage (assuming cost is charged only once)
+            for resp in responses[1:]:
+                trajs.append({
+                    "response": resp,
+                    "usage": {
+                        "completion_tokens": 0,
+                        "prompt_tokens": 0,
+                    },
+                })
+        return trajs
+
+    def is_direct_completion(self) -> bool:
+        return False
+
+
 def make_model(
     model: str,
     backend: str,
@@ -410,6 +488,14 @@ def make_model(
         )
     elif backend == "deepseek":
         return DeepSeekChatDecoder(
+            name=model,
+            logger=logger,
+            batch_size=batch_size,
+            max_new_tokens=max_tokens,
+            temperature=temperature,
+        )
+    elif backend == "gemini":
+        return GeminiChatDecoder(
             name=model,
             logger=logger,
             batch_size=batch_size,

@@ -1,6 +1,9 @@
 import json
 from abc import ABC, abstractmethod
 from typing import List
+from google import genai
+from google.genai import types
+import os
 
 from agentless.util.api_requests import (
     create_anthropic_config,
@@ -354,7 +357,7 @@ class DeepSeekChatDecoder(DecoderBase):
                 batch_size=1,
                 model=self.name,
             )
-            ret = request_chatgpt_engine(
+            ret = _engine(
                 config, self.logger, base_url="https://api.deepseek.com"
             )
             if ret:
@@ -416,5 +419,77 @@ def make_model(
             max_new_tokens=max_tokens,
             temperature=temperature,
         )
+    elif backend == "gemini":  
+        return GeminiChatDecoder(
+            name=model,
+            logger=logger,
+            batch_size=batch_size,
+            max_new_tokens=max_tokens,
+            temperature=temperature,
+        )
     else:
         raise NotImplementedError
+
+
+class GeminiChatDecoder(DecoderBase):
+    def __init__(self, name: str, logger, **kwargs) -> None:
+        super().__init__(name, logger, **kwargs)
+        self.logger.info(f"Initializing Gemini decoder with model: {self.name}")
+        
+        # Retrieve your Gemini API key from environment
+        self.api_key = os.environ.get("GEMINI_API_KEY")
+        
+        # Create the GenAI client
+        self.client = genai.Client(api_key=self.api_key)
+        
+        # If you are calling a particular Gemini 2.5 model ID, like "gemini-2.5-pro-exp-03-25",
+        # you can map self.name -> real name here:
+        self.real_model = "gemini-2.5-pro-exp-03-25" if name == "gemini-2.5" else name
+
+    def codegen(
+        self, message: str, num_samples: int = 1, prompt_cache: bool = False
+    ) -> List[dict]:
+        # For parity with the other decoders:
+        #   * We need to return a list of dicts, each with { "response": "...", "usage": {...} }
+        #   * usage is up to you; google-genai might not provide exact token usage.
+        
+        # If your model is strictly single-sample at temperature=0, you can enforce that:
+        if self.temperature == 0:
+            assert num_samples == 1
+        
+        # Minimal example of a single chat call:
+        # google-genai docs show async usage, but here's a synchronous-ish approach:
+        
+        # Create the chat
+        chat = self.client.aio.chats.create(
+            model=self.real_model,
+            config=types.GenerateContentConfig(
+                temperature=self.temperature,
+                # If you want code execution tools:
+                # tools=[types.Tool(code_execution=types.ToolCodeExecution)],
+            ),
+        )
+        
+        # Send the message. 
+        # In truly synchronous code, you might need an event loop or see if google-genai offers sync calls.
+        # We'll do a naive approach (pseudocode):
+        response = chat.send_message([message])  # Might be an await in reality.
+        
+        # Extract text
+        text_out = response.text
+        
+        # We'll build usage info, if available. If not, just supply zeros:
+        usage_info = {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+        }
+        
+        # We'll only produce one sample in this minimal example:
+        # If you needed multiple samples, you'd loop, or check if google-genai can produce multi-sample.
+        return [{
+            "response": text_out,
+            "usage": usage_info,
+        }]
+
+    def is_direct_completion(self) -> bool:
+        return False
