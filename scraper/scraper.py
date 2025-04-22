@@ -20,7 +20,7 @@ def find_domain(url:str) -> str:
 	return domain
 
 
-def grab_stackoverflow_urls(topic:str, num_results=50, max_results=None):
+def grab_stackoverflow_urls(topic:str, num_results=50, max_results=50):
 	urls = []
 
 	# Grab all StackOverflow URLs in the first 50 results from google
