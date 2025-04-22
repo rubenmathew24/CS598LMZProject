@@ -20,7 +20,7 @@ def find_domain(url:str) -> str:
 	return domain
 
 
-def grab_stackoverflow_urls(topic:str, num_results=50):
+def grab_stackoverflow_urls(topic:str, num_results=50, max_results=None):
 	urls = []
 
 	# Grab all StackOverflow URLs in the first 50 results from google
@@ -29,6 +29,9 @@ def grab_stackoverflow_urls(topic:str, num_results=50):
 			domain = find_domain(url)
 			if domain == "stackoverflow":
 				urls.append(url)
+
+			# Lets you set max amount of results to gather for early break
+			if len(urls) >= max_results: break
 	except Exception as e:
 		print(colored(f"Error: {e}", "red"))
 
