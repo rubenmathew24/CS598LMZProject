@@ -38,7 +38,7 @@ def grab_stackoverflow_urls(topic:str, num_results=50):
 
 	return urls
 
-def get_page_content(url:str, id):
+def get_page_content(url:str, folder, number):
 	# Get Page content
 	try:
 		r = requests.get(url)
@@ -89,7 +89,7 @@ def get_page_content(url:str, id):
 		
 
 		# Print to file
-		with open(f"test_logs/{id}.log", "w") as f:
+		with open(f"{folder}/{number}.log", "w") as f:
 
 			print("Title:", title, "\n\n", file = f)
 
@@ -107,16 +107,27 @@ def get_page_content(url:str, id):
 	return
 
 
-topics = [
-	"Stackoverflow AttributeError: 'functools.partial' object has no attribute '__name__'",
-]
+topics = {
+	"django__django-14787": "AttributeError: 'functools.partial' object has no attribute '__name__'",
+	"test_bad_query": "I love blueberries"
+}
 
 
 if __name__ == "__main__":
 
-	for topic_num, topic in tqdm(enumerate(topics), desc="Topics Completed", colour="green", total=len(topics)):
+	LOG_FOLDER = "test_logs"
+
+	if not os.path.exists(LOG_FOLDER):
+		os.mkdir(LOG_FOLDER)
+
+	for topic_id, topic in tqdm(topics.items(), desc="Topics Completed", colour="green", total=len(topics)):
 		urls = grab_stackoverflow_urls(topic)
 		# print(*urls, sep="\n")
 
+		topic_folder = f"{LOG_FOLDER}/{topic_id}"
+
+		if not os.path.exists(topic_folder):
+			os.mkdir(topic_folder)
+
 		for url_num, url in enumerate(urls):
-			get_page_content(url, id=f"data-{topic_num}-{url_num}")
+			get_page_content(url, folder=topic_folder, number=url_num)
