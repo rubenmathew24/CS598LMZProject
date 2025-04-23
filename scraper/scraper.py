@@ -112,7 +112,8 @@ def get_page_content(url:str, folder, number):
 
 topics = {
 	"django__django-14787": "AttributeError: 'functools.partial' object has no attribute '__name__'",
-	"test_bad_query": "I love blueberries"
+	"test_bad_query": "I love blueberries",
+	"astropy__astropy-14182": "TypeError: RST.__init__() got an unexpected keyword argument 'header_rows'"
 }
 
 

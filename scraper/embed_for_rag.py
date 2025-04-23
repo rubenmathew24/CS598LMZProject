@@ -8,6 +8,7 @@ import argparse
 
 # Get the API key from the environment variable
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+EMBEDDING_LENGTH = 3072
 
 # Embed text with Gemini for retrieval
 def embed(text:str):
@@ -28,7 +29,7 @@ def initialize_database(
 	host="localhost",
 	port="5432",
 	user=os.getenv("LOGNAME"),
-	embedding_dim=3072
+	embedding_dim=EMBEDDING_LENGTH
 ):
 
 	# Step 1: Connect to the Postgres server to create a new database
@@ -83,8 +84,7 @@ def initialize_database(
 	cur.execute(f"""
 		CREATE TABLE IF NOT EXISTS documents (
 			id SERIAL PRIMARY KEY,
-			filename TEXT,
-			content TEXT,
+			repo_id TEXT,
 			embedding VECTOR({embedding_dim})
 		);
 	""")
@@ -95,6 +95,7 @@ def initialize_database(
 	conn.close()
 	print("Database initialization complete.")
 
+# Delete Database for clean testing
 def delete_database(
 	server_dbname="postgres",
     target_dbname="rag_embeddings",
@@ -130,6 +131,43 @@ def delete_database(
         cur.close()
         conn.close()
 
+# Inserts the embeddings to the psql db
+def insert_embedding(
+	repo_id: str,
+	embedding: list,
+	dbname="rag_embeddings",
+	host="localhost",
+	port="5432",
+	user=os.getenv("LOGNAME")
+	):
+
+	if len(embedding) != EMBEDDING_LENGTH:
+		print(colored("Not the Embedding Length Expected...", color="yellow"))
+		
+	try:
+		conn = psycopg2.connect(
+			dbname=dbname,
+			user=user,
+			host=host,
+			port=port
+		)
+		cur = conn.cursor()
+
+		cur.execute(
+			"INSERT INTO documents (repo_id, embedding) VALUES (%s, %s);",
+			(repo_id, embedding)
+		)
+
+		conn.commit()
+		if cur:
+			cur.close()
+		if conn:
+			conn.close()
+
+	except Exception as e:
+		print(f"\nError inserting embedding for repo_id '{repo_id}': {e}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Manage the RAG embeddings database.")
     parser.add_argument(
@@ -153,15 +191,17 @@ if __name__ == "__main__":
 	main()
 
 	# Grab each file in test_logs
-	# files = os.listdir("test_logs")
+	log_folders = os.listdir("test_logs")
 
-	# for file in tqdm(files, desc="Embeddings Completed", colour="green", total=len(files)):
-	# 	# Read log
-	# 	with open(f"test_logs/{file}", "r") as f:
-	# 		log = f.read()
-	# 		print(log[:15])
-	# 		embedding = embed(log)
-	# 		print(len(embedding))
+	for folder in tqdm(log_folders, desc="Repositories Completed", colour="green", total=len(log_folders)):
+		folder_path = f"test_logs/{folder}"
+		files = os.listdir(folder_path)
 
-	# Grab username from environment variable
+		for file in tqdm(files, desc="Embeddings Completed", colour="green", total=len(files), leave=False):
+			# Read log
+			with open(f"{folder_path}/{file}", "r") as f:
+				log = f.read()
+				embedding = embed(log)
+				insert_embedding(folder,embedding)
+
 
