@@ -11,6 +11,8 @@ from tqdm import tqdm
 from termcolor import colored
 import urllib
 
+LOG_FOLDER = "test_logs"
+
 # Finds the domain of a URL
 # Example: "https://stackoverflow.com/questions...." => "stackoverflow" 
 def find_domain(url:str) -> str:
@@ -118,8 +120,6 @@ topics = {
 
 
 if __name__ == "__main__":
-
-	LOG_FOLDER = "test_logs"
 
 	if not os.path.exists(LOG_FOLDER):
 		os.mkdir(LOG_FOLDER)
