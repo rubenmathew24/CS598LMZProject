@@ -5,21 +5,37 @@ from tqdm import tqdm
 from termcolor import colored
 import psycopg2
 import argparse
+import time
 
 # Get the API key from the environment variable
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 EMBEDDING_LENGTH = 3072
+LOG_FOLDER = "test_logs"
 
 # Embed text with Gemini for retrieval
-def embed(text:str):
+def embed(text:str, max_retries = 40, wait_time = 5):
 
 	client = genai.Client(api_key=GEMINI_API_KEY)
-	result = client.models.embed_content(
-			model="gemini-embedding-exp-03-07",
-			contents=text,
-			config=types.EmbedContentConfig(task_type="RETRIEVAL_QUERY")
-	)
-	return result.embeddings[0].values
+
+	for attempt_num in range(max_retries):
+		try: 
+			result = client.models.embed_content(
+					model="gemini-embedding-exp-03-07",
+					contents=text,
+					config=types.EmbedContentConfig(task_type="RETRIEVAL_QUERY")
+			)
+			return result.embeddings[0].values
+		except Exception as e:
+			if "exhausted" in str(e) or "429" in str(e):
+				# print(colored(f"\nRate limited, sleeping for {wait_time} seconds", color="yellow"))
+				time.sleep(wait_time)
+			else:
+				print(f"Error on attempt {e}")
+				break
+	else:
+		print(colored("MAX RETRIES HIT. RATE LIMITED", color="red", attrs=["bold"]))
+
+	return None
 
 
 # Initialize the database for storing embeddings
@@ -74,7 +90,7 @@ def initialize_database(
 	try:
 		cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
 		conn.commit()
-		print("pgvector extension is ready.")
+		# print("pgvector extension is ready.")
 	except psycopg2.errors.UndefinedFile:
 		print(colored("Likely haven't installed pgvector", color="red", attrs=["bold"]))
 		print("\tUse Homebrew to install if you haven't:                                     'brew install pgvector'")
@@ -89,7 +105,7 @@ def initialize_database(
 		);
 	""")
 	conn.commit()
-	print("Table 'documents' is ready.")
+	# print("Table 'documents' is ready.")
 
 	cur.close()
 	conn.close()
@@ -168,7 +184,7 @@ def insert_embedding(
 		print(f"\nError inserting embedding for repo_id '{repo_id}': {e}")
 
 
-def main():
+def database_setup():
     parser = argparse.ArgumentParser(description="Manage the RAG embeddings database.")
     parser.add_argument(
         "--clear", action="store_true", help="Delete the database only."
@@ -188,13 +204,13 @@ def main():
 
 if __name__ == "__main__":
 	
-	main()
+	database_setup()
 
 	# Grab each file in test_logs
-	log_folders = os.listdir("test_logs")
+	log_folders = os.listdir(LOG_FOLDER)
 
 	for folder in tqdm(log_folders, desc="Repositories Completed", colour="green", total=len(log_folders)):
-		folder_path = f"test_logs/{folder}"
+		folder_path = f"{LOG_FOLDER}/{folder}"
 		files = os.listdir(folder_path)
 
 		for file in tqdm(files, desc="Embeddings Completed", colour="green", total=len(files), leave=False):
