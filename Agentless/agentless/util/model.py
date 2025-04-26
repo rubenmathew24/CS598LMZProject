@@ -66,7 +66,7 @@ class OpenAIChatDecoder(DecoderBase):
             batch_size=batch_size,
             model=self.name,
         )
-        ret = _engine(config, self.logger)
+        ret = request_chatgpt_engine(config, self.logger)
         if ret:
             responses = [choice.message.content for choice in ret.choices]
             completion_tokens = ret.usage.completion_tokens
