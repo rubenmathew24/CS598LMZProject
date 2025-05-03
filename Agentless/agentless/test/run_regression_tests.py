@@ -16,9 +16,9 @@ from agentless.test.run_tests import run_tests
 
 
 def rewrite_report(instance_id, input_folder_path, regression_tests):
-
     log_path = f"{input_folder_path}/test/{instance_id}/test_output.txt"
-    eval_sm, found = get_logs_eval(log_path)
+    with open(log_path, "r") as log_fp:
+        eval_sm, found = get_logs_eval(log_path, log_fp)
 
     eval_ref = {
         KEY_INSTANCE_ID: instance_id,
@@ -38,38 +38,38 @@ def save_passing_tests(output_jsonl_path, input_folder_path, dataset):
         for entry in ds["test"]:
             instance_id = entry["instance_id"]
 
-            log_path = f"{input_folder_path}/test/{instance_id}/test_output.txt"
-            try:
-                # obtain the list of tests that were ran
-                eval_sm, found = get_logs_eval(log_path)
-            except FileNotFoundError:
-                print(f"File not found: {log_path}")
+            log_dir = os.path.join(input_folder_path, "test", instance_id)
+            log_path = os.path.join(log_dir, "test_output.txt")
+
+            # skip missing log files
+            if not os.path.isfile(log_path):
+                print(f"Skipping {instance_id}: no {log_path}")
                 continue
 
-            successful_test = []
+            # parse the evaluation log
+            with open(log_path, "r", encoding="utf-8") as log_fp:
+                try:
+                    eval_sm, found = get_logs_eval(log_path, log_fp)
+                except Exception as e:
+                    print(f"Error parsing logs for {instance_id}: {e}")
+                    eval_sm, found = {}, False
 
+            successful_test = []
             for test_name, status in eval_sm.items():
-                # check for tests that passed
-                # NOTE: Different from `swebench.harness.grading.test_passed`, we don't collect XFAIL tests
-                # because they are expected to fail
-                if status in [TestStatus.PASSED.value]:
+                if status == TestStatus.PASSED.value:
                     successful_test.append(test_name)
 
-            if successful_test == []:
+            if not successful_test:
                 print(f"{instance_id} didn't get any passing tests")
 
-            # Create the dictionary for each entry
             result_entry = {
                 "instance_id": instance_id,
                 "tests_passing_in_original_repo": successful_test,
             }
-
-            # Write the entry to the JSONL file
             writer.write(result_entry)
 
 
 def run_regression_for_each_instance(args, lines, run_id):
-
     instance_ids = [line["instance_id"] for line in lines]
     patches = [line["model_patch"] for line in lines]
 
@@ -142,12 +142,11 @@ def _run_regression(args):
 
         for data in data_lines:
             instance_id = data["instance_id"]
-            if os.path.isfile(
-                f"logs/run_evaluation/{args.run_id}/test/{instance_id}/report.json"
-            ):
+            report_path = os.path.join("logs", "run_evaluation", args.run_id, "test", instance_id, "report.json")
+            if os.path.isfile(report_path):
                 regression_dict[instance_id] = rewrite_report(
                     instance_id,
-                    f"logs/run_evaluation/{args.run_id}",
+                    os.path.join("logs", "run_evaluation", args.run_id),
                     instance_test_dict,
                 )
             else:
@@ -160,20 +159,12 @@ def _run_regression(args):
                 data["regression"] = regression_dict[instance_id]
             updated_data_lines.append(data)
 
-        with open(
-            args.predictions_path.replace(
-                "processed.jsonl", "regression_test_results.jsonl"
-            ),
-            "w",
-        ) as file:
+        out_path = args.predictions_path.replace("processed.jsonl", "regression_test_results.jsonl")
+        with open(out_path, "w") as file:
             for data in updated_data_lines:
                 file.write(json.dumps(data) + "\n")
 
     else:
-        # this is for generating a list of passing tests from the original repor
-        # TODO: some instances don't get any passing tests because some test files
-        # are renamed in the test patch and we grabbed the new file names.
-        # We can fix this by checking if a test file exists in the base repo.
         ds = load_dataset(args.dataset)
         instance_ids = (
             ds["test"]["instance_id"]
@@ -181,7 +172,6 @@ def _run_regression(args):
             else args.instance_ids
         )
 
-        # Feed in a list of blank patches
         patches = [
             {"instance_id": instance_id, "patch": "", "normalized_patch": ""}
             for instance_id in instance_ids
@@ -200,11 +190,8 @@ def _run_regression(args):
         )
 
         if args.regression_tests:
-            # check if the base repo all passes on the selected regression tests (should be true)
             check_if_all_instances_pass(instance_to_plausible)
-
         else:
-            # save the list of passing tests
             save_passing_tests(
                 args.output_file,
                 os.path.join("logs", "run_evaluation", args.run_id),

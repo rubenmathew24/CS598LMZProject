@@ -58,6 +58,7 @@ def top_k_patches_with_results(iid, k):
     def score(e):
         return (
             0 if e["reproduction_test_result"] else 1,
+            
             e["regression_test_result"],
             -freq[e["normalized_patch"]]
         )

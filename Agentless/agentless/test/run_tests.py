@@ -18,12 +18,13 @@ from swebench.harness.constants import (
 )
 from swebench.harness.docker_build import build_env_images
 from swebench.harness.run_evaluation import get_dataset_from_preds, run_instance
-from swebench.harness.test_spec import (
+from swebench.harness.test_spec.test_spec import TestSpec
+from swebench.harness.test_spec.test_spec import (
     TestSpec,
-    make_env_script_list,
     make_repo_script_list,
+    make_env_script_list,
 )
-from swebench.harness.utils import get_test_directives
+
 from tqdm import tqdm
 
 OPEN_FILE_LIMIT = 4096
@@ -159,6 +160,9 @@ def make_reproduction_sec(instance: SWEbenchInstance) -> TestSpec:
         arch=arch,
         FAIL_TO_PASS=fail_to_pass,
         PASS_TO_PASS=pass_to_pass,
+        language="python",
+    docker_specs={},
+    namespace="default"
     )
 
 
@@ -252,6 +256,9 @@ def make_regression_spec(instance: SWEbenchInstance) -> TestSpec:
         arch=arch,
         FAIL_TO_PASS=fail_to_pass,  # Remove the fail to pass cases
         PASS_TO_PASS=pass_to_pass,
+        language="python",
+    docker_specs={},
+    namespace="default",
     )
 
 
@@ -267,14 +274,7 @@ def make_regression_script_list(instance, specs, env_name, repo_directory, base_
         f"git apply -v - <<'{HEREDOC_DELIMITER}'\n{NOOP_PATCH_2}\n{HEREDOC_DELIMITER}"
     )
 
-    test_command = " ".join(
-        [
-            MAP_REPO_VERSION_TO_SPECS[instance["repo"]][instance["version"]][
-                "test_cmd"
-            ],
-            *get_test_directives(instance),
-        ]
-    )
+    test_command = MAP_REPO_VERSION_TO_SPECS[instance["repo"]][instance["version"]]["test_cmd"]
     eval_commands = [
         "source /opt/miniconda3/bin/activate",
         f"conda activate {env_name}",
@@ -291,6 +291,7 @@ def make_regression_script_list(instance, specs, env_name, repo_directory, base_
         f"git diff {base_commit}",
         "source /opt/miniconda3/bin/activate",
         f"conda activate {env_name}",
+
     ]
     if "install" in specs:
         eval_commands.append(specs["install"])
@@ -377,8 +378,13 @@ def run_reproduction_tests(
             }
 
     instances = get_dataset_from_preds(
-        dataset_name, split, instance_ids, predictions, run_id
-    )
+    dataset_name=dataset_name,
+    split=split,
+    instance_ids=instance_ids,
+    predictions=predictions,
+    run_id=run_id,
+    rewrite_reports=False,
+)
 
     if not instances:
         print("No instances to run.")
@@ -523,8 +529,13 @@ def run_tests(
         }
 
     instances = get_dataset_from_preds(
-        dataset_name, split, instance_ids, predictions, run_id
-    )
+    dataset_name=dataset_name,
+    split=split,
+    instance_ids=instance_ids,
+    predictions=predictions,
+    run_id=run_id,
+    rewrite_reports=False,
+)
 
     print(f"Running {len(instances)} unevaluated instances...")
     if not instances:

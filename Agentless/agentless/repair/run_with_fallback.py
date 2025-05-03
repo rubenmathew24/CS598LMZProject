@@ -84,7 +84,7 @@ def main():
         print("❌ Top‐voted patch failed tests; falling back to iterative repair.")
 
     cmd = [
-        sys.executable, "iterative_repair.py",
+        sys.executable, "iterative_refine.py",
         "--patch_folders", args.patch_folders,
         "--num_samples", str(args.total_samples // len(args.patch_folders.split(","))),
         "--instance_id", args.instance_id,

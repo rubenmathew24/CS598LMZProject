@@ -15,9 +15,13 @@ from agentless.util.preprocess_data import (
 )
 from agentless.util.utils import load_json, load_jsonl, setup_logger
 
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s │ %(message)s")
+
 
 def retrieve_locs(bug, args, swe_bench_data, found_files, prev_o, write_lock=None):
-
+    global logger
     found = False
     for o in prev_o:
         if o["instance_id"] == bug["instance_id"]:
