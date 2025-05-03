@@ -1,0 +1,1892 @@
+2025-05-02 17:20:54,889 - INFO - ================ generating test for django__django-14534 ================
+2025-05-02 17:20:55,027 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+BoundWidget.id_for_label ignores id set by ChoiceWidget.options
+Description
+	
+If you look at the implementation of BoundField.subwidgets
+class BoundField:
+	...
+	def subwidgets(self):
+		id_ = self.field.widget.attrs.get('id') or self.auto_id
+		attrs = {'id': id_} if id_ else {}
+		attrs = self.build_widget_attrs(attrs)
+		return [
+			BoundWidget(self.field.widget, widget, self.form.renderer)
+			for widget in self.field.widget.subwidgets(self.html_name, self.value(), attrs=attrs)
+		]
+one sees that self.field.widget.subwidgets(self.html_name, self.value(), attrs=attrs) returns a dict and assigns it to widget. Now widget['attrs']['id'] contains the "id" we would like to use when rendering the label of our CheckboxSelectMultiple.
+However BoundWidget.id_for_label() is implemented as
+class BoundWidget:
+	...
+	def id_for_label(self):
+		return 'id_%s_%s' % (self.data['name'], self.data['index'])
+ignoring the id available through self.data['attrs']['id']. This re-implementation for rendering the "id" is confusing and presumably not intended. Nobody has probably realized that so far, because rarely the auto_id-argument is overridden when initializing a form. If however we do, one would assume that the method BoundWidget.id_for_label renders that string as specified through the auto_id format-string.
+By changing the code from above to
+class BoundWidget:
+	...
+	def id_for_label(self):
+		return self.data['attrs']['id']
+that function behaves as expected.
+Please note that this error only occurs when rendering the subwidgets of a widget of type CheckboxSelectMultiple. This has nothing to do with the method BoundField.id_for_label().
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:55,029 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:06:17,800 - INFO - ================ generating test for django__django-14534 ================
+2025-05-03 14:06:17,817 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+BoundWidget.id_for_label ignores id set by ChoiceWidget.options
+Description
+	
+If you look at the implementation of BoundField.subwidgets
+class BoundField:
+	...
+	def subwidgets(self):
+		id_ = self.field.widget.attrs.get('id') or self.auto_id
+		attrs = {'id': id_} if id_ else {}
+		attrs = self.build_widget_attrs(attrs)
+		return [
+			BoundWidget(self.field.widget, widget, self.form.renderer)
+			for widget in self.field.widget.subwidgets(self.html_name, self.value(), attrs=attrs)
+		]
+one sees that self.field.widget.subwidgets(self.html_name, self.value(), attrs=attrs) returns a dict and assigns it to widget. Now widget['attrs']['id'] contains the "id" we would like to use when rendering the label of our CheckboxSelectMultiple.
+However BoundWidget.id_for_label() is implemented as
+class BoundWidget:
+	...
+	def id_for_label(self):
+		return 'id_%s_%s' % (self.data['name'], self.data['index'])
+ignoring the id available through self.data['attrs']['id']. This re-implementation for rendering the "id" is confusing and presumably not intended. Nobody has probably realized that so far, because rarely the auto_id-argument is overridden when initializing a form. If however we do, one would assume that the method BoundWidget.id_for_label renders that string as specified through the auto_id format-string.
+By changing the code from above to
+class BoundWidget:
+	...
+	def id_for_label(self):
+		return self.data['attrs']['id']
+that function behaves as expected.
+Please note that this error only occurs when rendering the subwidgets of a widget of type CheckboxSelectMultiple. This has nothing to do with the method BoundField.id_for_label().
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 14:06:17,817 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:06:17,827 - INFO - Creating API request
+2025-05-03 14:06:22,878 - INFO - API response ChatCompletion(id='chatcmpl-BTCTizHYhrKM8fKDUJovsAsN9yc3d', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    def test_bound_widget_id_for_label(self):\n        form = TestForm(auto_id=\'custom_%s\')\n        bound_field = form[\'choices\']\n        subwidgets = bound_field.subwidgets()\n        \n        # Check the id_for_label for the first subwidget\n        first_subwidget = subwidgets[0]\n        expected_id = \'custom_id_0\'\n        \n        try:\n            if first_subwidget.id_for_label() == expected_id:\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n        except KeyError:\n            print("Other issues")\n\nBoundWidgetIdForLabelTest().test_bound_widget_id_for_label()\n```\n\nThis test case does the following:\n1. Imports necessary modules from Django.\n2. Defines a `TestForm` with a `MultipleChoiceField` using `CheckboxSelectMultiple` widget and a custom `id`.\n3. Defines a test case `BoundWidgetIdForLabelTest` that checks if the `id_for_label` method of the `BoundWidget` returns the expected custom id.\n4. Prints "Issue resolved" if the custom id is correctly used, "Issue reproduced" if the issue is still present, and "Other issues" if there are other problems with the code.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299178, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=330, prompt_tokens=728, total_tokens=1058, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:06:22,878 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:06:22,886 - INFO - Creating API request
+2025-05-03 14:07:37,967 - INFO - API response ChatCompletion(id='chatcmpl-BTCTnQvk9L4C542mSCAcTUF8XUlZ6', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\nclass TestChoiceWidgetIDForLabel(SimpleTestCase):\n    def test_choicewidget_id_for_label(self):\n        class TestForm(forms.Form):\n            choice_field = forms.MultipleChoiceField(\n                choices=((\'1\', \'Option 1\'), (\'2\', \'Option 2\')),\n                widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'}),\n                auto_id=\'custom_%s\'\n            )\n\n        form = TestForm()\n        rendered_widgets = list(form[\'choice_field\'].subwidgets())\n        \n        # Check if the subwidget ids are correctly rendered\n        try:\n            for widget in rendered_widgets:\n                if widget[\'attrs\'][\'id\'] != \'custom_id_1\' and widget[\'attrs\'][\'id\'] != \'custom_id_2\':\n                    raise AssertionError\n        except:\n            print("Other issues")\n            return\n        \n        # Before fix: BoundWidget.id_for_label() is reimplemented and does not use \'attrs\' id\n        # After fix: BoundWidget.id_for_label() should use the \'attrs\' id\n        try:\n            for widget in rendered_widgets:\n                bound_widget = forms.BoundWidget(widget, widget[\'attrs\'], form.renderer)\n                if bound_widget.id_for_label() not in [\'custom_id_1\', \'custom_id_2\']:\n                    print("Issue reproduced")\n                    return\n            print("Issue resolved")\n        except Exception:\n            print("Other issues")\n            return\n\ntest_case = TestChoiceWidgetIDForLabel()\ntest_case.test_choicewidget_id_for_label()\n```\n\nThis test script should follow the steps to reproduce and verify the issue described in the provided issue text. Here\'s an overview of what the script does:\n\n1. Imports necessary modules from Django.\n2. Defines a `TestForm` class with a `MultipleChoiceField` that uses `CheckboxSelectMultiple` widget with a custom \'id\'.\n3. Creates an instance of the form and gets the rendered subwidgets of the `choice_field`.\n4. Verifies if the subwidget ids are correctly assigned based on the provided \'id\' in attrs.\n5. Checks if the `id_for_label` method of `BoundWidget` uses the correct \'id\' from the attrs.\n\nIf the `id_for_label` method is not using the \'id\' from `attrs`, the script will print "Issue reproduced". If the fix is applied and the method uses the \'id\' from `attrs` correctly, it will print "Issue resolved". If other issues arise during the test, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\nclass TestChoiceWidgetIssue(SimpleTestCase):\n    def test_boundwidget_id_for_label(self):\n        class TestForm(forms.Form):\n            choices = forms.MultipleChoiceField(\n                choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n                widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n            )\n\n        form = TestForm(auto_id=\'id_custom_%s\')\n        bound_field = form[\'choices\']\n        subwidgets = list(bound_field.subwidgets())\n        \n        try:\n            # Expecting the id to be overridden by the custom id we set\n            expected_id = \'custom_id_0\'\n            \n            # Check if the id_for_label method returns the expected id\n            if hasattr(subwidgets[0], \'id_for_label\'):\n                actual_id = subwidgets[0].id_for_label()\n                if actual_id == expected_id:\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n            else:\n                print("Other issues")\n        except Exception as e:\n            print("Other issues")\n            print(e)\n\nTestChoiceWidgetIssue().test_boundwidget_id_for_label()\n```\n\nThis test will:\n1. Create a form with a `MultipleChoiceField` utilizing `CheckboxSelectMultiple` as its widget and set a custom `id` attribute.\n2. Retrieve the subwidgets and check if the `id_for_label` method returns the expected `id` (which should be the custom one we set).\n3. Output "Issue resolved" if the `id_for_label` method returns the custom `id`, "Issue reproduced" if it does not, and "Other issues" if any other unexpected behavior occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import CheckboxSelectMultiple\n\nclass ExampleForm(forms.Form):\n    options = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n    )\n\ndef test_bound_widget_id_for_label_issue():\n    form = ExampleForm()\n    bound_field = form[\'options\']\n    \n    # Extract the subwidgets\n    subwidgets = list(bound_field.subwidgets())\n    if not subwidgets:\n        print("Other issues")\n        return\n    \n    # Check the id_for_label of the first subwidget\n    bound_widget = subwidgets[0]\n    \n    expected_id = \'custom_id_0\'\n    actual_id = bound_widget.id_for_label()\n    \n    if actual_id == expected_id:\n        print("Issue resolved")\n    elif actual_id == \'id_options_0\':\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_bound_widget_id_for_label_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\n\nclass TestCheckboxSelectMultipleWidget(SimpleTestCase):\n\n    def test_checkboxselectmultiple_id_for_label(self):\n        class SampleForm(forms.Form):\n            choices = forms.MultipleChoiceField(\n                choices=[(\'1\', \'One\'), (\'2\', \'Two\')],\n                widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n            )\n\n        form = SampleForm()\n        rendered = form.as_p()\n\n        # Find the id attribute in the rendered output\n        if \'id="custom_id_0"\' in rendered and \'id="custom_id_1"\' in rendered:\n            print("Issue resolved")\n        elif \'id="id_choices_0"\' in rendered and \'id="id_choices_1"\' in rendered:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n\n# Run the test\nTestCheckboxSelectMultipleWidget().test_checkboxselectmultiple_id_for_label()\n```\n\nExplanation:\n1. **Imports**: Import necessary modules from `django`.\n2. **Sample Form**: Define a `SampleForm` with a `MultipleChoiceField` using a `CheckboxSelectMultiple` widget. Set the `id` attribute to a custom value (\'custom_id\').\n3. **Render Form**: Render the form as HTML and check the IDs for the individual checkboxes.\n4. **Check IDs**: If the IDs use the custom value correctly, print "Issue resolved". If they default to the auto-generated IDs, print "Issue reproduced". If the IDs are missing or another issue is detected, print "Other issues".\n\nThis test simulates the issue and its resolution by checking for custom IDs in the rendered HTML output. If the BoundWidget class has been fixed as suggested in the issue text, the custom IDs will be present, and the test will confirm the issue is resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import CheckboxSelectMultiple\n\n# Define a form with an overridden auto_id\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=CheckboxSelectMultiple,\n        label="Test Label"\n    )\n\n# Customizing form rendering to reproduce the issue\ndef test_boundwidget_id_for_label_issue():\n    # Creating a form instance with specified auto_id\n    form = TestForm(auto_id=\'custom_id_%s\')\n    \n    # Rendering the form to access BoundField and BoundWidget instances\n    rendered_output = form.as_p()\n    \n    # Accessing the bound field and subwidgets\n    bound_field = form[\'choices\']\n    subwidgets = bound_field.subwidgets()\n\n    # Check the id_for_label of the first subwidget\n    first_subwidget_id_for_label = subwidgets[0].id_for_label()\n\n    # Expected id as per the overridden auto_id\n    expected_id = \'custom_id_choices_0\'\n\n    if first_subwidget_id_for_label == expected_id:\n        print("Issue resolved")\n    elif first_subwidget_id_for_label == \'id_choices_0\':\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\n# Execute the test\ntest_boundwidget_id_for_label_issue()\n```\n\nThis test will:\n1. Define a form with a `CheckboxSelectMultiple` widget and an overridden `auto_id`.\n2. Create an instance of the form and render it.\n3. Access the `BoundField` and its subwidgets.\n4. Compare the `id_for_label` of the first subwidget with the expected `auto_id`.\n5. Print "Issue resolved" if the `id_for_label` behaves as expected, "Issue reproduced" if it matches the default id pattern, or "Other issues" if there is any other unexpected behavior.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\nclass SampleForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n    )\n\nclass TestWidgetIdForLabel(SimpleTestCase):\n\n    def test_checkbox_select_multiple_id_for_label(self):\n        form = SampleForm(data={\'choices\': [\'1\']})\n        bound_field = form[\'choices\']\n\n        # Check the id_for_label of subwidgets\n        subwidgets = bound_field.subwidgets()\n        \n        # Ideally this should be \'custom_id_0\'\n        subwidget_id = subwidgets[0].id_for_label()\n        \n        expected_id = \'custom_id_0\'\n        \n        if subwidget_id == expected_id:\n            print("Issue resolved")\n        elif \'id_\' in subwidget_id:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n            return\n\ntest_case = TestWidgetIdForLabel()\ntest_case.test_checkbox_select_multiple_id_for_label()\n```\n\nThis test case does the following:\n1. Imports necessary Django components.\n2. Defines a `SampleForm` with a `MultipleChoiceField` using the `CheckboxSelectMultiple` widget and a custom `id`.\n3. Creates a test case `TestWidgetIdForLabel` to check the `id_for_label` method on the subwidgets of the `CheckboxSelectMultiple` widget.\n4. Compares the `id_for_label` output with the expected custom `id`.\n5. Prints "Issue resolved" if the `id_for_label` matches the custom `id`, "Issue reproduced" if it matches the default pattern, and "Other issues" for any other discrepancies.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms.widgets import CheckboxSelectMultiple\n\n# Define a sample form class to reproduce the issue\nclass SampleForm(forms.Form):\n    sample_field = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n    )\n\ndef test_boundwidget_id_for_label():\n    # Instantiate the form\n    form = SampleForm()\n\n    # Access the bound field\n    bound_field = form[\'sample_field\']\n\n    # Access the subwidgets\n    subwidgets = bound_field.subwidgets()\n\n    # Loop through the subwidgets to check their labels\' IDs\n    for subwidget in subwidgets:\n        # Check if the id_for_label reflects the issue described\n        if subwidget.id_for_label() != \'custom_id\':\n            print("Issue reproduced")\n            return\n        else:\n            print("Issue resolved")\n            return\n\n    # If the loop doesn\'t execute as expected, it might point to other issues\n    print("Other issues")\n\ntest_boundwidget_id_for_label()\n```\n\nThis test script will:\n1. Import the necessary components from Django.\n2. Define a `SampleForm` that uses a `CheckboxSelectMultiple` widget with a custom ID.\n3. Instantiate the form and access the bound field and its subwidgets.\n4. Check if the `id_for_label` function returns the correct custom ID.\n5. Print "Issue reproduced" if the custom ID is not used, "Issue resolved" if it is, or "Other issues" if something unexpected happens.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\n\n# Custom Widget to reproduce the issue\nclass CustomChoiceWidget(forms.CheckboxSelectMultiple):\n    def __init__(self, *args, **kwargs):\n        super().__init__(*args, **kwargs)\n        self.attrs[\'id\'] = \'custom_id\'\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=CustomChoiceWidget\n    )\n\ndef test_issue_reproduction():\n    form = TestForm(auto_id=\'id_%s\')\n    field = form[\'choices\']\n    \n    # Retrieve the subwidgets\n    subwidgets = field.subwidgets()\n    \n    try:\n        for widget in subwidgets:\n            # Check if BoundWidget.id_for_label reflects the custom id\n            if widget.id_for_label() != \'custom_id_%s_%s\' % (field.html_name, widget.data[\'index\']):\n                print("Issue reproduced")\n                return\n        print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n        return\n\ntest_issue_reproduction()\n```\n\nSave the above script to a file and run it to check if the issue described in the issue text can be reproduced. The test will:\n1. Import the necessary Django modules.\n2. Define a custom form with a `CheckboxSelectMultiple` widget having a custom `id`.\n3. Attempt to reproduce the issue by checking if the `id_for_label` method reflects the custom `id`.\n4. Print "Issue reproduced" if the id doesn\'t match the expected custom id format.\n5. Print "Issue resolved" if the id matches the expected custom id format.\n6. Print "Other issues" if any other unexpected error occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms.widgets import CheckboxSelectMultiple\nfrom django.test import SimpleTestCase\n\nclass TestBoundWidgetIDForLabel(SimpleTestCase):\n\n    def test_bound_widget_id_for_label(self):\n        # Step 1: Create a form with a CheckboxSelectMultiple widget\n        class TestForm(forms.Form):\n            choices = forms.MultipleChoiceField(\n                widget=CheckboxSelectMultiple(attrs={\'id\': \'test-id\'}),\n                choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')]\n            )\n\n        # Instantiate the form\n        form = TestForm()\n\n        # Retrieve the BoundField\n        bound_field = form[\'choices\']\n        \n        # Retrieve the subwidgets\n        subwidgets = bound_field.subwidgets()\n\n        # There should be two subwidgets for the two choices\n        if len(subwidgets) != 2:\n            print("Other issues")\n            return\n\n        # Check the id attribute of the first subwidget\n        bound_widget = subwidgets[0]\n\n        # Check if the id_for_label method returns the expected id\n        expected_id = f\'{bound_field.auto_id}_0\'  # Django\'s default id format\n        if bound_widget.id_for_label() == expected_id:\n            print("Issue reproduced")\n        else:\n            expected_custom_id = \'test-id_0\'\n            if bound_widget.id_for_label() == expected_custom_id:\n                print("Issue resolved")\n            else:\n                print("Other issues")\n\nTestBoundWidgetIDForLabel().test_bound_widget_id_for_label()\n```\n\nThis test follows the structure you provided and will verify the issue described. It checks if the `id_for_label` method of `BoundWidget` correctly uses the custom `id` provided via the `attrs` dictionary. If the custom `id` is correctly used, it prints "Issue resolved"; otherwise, it prints "Issue reproduced" or "Other issues" based on the different failure conditions.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import TestCase\n\nclass CustomForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n    )\n\nclass BoundWidgetTest(TestCase):\n    \n    def test_bound_widget_id_for_label(self):\n        form = CustomForm()\n        bound_field = form[\'choices\']\n\n        # Attempt to reproduce the issue\n        try:\n            subwidgets = list(bound_field.subwidgets())\n            id_for_label = subwidgets[0].id_for_label()\n            \n            # Check if the id_for_label uses the custom \'id\' set in widget attrs\n            if id_for_label == \'custom_id_0\':\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n        \n        # Handle unexpected errors\n        except Exception as e:\n            print("Other issues")\n            print(str(e))\n\nBoundWidgetTest().test_bound_widget_id_for_label()\n```\n\nThis test case sets up a form with a `CheckboxSelectMultiple` widget that specifies a custom `id` attribute. It then inspects the `id_for_label` method of the subwidgets to determine if it correctly uses the custom `id` attribute. The test will print "Issue resolved" if the problem is fixed, "Issue reproduced" if the bug is present, and "Other issues" if any unexpected errors occur.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\n# Define a sample form to reproduce the issue\nclass SampleForm(forms.Form):\n    options = forms.MultipleChoiceField(\n        widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'}),\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    def test_bound_widget_id_for_label(self):\n        form = SampleForm()\n        bound_field = form[\'options\']\n        \n        # Access the first subwidget to check the ID\n        first_subwidget = bound_field.subwidgets()[0]\n        \n        # Check the ID for label\n        try:\n            id_for_label = first_subwidget.id_for_label()\n        except KeyError:\n            print("Other issues")\n            return\n        \n        expected_id = "custom_id_0"\n        \n        if id_for_label == expected_id:\n            print("Issue resolved")\n        elif id_for_label == \'id_options_0\':  \n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\nBoundWidgetIdForLabelTest().test_bound_widget_id_for_label()\n```\n\nThis test will:\n1. Create a form with a `CheckboxSelectMultiple` widget using a custom ID.\n2. Access the first subwidget and check its `id_for_label` method.\n3. Print "Issue resolved" if the custom ID is used correctly.\n4. Print "Issue reproduced" if the default ID is used, indicating the issue is still present.\n5. Print "Other issues" if there are any other problems encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import TestCase\n\nclass TestChoiceWidget(TestCase):\n    def test_boundwidget_id_for_label(self):\n        class MyForm(forms.Form):\n            choices = forms.MultipleChoiceField(\n                widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'}),\n                choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')]\n            )\n\n        form = MyForm()\n        subwidgets = form[\'choices\'].subwidgets()\n\n        ids = [subwidget[\'attrs\'][\'id\'] for subwidget in subwidgets]\n\n        try:\n            assert ids == [\'custom_id_0\', \'custom_id_1\']\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n            return\n\n        print("Other issues")\n\n# Running the test\nTestChoiceWidget().test_boundwidget_id_for_label()\n```\n\nThis test will create a form with a `CheckboxSelectMultiple` widget and attempt to reproduce the issue by checking the IDs of the subwidgets. If the issue is present, it will print "Issue reproduced". If the issue has been fixed, it will print "Issue resolved". If there are other issues, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\n\nclass TestForm(forms.Form):\n    choices_field = forms.MultipleChoiceField(\n        choices=[(\'option1\', \'Option 1\'), (\'option2\', \'Option 2\')],\n        widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n    )\n\ndef test_bound_widget_id_for_label():\n    # Create an instance of the form\n    form = TestForm()\n\n    # Access the bound field for the \'choices_field\' field\n    bound_field = form[\'choices_field\']\n\n    # Access the subwidgets (individual checkboxes)\n    subwidgets = bound_field.subwidgets()\n\n    # Check if the issue is reproduced\n    issue_reproduced = False\n    for widget in subwidgets:\n        if widget.id_for_label() != \'custom_id\':\n            issue_reproduced = True\n            break\n\n    # Print the result\n    if issue_reproduced:\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n        \n# Run the test\ntest_bound_widget_id_for_label()\n```\n\nThis test will create a simple form with a `MultipleChoiceField` using `CheckboxSelectMultiple`. It checks each subwidget\'s `id_for_label()` to see if it returns the custom `id` provided. If it doesn\'t, it means the issue is reproduced. Otherwise, the issue is resolved. If there are other issues with the source code, the assertion will handle them.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\n\n# Define a custom form field with CheckboxSelectMultiple widget\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Choice 1\'), (\'2\', \'Choice 2\'), (\'3\', \'Choice 3\')],\n        widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n    )\n\ndef test_bound_widget_id_for_label():\n    form = TestForm(auto_id=\'custom_%s\')\n    bound_field = form[\'choices\']\n    subwidgets = list(bound_field.subwidgets())\n\n    try:\n        # Check the id of the first subwidget\n        first_subwidget = subwidgets[0]\n        if first_subwidget.id_for_label() != \'custom_id_0\':\n            print("Issue reproduced")\n            return\n    except Exception as e:\n        print("Other issues")\n        return\n\n    # Assuming the issue has been fixed by changing the id_for_label method\n    # in BoundWidget as described in the issue text\n    class FixedBoundWidget:\n        def __init__(self, widget, data, renderer):\n            self.widget = widget\n            self.data = data\n            self.renderer = renderer\n\n        def id_for_label(self):\n            return self.data[\'attrs\'][\'id\']\n\n    fixed_subwidgets = [\n        FixedBoundWidget(bound_field.field.widget, widget, form.renderer)\n        for widget in bound_field.field.widget.subwidgets(bound_field.html_name, bound_field.value(), attrs={\'id\': \'custom_id\'})\n    ]\n\n    try:\n        first_fixed_subwidget = fixed_subwidgets[0]\n        if first_fixed_subwidget.id_for_label() == \'custom_id_0\':\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n\ntest_bound_widget_id_for_label()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms.widgets import CheckboxSelectMultiple\n\n# Define a simple form with a CheckboxSelectMultiple widget\nclass ExampleForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n    )\n\ndef test_bound_widget_id_for_label_issue():\n    # Initialize the form\n    form = ExampleForm()\n    \n    # Access the BoundField for the \'choices\' field\n    bound_field = form[\'choices\']\n    \n    # Get subwidgets (which are BoundWidget instances)\n    subwidgets = bound_field.subwidgets()\n    \n    # Check the id_for_label for each subwidget\n    for subwidget in subwidgets:\n        if subwidget.id_for_label() != \'custom_id_%s\' % subwidget.data[\'index\']:\n            print("Issue reproduced")\n            return\n\n    print("Issue resolved")\n\n# Run the test\ntest_bound_widget_id_for_label_issue()\n```\n\nThe test performs the following steps:\n1. Import the necessary modules from Django.\n2. Define a form `ExampleForm` with a `MultipleChoiceField` using the `CheckboxSelectMultiple` widget and a custom id.\n3. Define the test function `test_bound_widget_id_for_label_issue` to reproduce the issue.\n4. Initialize the form and access the `BoundField` for the `choices` field.\n5. Get the subwidgets of the field and check if the `id_for_label` matches the expected custom id format.\n6. Print "Issue reproduced" if the issue is detected, otherwise print "Issue resolved".\n\nThis test can be used to both reproduce the issue and verify if the issue has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import CheckboxSelectMultiple\n\nclass CustomForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'}),\n    )\n\ndef test_bound_widget_id_for_label():\n    form = CustomForm()\n    bound_field = form[\'choices\']\n    \n    # Reproduce the issue\n    for subwidget in bound_field.subwidgets():\n        bound_widget = subwidget\n        if isinstance(bound_widget, forms.widgets.CheckboxInput):\n            generated_id = bound_widget.attrs.get(\'id\')\n            expected_id = f"custom_id_{bound_widget.data[\'index\']}"\n            if generated_id != expected_id:\n                print("Issue reproduced")\n                return\n    \n    # If the code is fixed\n    for subwidget in bound_field.subwidgets():\n        bound_widget = subwidget\n        if isinstance(bound_widget, forms.widgets.CheckboxInput):\n            try:\n                generated_id = bound_widget.attrs.get(\'id\')\n                expected_id = f"custom_id_{bound_widget.data[\'index\']}"\n                assert generated_id == expected_id\n                print("Issue resolved")\n            except AssertionError:\n                print("Issue reproduced")\n                return\n            except Exception:\n                print("Other issues")\n                return\n\nif __name__ == "__main__":\n    test_bound_widget_id_for_label()\n```\n\nThis script creates a unit test for the issue described. The test initializes a custom form with a `MultipleChoiceField` using a `CheckboxSelectMultiple` widget and sets a custom id format. It then checks the `id` attribute in the subwidgets created by the `BoundField` instance. If the `id` does not match the expected format, it prints "Issue reproduced". If the issue is resolved, it prints "Issue resolved". If other issues arise, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import widgets\n\ndef test_choicewidget_id_for_label_issue():\n    class TestForm(forms.Form):\n        choices = forms.MultipleChoiceField(\n            choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n            widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n        )\n\n    # Create an instance of the form\n    form = TestForm()\n\n    # Access the bound field for \'choices\'\n    bound_field = form[\'choices\']\n\n    # Access the subwidgets\n    subwidgets = bound_field.subwidgets()\n\n    # Check the ID for the label of the first subwidget\n    try:\n        first_subwidget_id = subwidgets[0].id_for_label()\n    except KeyError:\n        print("Other issues")\n        return\n\n    # Expected ID is \'custom_id\'\n    expected_id = \'custom_id_0\'\n\n    if first_subwidget_id == expected_id:\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\ntest_choicewidget_id_for_label_issue()\n```\n\nExplanation:\n1. **Imports**: The necessary imports are included from Django forms.\n2. **Test Form**: A test form `TestForm` is defined with a `MultipleChoiceField` that uses `CheckboxSelectMultiple` widget with a custom ID.\n3. **Form Instance**: An instance of the form is created.\n4. **Bound Field Access**: The bound field for `choices` is accessed.\n5. **Subwidgets Access**: The `subwidgets` method is called on the bound field to get the subwidgets.\n6. **ID Check**: The ID for the label of the first subwidget is checked against the expected custom ID (`custom_id_0`).\n7. **Output**: Based on the ID comparison, it prints "Issue resolved" if the custom ID is correctly used or "Issue reproduced" if it is not. If there are unexpected issues like missing keys, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=forms.CheckboxSelectMultiple,\n        required=False\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    \n    def test_bound_widget_id_for_label_issue(self):\n        form = TestForm(auto_id=\'custom_id_%s\')\n        bound_field = form[\'choices\']\n        subwidgets = bound_field.subwidgets()\n\n        try:\n            for i, subwidget in enumerate(subwidgets):\n                expected_id = f\'custom_id_choices_{i}\'\n                if subwidget.id_for_label() != expected_id:\n                    print("Issue reproduced")\n                    return\n            print("Issue resolved")\n        except Exception as e:\n            print("Other issues", str(e))\n\nBoundWidgetIdForLabelTest().test_bound_widget_id_for_label_issue()\n```\n\n**Explanation:**\n\n1. **Necessary imports**: The required Django forms and test classes are imported.\n2. **Code to reproduce the issue described in the issue text**: A form (`TestForm`) with a `MultipleChoiceField` using a `CheckboxSelectMultiple` widget is defined. A test case (`BoundWidgetIdForLabelTest`) is set up to check the behavior of `id_for_label`.\n3. **Print "Issue reproduced" if the outcome indicates that the issue is reproduced**: The code checks if `subwidget.id_for_label()` matches the expected ID format (`custom_id_choices_{index}`). If it doesn\'t match, the issue is printed as reproduced.\n4. **Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved**: If all IDs match the expected format, it prints "Issue resolved".\n5. **Print "Other issues" if the outcome indicates there are other issues with the source code**: If any other exception occurs, it prints "Other issues".\n\nThis test can be used to confirm both the presence and fix of the described issue.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import TestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n    )\n\nclass BoundWidgetIdForLabelTest(TestCase):\n    def test_bound_widget_id_for_label(self):\n        form = TestForm()\n\n        # Access the bound field\n        bound_field = form[\'choices\']\n\n        # Access the subwidgets\n        subwidgets = bound_field.subwidgets()\n\n        try:\n            # Check the ID for label of the first subwidget\n            if subwidgets[0].id_for_label() == \'custom_id_0\':\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n        except KeyError:\n            print("Other issues")\n\n# Run the test\nBoundWidgetIdForLabelTest().test_bound_widget_id_for_label()\n```\n\n### Explanation:\n\n1. **Necessary Imports**: The test imports relevant classes from `django` for form creation and testing.\n\n2. **Code to Reproduce the Issue**:\n    - A `TestForm` class is defined with a `MultipleChoiceField` using a `CheckboxSelectMultiple` widget.\n    - The widget is given a custom ID attribute `id=\'custom_id\'`.\n    - The `BoundWidgetIdForLabelTest` test case is created to:\n        - Instantiate the form.\n        - Access the bound field and its subwidgets.\n        - Verify if the `id_for_label()` method returns the custom ID as expected.\n\n3. **Outcome Verification**:\n    - If the `id_for_label()` method returns `\'custom_id_0\'`, it prints "Issue resolved".\n    - If it does not match, it prints "Issue reproduced".\n    - If any other issue arises (like a `KeyError`), it prints "Other issues".\n\nThis test case should help verify if the issue described in the provided issue text is reproduced or resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\nclass SampleForm(forms.Form):\n    sample_field = forms.ChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=forms.CheckboxSelectMultiple,\n        required=False\n    )\n\ndef test_bound_widget_id_for_label():\n    try:\n        # Create an instance of the form\n        form = SampleForm(auto_id=\'custom_id_%s\')\n\n        # Access the BoundField for the sample_field\n        bound_field = form[\'sample_field\']\n        \n        # Access the subwidgets of the BoundField to retrieve the first BoundWidget\n        subwidgets = bound_field.subwidgets()\n        \n        # Check the id_for_label for the first subwidget\n        bound_widget = subwidgets[0]\n        generated_id = bound_widget.id_for_label()\n        \n        # Check if the id_for_label matches the expected custom ID format\n        expected_id = \'custom_id_sample_field_0\'\n        if generated_id == expected_id:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues", e)\n\ntest_bound_widget_id_for_label()\n```\n\nIn this test:\n1. We create a form with a `CheckboxSelectMultiple` widget and set a custom `auto_id`.\n2. We access the `BoundField` for the specified field and get its subwidgets.\n3. We check the `id_for_label` of the first subwidget to see if it matches the expected custom ID format.\n4. The test will print "Issue resolved" if the custom ID is correctly used, "Issue reproduced" if the problem persists, and "Other issues" if any other exception occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import TestCase\n\nclass TestCheckboxSelectMultipleIssue(TestCase):\n    def test_checkbox_select_multiple_id_for_label(self):\n        class SampleForm(forms.Form):\n            choices = forms.MultipleChoiceField(\n                choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n                widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n            )\n        \n        form = SampleForm()\n\n        # Access the BoundField for \'choices\'\n        bound_field = form[\'choices\']\n\n        # Access the subwidgets\n        subwidgets = bound_field.subwidgets()\n        \n        # Check the id_for_label for the first subwidget\n        id_for_label = subwidgets[0].id_for_label()\n\n        # Check if it matches the expected custom id format\n        expected_id_for_label = \'custom_id_0\'\n\n        try:\n            assert id_for_label == expected_id_for_label\n            print("Issue resolved")\n        except AssertionError:\n            if id_for_label == \'id_choices_0\':\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n                \nTestCheckboxSelectMultipleIssue().test_checkbox_select_multiple_id_for_label()\n```\n\nThis test performs the following actions:\n\n1. Defines a `SampleForm` with a `MultipleChoiceField` using the `CheckboxSelectMultiple` widget with a custom `id` attribute.\n2. Retrieves the `BoundField` for the `choices` field.\n3. Accesses the subwidgets of the `CheckboxSelectMultiple` widget.\n4. Checks the `id_for_label` for the first subwidget and compares it with the expected custom id format.\n5. Prints "Issue resolved" if the `id_for_label` matches the custom id format, "Issue reproduced" if it matches the default format, and "Other issues" if it doesn\'t match either.\n\nYou can run this test to verify if the issue is reproduced or resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\n\n# Step 1: Define a form with a ChoiceField using CheckboxSelectMultiple\nclass TestForm(forms.Form):\n    choices = forms.ChoiceField(\n        widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'}),\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')]\n    )\n\n# Step 2: Create an instance of the form\nform = TestForm()\n\n# Step 3: Access the subwidgets to check the IDs\nsubwidgets = form[\'choices\'].subwidgets()\n\n# Function to check the issue\ndef check_issue():\n    try:\n        # Extract the ID from the subwidget\n        actual_id = subwidgets[0].id_for_label()\n        # Expected ID based on the description in the issue\n        expected_id = \'custom_id_0\'\n        \n        # Check if the issue is reproduced\n        if actual_id == expected_id:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        # If any other exception occurs, print "Other issues"\n        print("Other issues:", e)\n\ncheck_issue()\n```\n\nThis test will:\n\n1. Create a form with a `ChoiceField` using `CheckboxSelectMultiple` widget and set a custom `id` attribute.\n2. Access the subwidgets of the form field to get their individual IDs.\n3. Compare the actual ID returned by `id_for_label` with the expected custom ID.\n4. Print "Issue resolved" if the IDs match, "Issue reproduced" if they do not, and "Other issues" if any other error occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='Sure, here is a complete test that can be used to reproduce the issue described in the issue text:\n\n```python\nfrom django import forms\nfrom django.forms.widgets import CheckboxSelectMultiple\n\n# Reproduce part of the issue\nclass CustomForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=CheckboxSelectMultiple(attrs={\'id\': \'custom_id_%s\'})\n    )\n\ndef test_bound_widget_id_for_label():\n    form = CustomForm(auto_id=\'custom_id_%s\')\n\n    # Retrieve the bound field and its subwidgets\n    bound_field = form[\'choices\']\n    subwidgets = list(bound_field.subwidgets())\n    \n    try:\n        # Check the id_for_label of the first subwidget\n        if subwidgets[0].id_for_label() == \'id_choices_0\':\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except IndexError:\n        print("Other issues")\n\n# Run the test\ntest_bound_widget_id_for_label()\n```\n\nHere\'s a brief explanation of the test:\n1. **Necessary Imports:** The necessary imports like `forms` and `CheckboxSelectMultiple` are included.\n2. **Reproduction Code:** A custom form `CustomForm` is created with a `MultipleChoiceField` using `CheckboxSelectMultiple` widget where the `id` attribute is customized.\n3. **Test Function:** The `test_bound_widget_id_for_label` function initializes the form and retrieves the subwidgets. It checks the `id_for_label` of the first subwidget and prints the appropriate outcome based on whether the issue is reproduced, resolved, or if there are other issues.\n4. **Running the Test:** The test function is executed at the end.\n\nThis test will help you verify the described issue and confirm if it has been resolved after making the necessary code changes.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import TestCase\n\nclass SampleForm(forms.Form):\n    options = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id_%s\'})\n    )\n\nclass TestIssueReproduction(TestCase):\n    def test_bound_widget_id_for_label(self):\n        form = SampleForm()\n        subwidgets = list(form[\'options\'].subwidgets())\n        \n        # Assuming the subwidgets are in order, get the first subwidget\n        first_widget = subwidgets[0]\n        \n        # Expected custom ID from the attrs set in the widget\n        expected_custom_id = \'custom_id_0\'\n        \n        try:\n            if first_widget.data[\'attrs\'][\'id\'] == expected_custom_id:\n                if first_widget.id_for_label() == expected_custom_id:\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n            else:\n                print("Other issues")\n        except KeyError:\n            print("Other issues")\n\n# Run the test\nTestIssueReproduction().test_bound_widget_id_for_label()\n```\n\nThis test checks if the `id_for_label` method in the `BoundWidget` class respects the custom ID set by `ChoiceWidget.options`. If the issue is still present, it will print "Issue reproduced." If the custom ID is used correctly, it will print "Issue resolved." Any unexpected outcomes will lead to "Other issues" being printed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        widget=forms.CheckboxSelectMultiple,\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')]\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    def test_bound_widget_id_for_label(self):\n        form = TestForm(auto_id=\'custom_id_%s\')\n        rendered = form.as_p()\n\n        # Check if the IDs are set correctly in the rendered HTML\n        try:\n            id_option_1 = \'custom_id_choices_0\'\n            id_option_2 = \'custom_id_choices_1\'\n            assert id_option_1 in rendered\n            assert id_option_2 in rendered\n        except AssertionError:\n            print("Issue reproduced")\n            return\n\n        # Check if BoundWidget.id_for_label returns the correct ID\n        subwidgets = list(form[\'choices\'].subwidgets())\n        try:\n            assert subwidgets[0].id_for_label() == id_option_1\n            assert subwidgets[1].id_for_label() == id_option_2\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n            return\n\n        print("Other issues")\n\n\nBoundWidgetIdForLabelTest().test_bound_widget_id_for_label()\n```\n\nThis test does the following:\n1. Creates a `TestForm` with a `MultipleChoiceField` using `CheckboxSelectMultiple`.\n2. Renders the form\'s HTML.\n3. Checks if the custom IDs are present in the rendered HTML, indicating the issue is reproduced.\n4. Checks if `BoundWidget.id_for_label` returns the correct ID, indicating if the issue is resolved.\n5. Provides appropriate console output based on the results.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'One\'), (\'2\', \'Two\'), (\'3\', \'Three\')],\n        widget=forms.CheckboxSelectMultiple,\n        widget_attrs={\'id\': \'custom_id_%s\'}\n    )\n\nclass BoundWidgetIdForLabelTest(SimpleTestCase):\n    def test_id_for_label_issue(self):\n        form = TestForm(auto_id=\'custom_id_%s\')\n        subwidgets = form[\'choices\'].subwidgets()\n\n        try:\n            # Check if the issue is reproduced\n            for index, widget in enumerate(subwidgets):\n                expected_id = \'custom_id_choices_%d\' % index\n                if widget.id_for_label() != expected_id:\n                    print("Issue reproduced")\n                    return\n            \n            # Check if the issue is resolved\n            for index, widget in enumerate(subwidgets):\n                expected_id = \'custom_id_choices_%d\' % index\n                if widget.id_for_label() != expected_id:\n                    print("Other issues")\n                    return\n\n            print("Issue resolved")\n        except Exception as e:\n            print("Other issues")\n            return\n\nBoundWidgetIdForLabelTest().test_id_for_label_issue()\n```\n\nExplanation:\n1. **Necessary imports**: The necessary imports from Django\'s forms and test modules are included.\n2. **Code to reproduce the issue**: The test form `TestForm` and test case `BoundWidgetIdForLabelTest` are created. The form includes a `MultipleChoiceField` with `CheckboxSelectMultiple` widget and a custom id format.\n3. **Test logic**: In the test method, the `subwidgets` of the form field are obtained. The method checks if the `id_for_label` is generated correctly according to the custom id format. If not, it prints `"Issue reproduced"`. If the ids match the expected format, it prints `"Issue resolved"`. If any exceptions occur, it prints `"Other issues"`.\n4. **Output messages**: The test will print either "Issue reproduced", "Issue resolved", or "Other issues" based on the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import CheckboxSelectMultiple\n\ndef test_boundwidget_id_for_label():\n    class SampleForm(forms.Form):\n        choices = forms.MultipleChoiceField(\n            choices=[(\'1\', \'One\'), (\'2\', \'Two\')],\n            widget=CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n        )\n\n    form = SampleForm()\n\n    # Access the BoundField for the choices field\n    bound_field = form[\'choices\']\n\n    # Print out the subwidgets and their ids\n    for i, subwidget in enumerate(bound_field.subwidgets()):\n        id_for_label = subwidget.id_for_label()\n        print(f\'Subwidget {i} id_for_label: {id_for_label}\')\n\n    # Check if the id_for_label matches the expected custom id format\n    expected_id = \'custom_id_0\'\n    if any(subwidget.id_for_label() == expected_id for subwidget in bound_field.subwidgets()):\n        print("Issue resolved")\n    elif any(subwidget.id_for_label().startswith(\'id_choices_\') for subwidget in bound_field.subwidgets()):\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_boundwidget_id_for_label()\n```\n\nThis script assumes you have Django installed and properly configured. The `test_boundwidget_id_for_label` function defines a form with a `MultipleChoiceField` using a `CheckboxSelectMultiple` widget with a custom id. It then checks if the `id_for_label` of the subwidgets matches the custom id format. If it does, it prints "Issue resolved". If it still uses the default id format, it prints "Issue reproduced". If there are other issues, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.utils.safestring import mark_safe\n\ndef test_boundwidget_id_for_label() -> None:\n    class TestForm(forms.Form):\n        choices = forms.MultipleChoiceField(\n            choices=[(\'1\', \'First\'), (\'2\', \'Second\')],\n            widget=forms.CheckboxSelectMultiple(attrs={"id": "custom_id"})\n        )\n\n    form = TestForm(auto_id=\'test_%s\')\n    subwidgets = form[\'choices\'].subwidgets\n    bound_widget = subwidgets[0]  # Get the first bound widget\n\n    # Get the id_for_label from BoundWidget\n    widget_id_for_label = bound_widget.id_for_label()\n\n    # Check if the id_for_label ignores the custom id\n    expected_id = \'test_choices_0\'  # Expected default behavior\n    custom_id = \'custom_id_0\'  # Expected custom behavior\n\n    if widget_id_for_label == custom_id:\n        print("Issue resolved")\n    elif widget_id_for_label == expected_id:\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_boundwidget_id_for_label()\n```\n\nThis test script checks if the `BoundWidget.id_for_label` method uses the custom ID or falls back to the default behavior. By comparing the output, you can determine if the issue is reproduced, resolved, or if there are other issues present.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\nclass SampleForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'First\'), (\'2\', \'Second\')],\n        widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id_%s\'})\n    )\n\nclass TestBoundWidgetIDForLabel(SimpleTestCase):\n    def test_bound_widget_id_for_label(self):\n        form = SampleForm()\n        rendered_form = form.as_p()\n\n        # Extract checkbox ids\n        first_checkbox_id = form[\'choices\'].subwidgets()[0].data[\'attrs\'][\'id\']\n        second_checkbox_id = form[\'choices\'].subwidgets()[1].data[\'attrs\'][\'id\']\n\n        expected_first_id = \'custom_id_choices_0\'\n        expected_second_id = \'custom_id_choices_1\'\n\n        try:\n            # Check if the ids match the expected custom ids\n            assert first_checkbox_id == expected_first_id\n            assert second_checkbox_id == expected_second_id\n\n            # Issue resolved if the ids are as expected\n            print("Issue resolved")\n        except AssertionError:\n            # If the ids do not match\n            print("Issue reproduced")\n        except Exception:\n            # Other errors\n            print("Other issues")\n\n# Run the test\nTestBoundWidgetIDForLabel().test_bound_widget_id_for_label()\n```\n\n### Explanation:\n\n1. **Necessary Imports**: The test imports required modules from `django` including `forms` and `SimpleTestCase`.\n\n2. **Reproduce the Issue**:\n   - A `SampleForm` is created with a `MultipleChoiceField` using `CheckboxSelectMultiple` widget, and a custom `id` format is provided.\n   - The `test_bound_widget_id_for_label` method in `TestBoundWidgetIDForLabel` class is defined to instantiate the form and extract the ids of subwidgets.\n\n3. **Assertions**:\n   - The test checks if the `id` of the first and second checkboxes match the expected custom ids.\n   - If the ids match the expected values, it prints "Issue resolved". Otherwise, it prints "Issue reproduced".\n   - If there are any other unexpected issues, it prints "Other issues".\n\n4. **Run the Test**: The test is executed by calling the method `test_bound_widget_id_for_label`.\n\nThis test will help verify if the custom `id` provided through `ChoiceWidget.options` is correctly used in `BoundWidget.id_for_label`. If not, it will print "Issue reproduced", indicating that the issue persists. If the issue is fixed, it will print "Issue resolved". If there are unexpected errors, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\n# Define a sample form for testing\nclass TestForm(forms.Form):\n    test_field = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n    )\n\nclass BoundWidgetIDForLabelTest(SimpleTestCase):\n\n    def test_id_for_label_issue(self):\n        # Create form instance\n        form = TestForm()\n\n        # Get bound field\n        bound_field = form[\'test_field\']\n\n        # Get subwidgets\n        subwidgets = bound_field.subwidgets()\n\n        try:\n            # Fetch the id for the first subwidget\'s label\n            subwidget_id_for_label = subwidgets[0].id_for_label()\n\n            # Check if the id matches the expected custom id format\n            expected_id = \'custom_id_0\'\n\n            if subwidget_id_for_label == expected_id:\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n        except Exception as e:\n            print("Other issues")\n            print(str(e))\n\nBoundWidgetIDForLabelTest().test_id_for_label_issue()\n```\n\nThis test case will:\n1. Import the necessary modules and classes from Django.\n2. Define a `TestForm` class with a `MultipleChoiceField` using the `CheckboxSelectMultiple` widget with a custom `id`.\n3. Implement a `BoundWidgetIDForLabelTest` test case to check if the issue described in the provided issue text is occurring.\n4. Print "Issue resolved" if the `id_for_label` returns the expected custom id.\n5. Print "Issue reproduced" if the `id_for_label` does not return the expected custom id.\n6. Print "Other issues" if any other exceptions occur during the test execution.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import CheckboxSelectMultiple\n\ndef test_boundwidget_id_for_label():\n    class TestForm(forms.Form):\n        choices = forms.MultipleChoiceField(\n            choices=[(\'1\', \'One\'), (\'2\', \'Two\'), (\'3\', \'Three\')],\n            widget=CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n        )\n    \n    form = TestForm()\n    \n    # Access subwidgets of the \'choices\' field\n    subwidgets = list(form[\'choices\'].subwidgets())\n    \n    if not subwidgets:\n        print("Other issues")\n        return\n    \n    # Check the id_for_label of the first subwidget\n    first_widget = subwidgets[0]\n    generated_id = first_widget.id_for_label()\n    \n    expected_id = "custom_id_0"  # This should match the auto_id format specified\n    \n    if generated_id == expected_id:\n        print("Issue resolved")\n    elif generated_id == \'id_choices_0\':  # This is the current incorrect id being generated\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_boundwidget_id_for_label()\n```\n\nIn this script:\n\n1. We define a form (`TestForm`) with a `MultipleChoiceField` using `CheckboxSelectMultiple` and set a custom ID.\n2. We instantiate the form and access the subwidgets of the `choices` field.\n3. We then verify if the `id_for_label` of the first subwidget matches the expected custom format.\n4. Finally, the script prints the appropriate message based on the outcome of the test.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms.widgets import CheckboxSelectMultiple\n\ndef test_boundwidget_id_for_label():\n    class TestForm(forms.Form):\n        choices = forms.MultipleChoiceField(\n            choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n            widget=CheckboxSelectMultiple(attrs={\'id\': \'custom_id_%s\'})\n        )\n    \n    form = TestForm(auto_id=\'custom_id_%s\')\n    subwidgets = form[\'choices\'].subwidgets()\n\n    try:\n        # Loop through subwidgets to test id_for_label\n        for i, subwidget in enumerate(subwidgets):\n            expected_id = f"custom_id_{i}"\n            if subwidget.id_for_label() != expected_id:\n                print("Issue reproduced")\n                return\n        print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n        return\n\ntest_boundwidget_id_for_label()\n```\n\nIn the above test:\n1. We import necessary modules from Django.\n2. We define a `TestForm` with a `MultipleChoiceField` that uses `CheckboxSelectMultiple` with a custom `id` format.\n3. We create an instance of the form with a custom `auto_id` format.\n4. We retrieve the subwidgets of the `choices` field.\n5. We check the `id_for_label` of each subwidget to see if it matches the expected `custom_id_%s` format.\n6. Depending on the outcome, we print "Issue reproduced", "Issue resolved", or "Other issues".\n\nThis test will help you determine if the issue described has been reproduced or resolved based on the `id_for_label` output.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        widget=forms.CheckboxSelectMultiple,\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')]\n    )\n\ndef test_boundwidget_id_for_label():\n    form = TestForm(auto_id=\'custom_id_%s\')\n    bound_field = form[\'choices\']\n    subwidget_ids = [widget.id_for_label() for widget in bound_field.subwidgets()]\n\n    try:\n        # Check if the IDs generated follow the incorrect format\n        for idx, _ in enumerate(form.fields[\'choices\'].choices):\n            if subwidget_ids[idx] != f\'custom_id_choices_{idx}\':\n                print("Issue reproduced")\n                return\n\n        # If the IDs are correct\n        print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n        print(str(e))\n\ntest_boundwidget_id_for_label()\n```\n\nThis script sets up a Django form with a `CheckboxSelectMultiple` widget, and then creates a test function to check the `id_for_label` method of the `BoundWidget`. The test tries to ensure that the IDs are generated correctly based on the `auto_id` format provided. If they do not match the expected format, it prints "Issue reproduced". If everything is correct, it prints "Issue resolved". If any other issues occur, it catches the exception and prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='Here\'s a complete test to reproduce and verify the issue described in the issue text:\n\n```python\nfrom django import forms\n\ndef test_boundwidget_id_for_label():\n    # Custom ChoiceWidget to override id in options\n    class CustomChoiceWidget(forms.CheckboxSelectMultiple):\n        def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):\n            option = super().create_option(name, value, label, selected, index, subindex, attrs)\n            option[\'attrs\'][\'id\'] = f\'custom_id_{index}\'\n            return option\n\n    # Form using the custom widget\n    class TestForm(forms.Form):\n        choices = forms.MultipleChoiceField(\n            choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n            widget=CustomChoiceWidget,\n            widget_attrs={\'id\': \'custom_id_format\'}\n        )\n\n    form = TestForm()\n\n    # Get the BoundField for the \'choices\' field\n    bound_field = form[\'choices\']\n\n    # Get the subwidgets\n    subwidgets = list(bound_field.subwidgets())\n\n    # Check the first subwidget\'s id_for_label\n    first_subwidget = subwidgets[0]\n    try:\n        if first_subwidget.id_for_label() == \'custom_id_0\':\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except KeyError:\n        print("Other issues")\n\ntest_boundwidget_id_for_label()\n```\n\nExplanation:\n1. We define a custom `ChoiceWidget` (as `CustomChoiceWidget`) that overrides the `create_option` method to set a custom id for each option.\n2. We define a form (`TestForm`) that uses this custom widget for its `choices` field.\n3. We instantiate the form and get the `BoundField` for the `choices` field.\n4. We get the subwidgets of this bound field.\n5. We check the `id_for_label` of the first subwidget to see if it matches the custom id format we set in the `create_option` method.\n6. Depending on the outcome, we print "Issue resolved", "Issue reproduced", or "Other issues".\n\nThis test can be used to both reproduce the issue and verify if the issue has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms.widgets import CheckboxSelectMultiple\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n    )\n\ndef test_bound_widget_id_for_label():\n    form = TestForm()\n    bound_field = form[\'choices\']\n    subwidgets = bound_field.subwidgets()\n\n    # Check the id for each subwidget\n    for index, subwidget in enumerate(subwidgets):\n        expected_id = f"custom_id_{index}"\n        try:\n            assert subwidget.id_for_label() == expected_id, \\\n                f"Expected {expected_id}, but got {subwidget.id_for_label()}"\n        except AssertionError:\n            # Identify if the issue is reproduced or if there are other issues\n            if subwidget.id_for_label() == f"id_choices_{index}":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n\n    print("Issue resolved")\n\ntest_bound_widget_id_for_label()\n```\n\nExplanation:\n1. **Necessary Imports**: The test imports necessary modules from Django.\n2. **Code to Reproduce the Issue**: \n   - A form `TestForm` is created with a `MultipleChoiceField` that uses `CheckboxSelectMultiple` with a custom `id`.\n   - The test function `test_bound_widget_id_for_label()` initializes the form and fetches the subwidgets.\n   - The expected `id` for each subwidget is checked against the actual `id` produced by `id_for_label()`.\n3. **Print Statements**: \n   - If the `id` does not match the expected format, it checks whether it matches the format that indicates the issue is reproduced.\n   - It prints "Issue reproduced" if the issue is verified.\n   - It prints "Other issues" if the mismatch does not conform to the expected reproducible issue.\n   - If all `id`s are correct, it prints "Issue resolved".\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is a complete test that can be used to reproduce the issue described in your issue text.\n\n```python\nfrom django import forms\nfrom django.forms.widgets import CheckboxSelectMultiple\n\ndef test_checkbox_select_multiple_subwidgets_id():\n    class TestForm(forms.Form):\n        choices = forms.MultipleChoiceField(\n            choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n            widget=CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n        )\n\n    form = TestForm()\n\n    subwidgets = form[\'choices\'].subwidgets\n\n    issue_reproduced = False\n    for subwidget in subwidgets:\n        if subwidget.id_for_label() != \'custom_id_0\':\n            issue_reproduced = True\n            break\n\n    if issue_reproduced:\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n\ntry:\n    test_checkbox_select_multiple_subwidgets_id()\nexcept Exception as e:\n    print("Other issues")\n    print(str(e))\n```\n\nThis test does the following:\n\n1. It defines a simple Django form with a `MultipleChoiceField` using a `CheckboxSelectMultiple` widget, setting a custom `id` attribute.\n2. It retrieves the subwidgets from the form field.\n3. It checks if the `id_for_label()` of the subwidgets is not the expected `custom_id_0`. If it isn\'t, it indicates that the issue is reproduced.\n4. It prints "Issue reproduced" if the issue is found, "Issue resolved" if the issue seems fixed, and "Other issues" if there are any exceptions raised during the test.\n\nThis test can be used to both reproduce the issue and verify that it has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.test import SimpleTestCase\n\nclass TestBoundWidget(SimpleTestCase):\n    def setUp(self):\n        choices = [(1, \'Option 1\'), (2, \'Option 2\')]\n        self.form = forms.Form()\n        self.form.fields[\'example\'] = forms.MultipleChoiceField(\n            widget=forms.CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'}),\n            choices=choices\n        )\n    \n    def test_bound_widget_id_for_label(self):\n        bound_field = self.form[\'example\']\n        subwidgets = list(bound_field.subwidgets())\n        \n        try:\n            if subwidgets[0].id_for_label() == \'custom_id_0\':\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n        except Exception:\n            print("Other issues")\n        \n        return\n\n# Run the test\ntest = TestBoundWidget()\ntest.setUp()\ntest.test_bound_widget_id_for_label()\n```\n\nIn this test:\n1. We set up a form with a `MultipleChoiceField` and a `CheckboxSelectMultiple` widget with a custom `id` attribute.\n2. We fetch the subwidgets from `bound_field.subwidgets()`.\n3. We check whether `id_for_label` returns the expected custom `id` for the first subwidget.\n4. We print the appropriate message based on the outcome: "Issue resolved", "Issue reproduced", or "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is a complete test that you can use to reproduce the issue described in the provided issue text, as well as to verify if the issue has been resolved.\n\n```python\nfrom django import forms\nfrom django.forms.widgets import CheckboxSelectMultiple\n\ndef test_boundwidget_id_for_label_issue():\n    class TestForm(forms.Form):\n        choices_field = forms.MultipleChoiceField(\n            choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n            widget=CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n        )\n\n    form = TestForm()\n    bound_field = form[\'choices_field\']\n    subwidgets = bound_field.subwidgets()\n\n    try:\n        # Fetch the first subwidget\n        first_widget = subwidgets[0]\n        generated_id = first_widget.id_for_label()\n\n        # Check if id_for_label() returns the correct id\n        if generated_id == \'custom_id_0\':\n            print("Issue resolved")\n        elif generated_id == \'id_choices_field_0\':\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n        print(f"Exception: {e}")\n\ntest_boundwidget_id_for_label_issue()\n```\n\nExplanation:\n1. **Imports**: Necessary imports are included from `django`.\n2. **Reproduce Issue**:\n    - A `TestForm` class is defined with a `MultipleChoiceField` using `CheckboxSelectMultiple` widget where the `id` attribute is explicitly set.\n    - An instance of the form is created, and its bound field is fetched.\n    - Subwidgets are generated from the bound field.\n3. **Outcome Checks**:\n    - The first subwidget\'s `id_for_label` is fetched.\n    - The test checks if the `id_for_label` returns the correct id based on the custom id set (`custom_id_0`). If it does, it prints "Issue resolved".\n    - If the default id format (`id_choices_field_0`) is returned, it prints "Issue reproduced".\n    - If any other conditions or exceptions occur, it prints "Other issues".\n\nThis test should help in verifying if the issue described is reproduced or resolved, and should aid in debugging further if there are any other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms.widgets import CheckboxSelectMultiple\n\nclass CustomForm(forms.Form):\n    choices = forms.MultipleChoiceField(\n        choices=[(\'1\', \'Option 1\'), (\'2\', \'Option 2\')],\n        widget=CheckboxSelectMultiple(attrs={\'id\': \'custom_id\'})\n    )\n\ndef test_boundwidget_id_for_label():\n    form = CustomForm()\n    bound_field = form[\'choices\']\n    subwidgets = bound_field.subwidgets()\n    \n    # Checking the id_for_label for each subwidget\n    ids_for_labels = [subwidget.id_for_label() for subwidget in subwidgets]\n    \n    expected_ids = [\'custom_id_0\', \'custom_id_1\']\n    \n    try:\n        assert ids_for_labels == expected_ids\n        print("Issue resolved")\n    except AssertionError:\n        if any(id.startswith(\'id_choices_\') for id in ids_for_labels):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n\ntest_boundwidget_id_for_label()\n```\n\nExplanation:\n1. **Necessary imports**: Import necessary components from Django.\n2. **Code to reproduce the issue**: Define a `CustomForm` with a `MultipleChoiceField` using `CheckboxSelectMultiple` and set the `id` attribute.\n3. **Print statements**: Depending on the outcome of the test, print whether the issue is reproduced, resolved, or if there are other issues. The expected IDs check if the IDs generated are as expected.\n4. **Assertions**: Compare the actual IDs generated to the expected ones. If they match, the issue is resolved; if not, it checks if the IDs start with `id_choices_` to identify if the original issue is reproduced.\n\nRunning this test will help in verifying whether the issue has been fixed or not.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299183, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=14527, prompt_tokens=728, total_tokens=15255, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:07:37,968 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+class TestForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+    )
+
+class BoundWidgetIdForLabelTest(SimpleTestCase):
+    def test_bound_widget_id_for_label(self):
+        form = TestForm(auto_id='custom_%s')
+        bound_field = form['choices']
+        subwidgets = bound_field.subwidgets()
+        
+        # Check the id_for_label for the first subwidget
+        first_subwidget = subwidgets[0]
+        expected_id = 'custom_id_0'
+        
+        try:
+            if first_subwidget.id_for_label() == expected_id:
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+        except KeyError:
+            print("Other issues")
+
+BoundWidgetIdForLabelTest().test_bound_widget_id_for_label()
+```
+
+This test case does the following:
+1. Imports necessary modules from Django.
+2. Defines a `TestForm` with a `MultipleChoiceField` using `CheckboxSelectMultiple` widget and a custom `id`.
+3. Defines a test case `BoundWidgetIdForLabelTest` that checks if the `id_for_label` method of the `BoundWidget` returns the expected custom id.
+4. Prints "Issue resolved" if the custom id is correctly used, "Issue reproduced" if the issue is still present, and "Other issues" if there are other problems with the code.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+class TestChoiceWidgetIDForLabel(SimpleTestCase):
+    def test_choicewidget_id_for_label(self):
+        class TestForm(forms.Form):
+            choice_field = forms.MultipleChoiceField(
+                choices=(('1', 'Option 1'), ('2', 'Option 2')),
+                widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'}),
+                auto_id='custom_%s'
+            )
+
+        form = TestForm()
+        rendered_widgets = list(form['choice_field'].subwidgets())
+        
+        # Check if the subwidget ids are correctly rendered
+        try:
+            for widget in rendered_widgets:
+                if widget['attrs']['id'] != 'custom_id_1' and widget['attrs']['id'] != 'custom_id_2':
+                    raise AssertionError
+        except:
+            print("Other issues")
+            return
+        
+        # Before fix: BoundWidget.id_for_label() is reimplemented and does not use 'attrs' id
+        # After fix: BoundWidget.id_for_label() should use the 'attrs' id
+        try:
+            for widget in rendered_widgets:
+                bound_widget = forms.BoundWidget(widget, widget['attrs'], form.renderer)
+                if bound_widget.id_for_label() not in ['custom_id_1', 'custom_id_2']:
+                    print("Issue reproduced")
+                    return
+            print("Issue resolved")
+        except Exception:
+            print("Other issues")
+            return
+
+test_case = TestChoiceWidgetIDForLabel()
+test_case.test_choicewidget_id_for_label()
+```
+
+This test script should follow the steps to reproduce and verify the issue described in the provided issue text. Here's an overview of what the script does:
+
+1. Imports necessary modules from Django.
+2. Defines a `TestForm` class with a `MultipleChoiceField` that uses `CheckboxSelectMultiple` widget with a custom 'id'.
+3. Creates an instance of the form and gets the rendered subwidgets of the `choice_field`.
+4. Verifies if the subwidget ids are correctly assigned based on the provided 'id' in attrs.
+5. Checks if the `id_for_label` method of `BoundWidget` uses the correct 'id' from the attrs.
+
+If the `id_for_label` method is not using the 'id' from `attrs`, the script will print "Issue reproduced". If the fix is applied and the method uses the 'id' from `attrs` correctly, it will print "Issue resolved". If other issues arise during the test, it will print "Other issues".
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+class TestChoiceWidgetIssue(SimpleTestCase):
+    def test_boundwidget_id_for_label(self):
+        class TestForm(forms.Form):
+            choices = forms.MultipleChoiceField(
+                choices=[('1', 'Option 1'), ('2', 'Option 2')],
+                widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+            )
+
+        form = TestForm(auto_id='id_custom_%s')
+        bound_field = form['choices']
+        subwidgets = list(bound_field.subwidgets())
+        
+        try:
+            # Expecting the id to be overridden by the custom id we set
+            expected_id = 'custom_id_0'
+            
+            # Check if the id_for_label method returns the expected id
+            if hasattr(subwidgets[0], 'id_for_label'):
+                actual_id = subwidgets[0].id_for_label()
+                if actual_id == expected_id:
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+            else:
+                print("Other issues")
+        except Exception as e:
+            print("Other issues")
+            print(e)
+
+TestChoiceWidgetIssue().test_boundwidget_id_for_label()
+```
+
+This test will:
+1. Create a form with a `MultipleChoiceField` utilizing `CheckboxSelectMultiple` as its widget and set a custom `id` attribute.
+2. Retrieve the subwidgets and check if the `id_for_label` method returns the expected `id` (which should be the custom one we set).
+3. Output "Issue resolved" if the `id_for_label` method returns the custom `id`, "Issue reproduced" if it does not, and "Other issues" if any other unexpected behavior occurs.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.forms import CheckboxSelectMultiple
+
+class ExampleForm(forms.Form):
+    options = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+    )
+
+def test_bound_widget_id_for_label_issue():
+    form = ExampleForm()
+    bound_field = form['options']
+    
+    # Extract the subwidgets
+    subwidgets = list(bound_field.subwidgets())
+    if not subwidgets:
+        print("Other issues")
+        return
+    
+    # Check the id_for_label of the first subwidget
+    bound_widget = subwidgets[0]
+    
+    expected_id = 'custom_id_0'
+    actual_id = bound_widget.id_for_label()
+    
+    if actual_id == expected_id:
+        print("Issue resolved")
+    elif actual_id == 'id_options_0':
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_bound_widget_id_for_label_issue()
+```
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+
+class TestCheckboxSelectMultipleWidget(SimpleTestCase):
+
+    def test_checkboxselectmultiple_id_for_label(self):
+        class SampleForm(forms.Form):
+            choices = forms.MultipleChoiceField(
+                choices=[('1', 'One'), ('2', 'Two')],
+                widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+            )
+
+        form = SampleForm()
+        rendered = form.as_p()
+
+        # Find the id attribute in the rendered output
+        if 'id="custom_id_0"' in rendered and 'id="custom_id_1"' in rendered:
+            print("Issue resolved")
+        elif 'id="id_choices_0"' in rendered and 'id="id_choices_1"' in rendered:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+
+# Run the test
+TestCheckboxSelectMultipleWidget().test_checkboxselectmultiple_id_for_label()
+```
+
+Explanation:
+1. **Imports**: Import necessary modules from `django`.
+2. **Sample Form**: Define a `SampleForm` with a `MultipleChoiceField` using a `CheckboxSelectMultiple` widget. Set the `id` attribute to a custom value ('custom_id').
+3. **Render Form**: Render the form as HTML and check the IDs for the individual checkboxes.
+4. **Check IDs**: If the IDs use the custom value correctly, print "Issue resolved". If they default to the auto-generated IDs, print "Issue reproduced". If the IDs are missing or another issue is detected, print "Other issues".
+
+This test simulates the issue and its resolution by checking for custom IDs in the rendered HTML output. If the BoundWidget class has been fixed as suggested in the issue text, the custom IDs will be present, and the test will confirm the issue is resolved.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.forms import CheckboxSelectMultiple
+
+# Define a form with an overridden auto_id
+class TestForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=CheckboxSelectMultiple,
+        label="Test Label"
+    )
+
+# Customizing form rendering to reproduce the issue
+def test_boundwidget_id_for_label_issue():
+    # Creating a form instance with specified auto_id
+    form = TestForm(auto_id='custom_id_%s')
+    
+    # Rendering the form to access BoundField and BoundWidget instances
+    rendered_output = form.as_p()
+    
+    # Accessing the bound field and subwidgets
+    bound_field = form['choices']
+    subwidgets = bound_field.subwidgets()
+
+    # Check the id_for_label of the first subwidget
+    first_subwidget_id_for_label = subwidgets[0].id_for_label()
+
+    # Expected id as per the overridden auto_id
+    expected_id = 'custom_id_choices_0'
+
+    if first_subwidget_id_for_label == expected_id:
+        print("Issue resolved")
+    elif first_subwidget_id_for_label == 'id_choices_0':
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+# Execute the test
+test_boundwidget_id_for_label_issue()
+```
+
+This test will:
+1. Define a form with a `CheckboxSelectMultiple` widget and an overridden `auto_id`.
+2. Create an instance of the form and render it.
+3. Access the `BoundField` and its subwidgets.
+4. Compare the `id_for_label` of the first subwidget with the expected `auto_id`.
+5. Print "Issue resolved" if the `id_for_label` behaves as expected, "Issue reproduced" if it matches the default id pattern, or "Other issues" if there is any other unexpected behavior.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+class SampleForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+    )
+
+class TestWidgetIdForLabel(SimpleTestCase):
+
+    def test_checkbox_select_multiple_id_for_label(self):
+        form = SampleForm(data={'choices': ['1']})
+        bound_field = form['choices']
+
+        # Check the id_for_label of subwidgets
+        subwidgets = bound_field.subwidgets()
+        
+        # Ideally this should be 'custom_id_0'
+        subwidget_id = subwidgets[0].id_for_label()
+        
+        expected_id = 'custom_id_0'
+        
+        if subwidget_id == expected_id:
+            print("Issue resolved")
+        elif 'id_' in subwidget_id:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+            return
+
+test_case = TestWidgetIdForLabel()
+test_case.test_checkbox_select_multiple_id_for_label()
+```
+
+This test case does the following:
+1. Imports necessary Django components.
+2. Defines a `SampleForm` with a `MultipleChoiceField` using the `CheckboxSelectMultiple` widget and a custom `id`.
+3. Creates a test case `TestWidgetIdForLabel` to check the `id_for_label` method on the subwidgets of the `CheckboxSelectMultiple` widget.
+4. Compares the `id_for_label` output with the expected custom `id`.
+5. Prints "Issue resolved" if the `id_for_label` matches the custom `id`, "Issue reproduced" if it matches the default pattern, and "Other issues" for any other discrepancies.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.forms.widgets import CheckboxSelectMultiple
+
+# Define a sample form class to reproduce the issue
+class SampleForm(forms.Form):
+    sample_field = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+    )
+
+def test_boundwidget_id_for_label():
+    # Instantiate the form
+    form = SampleForm()
+
+    # Access the bound field
+    bound_field = form['sample_field']
+
+    # Access the subwidgets
+    subwidgets = bound_field.subwidgets()
+
+    # Loop through the subwidgets to check their labels' IDs
+    for subwidget in subwidgets:
+        # Check if the id_for_label reflects the issue described
+        if subwidget.id_for_label() != 'custom_id':
+            print("Issue reproduced")
+            return
+        else:
+            print("Issue resolved")
+            return
+
+    # If the loop doesn't execute as expected, it might point to other issues
+    print("Other issues")
+
+test_boundwidget_id_for_label()
+```
+
+This test script will:
+1. Import the necessary components from Django.
+2. Define a `SampleForm` that uses a `CheckboxSelectMultiple` widget with a custom ID.
+3. Instantiate the form and access the bound field and its subwidgets.
+4. Check if the `id_for_label` function returns the correct custom ID.
+5. Print "Issue reproduced" if the custom ID is not used, "Issue resolved" if it is, or "Other issues" if something unexpected happens.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+
+# Custom Widget to reproduce the issue
+class CustomChoiceWidget(forms.CheckboxSelectMultiple):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attrs['id'] = 'custom_id'
+
+class TestForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=CustomChoiceWidget
+    )
+
+def test_issue_reproduction():
+    form = TestForm(auto_id='id_%s')
+    field = form['choices']
+    
+    # Retrieve the subwidgets
+    subwidgets = field.subwidgets()
+    
+    try:
+        for widget in subwidgets:
+            # Check if BoundWidget.id_for_label reflects the custom id
+            if widget.id_for_label() != 'custom_id_%s_%s' % (field.html_name, widget.data['index']):
+                print("Issue reproduced")
+                return
+        print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+        return
+
+test_issue_reproduction()
+```
+
+Save the above script to a file and run it to check if the issue described in the issue text can be reproduced. The test will:
+1. Import the necessary Django modules.
+2. Define a custom form with a `CheckboxSelectMultiple` widget having a custom `id`.
+3. Attempt to reproduce the issue by checking if the `id_for_label` method reflects the custom `id`.
+4. Print "Issue reproduced" if the id doesn't match the expected custom id format.
+5. Print "Issue resolved" if the id matches the expected custom id format.
+6. Print "Other issues" if any other unexpected error occurs.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.forms.widgets import CheckboxSelectMultiple
+from django.test import SimpleTestCase
+
+class TestBoundWidgetIDForLabel(SimpleTestCase):
+
+    def test_bound_widget_id_for_label(self):
+        # Step 1: Create a form with a CheckboxSelectMultiple widget
+        class TestForm(forms.Form):
+            choices = forms.MultipleChoiceField(
+                widget=CheckboxSelectMultiple(attrs={'id': 'test-id'}),
+                choices=[('1', 'Option 1'), ('2', 'Option 2')]
+            )
+
+        # Instantiate the form
+        form = TestForm()
+
+        # Retrieve the BoundField
+        bound_field = form['choices']
+        
+        # Retrieve the subwidgets
+        subwidgets = bound_field.subwidgets()
+
+        # There should be two subwidgets for the two choices
+        if len(subwidgets) != 2:
+            print("Other issues")
+            return
+
+        # Check the id attribute of the first subwidget
+        bound_widget = subwidgets[0]
+
+        # Check if the id_for_label method returns the expected id
+        expected_id = f'{bound_field.auto_id}_0'  # Django's default id format
+        if bound_widget.id_for_label() == expected_id:
+            print("Issue reproduced")
+        else:
+            expected_custom_id = 'test-id_0'
+            if bound_widget.id_for_label() == expected_custom_id:
+                print("Issue resolved")
+            else:
+                print("Other issues")
+
+TestBoundWidgetIDForLabel().test_bound_widget_id_for_label()
+```
+
+This test follows the structure you provided and will verify the issue described. It checks if the `id_for_label` method of `BoundWidget` correctly uses the custom `id` provided via the `attrs` dictionary. If the custom `id` is correctly used, it prints "Issue resolved"; otherwise, it prints "Issue reproduced" or "Other issues" based on the different failure conditions.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.test import TestCase
+
+class CustomForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+    )
+
+class BoundWidgetTest(TestCase):
+    
+    def test_bound_widget_id_for_label(self):
+        form = CustomForm()
+        bound_field = form['choices']
+
+        # Attempt to reproduce the issue
+        try:
+            subwidgets = list(bound_field.subwidgets())
+            id_for_label = subwidgets[0].id_for_label()
+            
+            # Check if the id_for_label uses the custom 'id' set in widget attrs
+            if id_for_label == 'custom_id_0':
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+        
+        # Handle unexpected errors
+        except Exception as e:
+            print("Other issues")
+            print(str(e))
+
+BoundWidgetTest().test_bound_widget_id_for_label()
+```
+
+This test case sets up a form with a `CheckboxSelectMultiple` widget that specifies a custom `id` attribute. It then inspects the `id_for_label` method of the subwidgets to determine if it correctly uses the custom `id` attribute. The test will print "Issue resolved" if the problem is fixed, "Issue reproduced" if the bug is present, and "Other issues" if any unexpected errors occur.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+# Define a sample form to reproduce the issue
+class SampleForm(forms.Form):
+    options = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'}),
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+    )
+
+class BoundWidgetIdForLabelTest(SimpleTestCase):
+    def test_bound_widget_id_for_label(self):
+        form = SampleForm()
+        bound_field = form['options']
+        
+        # Access the first subwidget to check the ID
+        first_subwidget = bound_field.subwidgets()[0]
+        
+        # Check the ID for label
+        try:
+            id_for_label = first_subwidget.id_for_label()
+        except KeyError:
+            print("Other issues")
+            return
+        
+        expected_id = "custom_id_0"
+        
+        if id_for_label == expected_id:
+            print("Issue resolved")
+        elif id_for_label == 'id_options_0':  
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+BoundWidgetIdForLabelTest().test_bound_widget_id_for_label()
+```
+
+This test will:
+1. Create a form with a `CheckboxSelectMultiple` widget using a custom ID.
+2. Access the first subwidget and check its `id_for_label` method.
+3. Print "Issue resolved" if the custom ID is used correctly.
+4. Print "Issue reproduced" if the default ID is used, indicating the issue is still present.
+5. Print "Other issues" if there are any other problems encountered.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.test import TestCase
+
+class TestChoiceWidget(TestCase):
+    def test_boundwidget_id_for_label(self):
+        class MyForm(forms.Form):
+            choices = forms.MultipleChoiceField(
+                widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'}),
+                choices=[('1', 'Option 1'), ('2', 'Option 2')]
+            )
+
+        form = MyForm()
+        subwidgets = form['choices'].subwidgets()
+
+        ids = [subwidget['attrs']['id'] for subwidget in subwidgets]
+
+        try:
+            assert ids == ['custom_id_0', 'custom_id_1']
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+            return
+
+        print("Other issues")
+
+# Running the test
+TestChoiceWidget().test_boundwidget_id_for_label()
+```
+
+This test will create a form with a `CheckboxSelectMultiple` widget and attempt to reproduce the issue by checking the IDs of the subwidgets. If the issue is present, it will print "Issue reproduced". If the issue has been fixed, it will print "Issue resolved". If there are other issues, it will print "Other issues".
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+
+class TestForm(forms.Form):
+    choices_field = forms.MultipleChoiceField(
+        choices=[('option1', 'Option 1'), ('option2', 'Option 2')],
+        widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+    )
+
+def test_bound_widget_id_for_label():
+    # Create an instance of the form
+    form = TestForm()
+
+    # Access the bound field for the 'choices_field' field
+    bound_field = form['choices_field']
+
+    # Access the subwidgets (individual checkboxes)
+    subwidgets = bound_field.subwidgets()
+
+    # Check if the issue is reproduced
+    issue_reproduced = False
+    for widget in subwidgets:
+        if widget.id_for_label() != 'custom_id':
+            issue_reproduced = True
+            break
+
+    # Print the result
+    if issue_reproduced:
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+        
+# Run the test
+test_bound_widget_id_for_label()
+```
+
+This test will create a simple form with a `MultipleChoiceField` using `CheckboxSelectMultiple`. It checks each subwidget's `id_for_label()` to see if it returns the custom `id` provided. If it doesn't, it means the issue is reproduced. Otherwise, the issue is resolved. If there are other issues with the source code, the assertion will handle them.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+
+# Define a custom form field with CheckboxSelectMultiple widget
+class TestForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Choice 1'), ('2', 'Choice 2'), ('3', 'Choice 3')],
+        widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+    )
+
+def test_bound_widget_id_for_label():
+    form = TestForm(auto_id='custom_%s')
+    bound_field = form['choices']
+    subwidgets = list(bound_field.subwidgets())
+
+    try:
+        # Check the id of the first subwidget
+        first_subwidget = subwidgets[0]
+        if first_subwidget.id_for_label() != 'custom_id_0':
+            print("Issue reproduced")
+            return
+    except Exception as e:
+        print("Other issues")
+        return
+
+    # Assuming the issue has been fixed by changing the id_for_label method
+    # in BoundWidget as described in the issue text
+    class FixedBoundWidget:
+        def __init__(self, widget, data, renderer):
+            self.widget = widget
+            self.data = data
+            self.renderer = renderer
+
+        def id_for_label(self):
+            return self.data['attrs']['id']
+
+    fixed_subwidgets = [
+        FixedBoundWidget(bound_field.field.widget, widget, form.renderer)
+        for widget in bound_field.field.widget.subwidgets(bound_field.html_name, bound_field.value(), attrs={'id': 'custom_id'})
+    ]
+
+    try:
+        first_fixed_subwidget = fixed_subwidgets[0]
+        if first_fixed_subwidget.id_for_label() == 'custom_id_0':
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+
+test_bound_widget_id_for_label()
+```
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.forms.widgets import CheckboxSelectMultiple
+
+# Define a simple form with a CheckboxSelectMultiple widget
+class ExampleForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+    )
+
+def test_bound_widget_id_for_label_issue():
+    # Initialize the form
+    form = ExampleForm()
+    
+    # Access the BoundField for the 'choices' field
+    bound_field = form['choices']
+    
+    # Get subwidgets (which are BoundWidget instances)
+    subwidgets = bound_field.subwidgets()
+    
+    # Check the id_for_label for each subwidget
+    for subwidget in subwidgets:
+        if subwidget.id_for_label() != 'custom_id_%s' % subwidget.data['index']:
+            print("Issue reproduced")
+            return
+
+    print("Issue resolved")
+
+# Run the test
+test_bound_widget_id_for_label_issue()
+```
+
+The test performs the following steps:
+1. Import the necessary modules from Django.
+2. Define a form `ExampleForm` with a `MultipleChoiceField` using the `CheckboxSelectMultiple` widget and a custom id.
+3. Define the test function `test_bound_widget_id_for_label_issue` to reproduce the issue.
+4. Initialize the form and access the `BoundField` for the `choices` field.
+5. Get the subwidgets of the field and check if the `id_for_label` matches the expected custom id format.
+6. Print "Issue reproduced" if the issue is detected, otherwise print "Issue resolved".
+
+This test can be used to both reproduce the issue and verify if the issue has been fixed.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.forms import CheckboxSelectMultiple
+
+class CustomForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=CheckboxSelectMultiple(attrs={'id': 'custom_id'}),
+    )
+
+def test_bound_widget_id_for_label():
+    form = CustomForm()
+    bound_field = form['choices']
+    
+    # Reproduce the issue
+    for subwidget in bound_field.subwidgets():
+        bound_widget = subwidget
+        if isinstance(bound_widget, forms.widgets.CheckboxInput):
+            generated_id = bound_widget.attrs.get('id')
+            expected_id = f"custom_id_{bound_widget.data['index']}"
+            if generated_id != expected_id:
+                print("Issue reproduced")
+                return
+    
+    # If the code is fixed
+    for subwidget in bound_field.subwidgets():
+        bound_widget = subwidget
+        if isinstance(bound_widget, forms.widgets.CheckboxInput):
+            try:
+                generated_id = bound_widget.attrs.get('id')
+                expected_id = f"custom_id_{bound_widget.data['index']}"
+                assert generated_id == expected_id
+                print("Issue resolved")
+            except AssertionError:
+                print("Issue reproduced")
+                return
+            except Exception:
+                print("Other issues")
+                return
+
+if __name__ == "__main__":
+    test_bound_widget_id_for_label()
+```
+
+This script creates a unit test for the issue described. The test initializes a custom form with a `MultipleChoiceField` using a `CheckboxSelectMultiple` widget and sets a custom id format. It then checks the `id` attribute in the subwidgets created by the `BoundField` instance. If the `id` does not match the expected format, it prints "Issue reproduced". If the issue is resolved, it prints "Issue resolved". If other issues arise, it prints "Other issues".
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.forms import widgets
+
+def test_choicewidget_id_for_label_issue():
+    class TestForm(forms.Form):
+        choices = forms.MultipleChoiceField(
+            choices=[('1', 'Option 1'), ('2', 'Option 2')],
+            widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+        )
+
+    # Create an instance of the form
+    form = TestForm()
+
+    # Access the bound field for 'choices'
+    bound_field = form['choices']
+
+    # Access the subwidgets
+    subwidgets = bound_field.subwidgets()
+
+    # Check the ID for the label of the first subwidget
+    try:
+        first_subwidget_id = subwidgets[0].id_for_label()
+    except KeyError:
+        print("Other issues")
+        return
+
+    # Expected ID is 'custom_id'
+    expected_id = 'custom_id_0'
+
+    if first_subwidget_id == expected_id:
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+test_choicewidget_id_for_label_issue()
+```
+
+Explanation:
+1. **Imports**: The necessary imports are included from Django forms.
+2. **Test Form**: A test form `TestForm` is defined with a `MultipleChoiceField` that uses `CheckboxSelectMultiple` widget with a custom ID.
+3. **Form Instance**: An instance of the form is created.
+4. **Bound Field Access**: The bound field for `choices` is accessed.
+5. **Subwidgets Access**: The `subwidgets` method is called on the bound field to get the subwidgets.
+6. **ID Check**: The ID for the label of the first subwidget is checked against the expected custom ID (`custom_id_0`).
+7. **Output**: Based on the ID comparison, it prints "Issue resolved" if the custom ID is correctly used or "Issue reproduced" if it is not. If there are unexpected issues like missing keys, it prints "Other issues".
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+class TestForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
+class BoundWidgetIdForLabelTest(SimpleTestCase):
+    
+    def test_bound_widget_id_for_label_issue(self):
+        form = TestForm(auto_id='custom_id_%s')
+        bound_field = form['choices']
+        subwidgets = bound_field.subwidgets()
+
+        try:
+            for i, subwidget in enumerate(subwidgets):
+                expected_id = f'custom_id_choices_{i}'
+                if subwidget.id_for_label() != expected_id:
+                    print("Issue reproduced")
+                    return
+            print("Issue resolved")
+        except Exception as e:
+            print("Other issues", str(e))
+
+BoundWidgetIdForLabelTest().test_bound_widget_id_for_label_issue()
+```
+
+**Explanation:**
+
+1. **Necessary imports**: The required Django forms and test classes are imported.
+2. **Code to reproduce the issue described in the issue text**: A form (`TestForm`) with a `MultipleChoiceField` using a `CheckboxSelectMultiple` widget is defined. A test case (`BoundWidgetIdForLabelTest`) is set up to check the behavior of `id_for_label`.
+3. **Print "Issue reproduced" if the outcome indicates that the issue is reproduced**: The code checks if `subwidget.id_for_label()` matches the expected ID format (`custom_id_choices_{index}`). If it doesn't match, the issue is printed as reproduced.
+4. **Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved**: If all IDs match the expected format, it prints "Issue resolved".
+5. **Print "Other issues" if the outcome indicates there are other issues with the source code**: If any other exception occurs, it prints "Other issues".
+
+This test can be used to confirm both the presence and fix of the described issue.
+2025-05-03 14:07:37,969 - INFO - raw output:
+```python
+from django import forms
+from django.test import TestCase
+
+class TestForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+    )
+
+class BoundWidgetIdForLabelTest(TestCase):
+    def test_bound_widget_id_for_label(self):
+        form = TestForm()
+
+        # Access the bound field
+        bound_field = form['choices']
+
+        # Access the subwidgets
+        subwidgets = bound_field.subwidgets()
+
+        try:
+            # Check the ID for label of the first subwidget
+            if subwidgets[0].id_for_label() == 'custom_id_0':
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+        except KeyError:
+            print("Other issues")
+
+# Run the test
+BoundWidgetIdForLabelTest().test_bound_widget_id_for_label()
+```
+
+### Explanation:
+
+1. **Necessary Imports**: The test imports relevant classes from `django` for form creation and testing.
+
+2. **Code to Reproduce the Issue**:
+    - A `TestForm` class is defined with a `MultipleChoiceField` using a `CheckboxSelectMultiple` widget.
+    - The widget is given a custom ID attribute `id='custom_id'`.
+    - The `BoundWidgetIdForLabelTest` test case is created to:
+        - Instantiate the form.
+        - Access the bound field and its subwidgets.
+        - Verify if the `id_for_label()` method returns the custom ID as expected.
+
+3. **Outcome Verification**:
+    - If the `id_for_label()` method returns `'custom_id_0'`, it prints "Issue resolved".
+    - If it does not match, it prints "Issue reproduced".
+    - If any other issue arises (like a `KeyError`), it prints "Other issues".
+
+This test case should help verify if the issue described in the provided issue text is reproduced or resolved.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+class SampleForm(forms.Form):
+    sample_field = forms.ChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
+def test_bound_widget_id_for_label():
+    try:
+        # Create an instance of the form
+        form = SampleForm(auto_id='custom_id_%s')
+
+        # Access the BoundField for the sample_field
+        bound_field = form['sample_field']
+        
+        # Access the subwidgets of the BoundField to retrieve the first BoundWidget
+        subwidgets = bound_field.subwidgets()
+        
+        # Check the id_for_label for the first subwidget
+        bound_widget = subwidgets[0]
+        generated_id = bound_widget.id_for_label()
+        
+        # Check if the id_for_label matches the expected custom ID format
+        expected_id = 'custom_id_sample_field_0'
+        if generated_id == expected_id:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues", e)
+
+test_bound_widget_id_for_label()
+```
+
+In this test:
+1. We create a form with a `CheckboxSelectMultiple` widget and set a custom `auto_id`.
+2. We access the `BoundField` for the specified field and get its subwidgets.
+3. We check the `id_for_label` of the first subwidget to see if it matches the expected custom ID format.
+4. The test will print "Issue resolved" if the custom ID is correctly used, "Issue reproduced" if the problem persists, and "Other issues" if any other exception occurs.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.test import TestCase
+
+class TestCheckboxSelectMultipleIssue(TestCase):
+    def test_checkbox_select_multiple_id_for_label(self):
+        class SampleForm(forms.Form):
+            choices = forms.MultipleChoiceField(
+                choices=[('1', 'Option 1'), ('2', 'Option 2')],
+                widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+            )
+        
+        form = SampleForm()
+
+        # Access the BoundField for 'choices'
+        bound_field = form['choices']
+
+        # Access the subwidgets
+        subwidgets = bound_field.subwidgets()
+        
+        # Check the id_for_label for the first subwidget
+        id_for_label = subwidgets[0].id_for_label()
+
+        # Check if it matches the expected custom id format
+        expected_id_for_label = 'custom_id_0'
+
+        try:
+            assert id_for_label == expected_id_for_label
+            print("Issue resolved")
+        except AssertionError:
+            if id_for_label == 'id_choices_0':
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+                
+TestCheckboxSelectMultipleIssue().test_checkbox_select_multiple_id_for_label()
+```
+
+This test performs the following actions:
+
+1. Defines a `SampleForm` with a `MultipleChoiceField` using the `CheckboxSelectMultiple` widget with a custom `id` attribute.
+2. Retrieves the `BoundField` for the `choices` field.
+3. Accesses the subwidgets of the `CheckboxSelectMultiple` widget.
+4. Checks the `id_for_label` for the first subwidget and compares it with the expected custom id format.
+5. Prints "Issue resolved" if the `id_for_label` matches the custom id format, "Issue reproduced" if it matches the default format, and "Other issues" if it doesn't match either.
+
+You can run this test to verify if the issue is reproduced or resolved.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+
+# Step 1: Define a form with a ChoiceField using CheckboxSelectMultiple
+class TestForm(forms.Form):
+    choices = forms.ChoiceField(
+        widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'}),
+        choices=[('1', 'Option 1'), ('2', 'Option 2')]
+    )
+
+# Step 2: Create an instance of the form
+form = TestForm()
+
+# Step 3: Access the subwidgets to check the IDs
+subwidgets = form['choices'].subwidgets()
+
+# Function to check the issue
+def check_issue():
+    try:
+        # Extract the ID from the subwidget
+        actual_id = subwidgets[0].id_for_label()
+        # Expected ID based on the description in the issue
+        expected_id = 'custom_id_0'
+        
+        # Check if the issue is reproduced
+        if actual_id == expected_id:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        # If any other exception occurs, print "Other issues"
+        print("Other issues:", e)
+
+check_issue()
+```
+
+This test will:
+
+1. Create a form with a `ChoiceField` using `CheckboxSelectMultiple` widget and set a custom `id` attribute.
+2. Access the subwidgets of the form field to get their individual IDs.
+3. Compare the actual ID returned by `id_for_label` with the expected custom ID.
+4. Print "Issue resolved" if the IDs match, "Issue reproduced" if they do not, and "Other issues" if any other error occurs.
+2025-05-03 14:07:37,970 - INFO - raw output:
+Sure, here is a complete test that can be used to reproduce the issue described in the issue text:
+
+```python
+from django import forms
+from django.forms.widgets import CheckboxSelectMultiple
+
+# Reproduce part of the issue
+class CustomForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=CheckboxSelectMultiple(attrs={'id': 'custom_id_%s'})
+    )
+
+def test_bound_widget_id_for_label():
+    form = CustomForm(auto_id='custom_id_%s')
+
+    # Retrieve the bound field and its subwidgets
+    bound_field = form['choices']
+    subwidgets = list(bound_field.subwidgets())
+    
+    try:
+        # Check the id_for_label of the first subwidget
+        if subwidgets[0].id_for_label() == 'id_choices_0':
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except IndexError:
+        print("Other issues")
+
+# Run the test
+test_bound_widget_id_for_label()
+```
+
+Here's a brief explanation of the test:
+1. **Necessary Imports:** The necessary imports like `forms` and `CheckboxSelectMultiple` are included.
+2. **Reproduction Code:** A custom form `CustomForm` is created with a `MultipleChoiceField` using `CheckboxSelectMultiple` widget where the `id` attribute is customized.
+3. **Test Function:** The `test_bound_widget_id_for_label` function initializes the form and retrieves the subwidgets. It checks the `id_for_label` of the first subwidget and prints the appropriate outcome based on whether the issue is reproduced, resolved, or if there are other issues.
+4. **Running the Test:** The test function is executed at the end.
+
+This test will help you verify the described issue and confirm if it has been resolved after making the necessary code changes.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.test import TestCase
+
+class SampleForm(forms.Form):
+    options = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id_%s'})
+    )
+
+class TestIssueReproduction(TestCase):
+    def test_bound_widget_id_for_label(self):
+        form = SampleForm()
+        subwidgets = list(form['options'].subwidgets())
+        
+        # Assuming the subwidgets are in order, get the first subwidget
+        first_widget = subwidgets[0]
+        
+        # Expected custom ID from the attrs set in the widget
+        expected_custom_id = 'custom_id_0'
+        
+        try:
+            if first_widget.data['attrs']['id'] == expected_custom_id:
+                if first_widget.id_for_label() == expected_custom_id:
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+            else:
+                print("Other issues")
+        except KeyError:
+            print("Other issues")
+
+# Run the test
+TestIssueReproduction().test_bound_widget_id_for_label()
+```
+
+This test checks if the `id_for_label` method in the `BoundWidget` class respects the custom ID set by `ChoiceWidget.options`. If the issue is still present, it will print "Issue reproduced." If the custom ID is used correctly, it will print "Issue resolved." Any unexpected outcomes will lead to "Other issues" being printed.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+class TestForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple,
+        choices=[('1', 'Option 1'), ('2', 'Option 2')]
+    )
+
+class BoundWidgetIdForLabelTest(SimpleTestCase):
+    def test_bound_widget_id_for_label(self):
+        form = TestForm(auto_id='custom_id_%s')
+        rendered = form.as_p()
+
+        # Check if the IDs are set correctly in the rendered HTML
+        try:
+            id_option_1 = 'custom_id_choices_0'
+            id_option_2 = 'custom_id_choices_1'
+            assert id_option_1 in rendered
+            assert id_option_2 in rendered
+        except AssertionError:
+            print("Issue reproduced")
+            return
+
+        # Check if BoundWidget.id_for_label returns the correct ID
+        subwidgets = list(form['choices'].subwidgets())
+        try:
+            assert subwidgets[0].id_for_label() == id_option_1
+            assert subwidgets[1].id_for_label() == id_option_2
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+            return
+
+        print("Other issues")
+
+
+BoundWidgetIdForLabelTest().test_bound_widget_id_for_label()
+```
+
+This test does the following:
+1. Creates a `TestForm` with a `MultipleChoiceField` using `CheckboxSelectMultiple`.
+2. Renders the form's HTML.
+3. Checks if the custom IDs are present in the rendered HTML, indicating the issue is reproduced.
+4. Checks if `BoundWidget.id_for_label` returns the correct ID, indicating if the issue is resolved.
+5. Provides appropriate console output based on the results.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+class TestForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'One'), ('2', 'Two'), ('3', 'Three')],
+        widget=forms.CheckboxSelectMultiple,
+        widget_attrs={'id': 'custom_id_%s'}
+    )
+
+class BoundWidgetIdForLabelTest(SimpleTestCase):
+    def test_id_for_label_issue(self):
+        form = TestForm(auto_id='custom_id_%s')
+        subwidgets = form['choices'].subwidgets()
+
+        try:
+            # Check if the issue is reproduced
+            for index, widget in enumerate(subwidgets):
+                expected_id = 'custom_id_choices_%d' % index
+                if widget.id_for_label() != expected_id:
+                    print("Issue reproduced")
+                    return
+            
+            # Check if the issue is resolved
+            for index, widget in enumerate(subwidgets):
+                expected_id = 'custom_id_choices_%d' % index
+                if widget.id_for_label() != expected_id:
+                    print("Other issues")
+                    return
+
+            print("Issue resolved")
+        except Exception as e:
+            print("Other issues")
+            return
+
+BoundWidgetIdForLabelTest().test_id_for_label_issue()
+```
+
+Explanation:
+1. **Necessary imports**: The necessary imports from Django's forms and test modules are included.
+2. **Code to reproduce the issue**: The test form `TestForm` and test case `BoundWidgetIdForLabelTest` are created. The form includes a `MultipleChoiceField` with `CheckboxSelectMultiple` widget and a custom id format.
+3. **Test logic**: In the test method, the `subwidgets` of the form field are obtained. The method checks if the `id_for_label` is generated correctly according to the custom id format. If not, it prints `"Issue reproduced"`. If the ids match the expected format, it prints `"Issue resolved"`. If any exceptions occur, it prints `"Other issues"`.
+4. **Output messages**: The test will print either "Issue reproduced", "Issue resolved", or "Other issues" based on the outcome.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.forms import CheckboxSelectMultiple
+
+def test_boundwidget_id_for_label():
+    class SampleForm(forms.Form):
+        choices = forms.MultipleChoiceField(
+            choices=[('1', 'One'), ('2', 'Two')],
+            widget=CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+        )
+
+    form = SampleForm()
+
+    # Access the BoundField for the choices field
+    bound_field = form['choices']
+
+    # Print out the subwidgets and their ids
+    for i, subwidget in enumerate(bound_field.subwidgets()):
+        id_for_label = subwidget.id_for_label()
+        print(f'Subwidget {i} id_for_label: {id_for_label}')
+
+    # Check if the id_for_label matches the expected custom id format
+    expected_id = 'custom_id_0'
+    if any(subwidget.id_for_label() == expected_id for subwidget in bound_field.subwidgets()):
+        print("Issue resolved")
+    elif any(subwidget.id_for_label().startswith('id_choices_') for subwidget in bound_field.subwidgets()):
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_boundwidget_id_for_label()
+```
+
+This script assumes you have Django installed and properly configured. The `test_boundwidget_id_for_label` function defines a form with a `MultipleChoiceField` using a `CheckboxSelectMultiple` widget with a custom id. It then checks if the `id_for_label` of the subwidgets matches the custom id format. If it does, it prints "Issue resolved". If it still uses the default id format, it prints "Issue reproduced". If there are other issues, it prints "Other issues".
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.utils.safestring import mark_safe
+
+def test_boundwidget_id_for_label() -> None:
+    class TestForm(forms.Form):
+        choices = forms.MultipleChoiceField(
+            choices=[('1', 'First'), ('2', 'Second')],
+            widget=forms.CheckboxSelectMultiple(attrs={"id": "custom_id"})
+        )
+
+    form = TestForm(auto_id='test_%s')
+    subwidgets = form['choices'].subwidgets
+    bound_widget = subwidgets[0]  # Get the first bound widget
+
+    # Get the id_for_label from BoundWidget
+    widget_id_for_label = bound_widget.id_for_label()
+
+    # Check if the id_for_label ignores the custom id
+    expected_id = 'test_choices_0'  # Expected default behavior
+    custom_id = 'custom_id_0'  # Expected custom behavior
+
+    if widget_id_for_label == custom_id:
+        print("Issue resolved")
+    elif widget_id_for_label == expected_id:
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_boundwidget_id_for_label()
+```
+
+This test script checks if the `BoundWidget.id_for_label` method uses the custom ID or falls back to the default behavior. By comparing the output, you can determine if the issue is reproduced, resolved, or if there are other issues present.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+class SampleForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'First'), ('2', 'Second')],
+        widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id_%s'})
+    )
+
+class TestBoundWidgetIDForLabel(SimpleTestCase):
+    def test_bound_widget_id_for_label(self):
+        form = SampleForm()
+        rendered_form = form.as_p()
+
+        # Extract checkbox ids
+        first_checkbox_id = form['choices'].subwidgets()[0].data['attrs']['id']
+        second_checkbox_id = form['choices'].subwidgets()[1].data['attrs']['id']
+
+        expected_first_id = 'custom_id_choices_0'
+        expected_second_id = 'custom_id_choices_1'
+
+        try:
+            # Check if the ids match the expected custom ids
+            assert first_checkbox_id == expected_first_id
+            assert second_checkbox_id == expected_second_id
+
+            # Issue resolved if the ids are as expected
+            print("Issue resolved")
+        except AssertionError:
+            # If the ids do not match
+            print("Issue reproduced")
+        except Exception:
+            # Other errors
+            print("Other issues")
+
+# Run the test
+TestBoundWidgetIDForLabel().test_bound_widget_id_for_label()
+```
+
+### Explanation:
+
+1. **Necessary Imports**: The test imports required modules from `django` including `forms` and `SimpleTestCase`.
+
+2. **Reproduce the Issue**:
+   - A `SampleForm` is created with a `MultipleChoiceField` using `CheckboxSelectMultiple` widget, and a custom `id` format is provided.
+   - The `test_bound_widget_id_for_label` method in `TestBoundWidgetIDForLabel` class is defined to instantiate the form and extract the ids of subwidgets.
+
+3. **Assertions**:
+   - The test checks if the `id` of the first and second checkboxes match the expected custom ids.
+   - If the ids match the expected values, it prints "Issue resolved". Otherwise, it prints "Issue reproduced".
+   - If there are any other unexpected issues, it prints "Other issues".
+
+4. **Run the Test**: The test is executed by calling the method `test_bound_widget_id_for_label`.
+
+This test will help verify if the custom `id` provided through `ChoiceWidget.options` is correctly used in `BoundWidget.id_for_label`. If not, it will print "Issue reproduced", indicating that the issue persists. If the issue is fixed, it will print "Issue resolved". If there are unexpected errors, it will print "Other issues".
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+# Define a sample form for testing
+class TestForm(forms.Form):
+    test_field = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+    )
+
+class BoundWidgetIDForLabelTest(SimpleTestCase):
+
+    def test_id_for_label_issue(self):
+        # Create form instance
+        form = TestForm()
+
+        # Get bound field
+        bound_field = form['test_field']
+
+        # Get subwidgets
+        subwidgets = bound_field.subwidgets()
+
+        try:
+            # Fetch the id for the first subwidget's label
+            subwidget_id_for_label = subwidgets[0].id_for_label()
+
+            # Check if the id matches the expected custom id format
+            expected_id = 'custom_id_0'
+
+            if subwidget_id_for_label == expected_id:
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+        except Exception as e:
+            print("Other issues")
+            print(str(e))
+
+BoundWidgetIDForLabelTest().test_id_for_label_issue()
+```
+
+This test case will:
+1. Import the necessary modules and classes from Django.
+2. Define a `TestForm` class with a `MultipleChoiceField` using the `CheckboxSelectMultiple` widget with a custom `id`.
+3. Implement a `BoundWidgetIDForLabelTest` test case to check if the issue described in the provided issue text is occurring.
+4. Print "Issue resolved" if the `id_for_label` returns the expected custom id.
+5. Print "Issue reproduced" if the `id_for_label` does not return the expected custom id.
+6. Print "Other issues" if any other exceptions occur during the test execution.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.forms import CheckboxSelectMultiple
+
+def test_boundwidget_id_for_label():
+    class TestForm(forms.Form):
+        choices = forms.MultipleChoiceField(
+            choices=[('1', 'One'), ('2', 'Two'), ('3', 'Three')],
+            widget=CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+        )
+    
+    form = TestForm()
+    
+    # Access subwidgets of the 'choices' field
+    subwidgets = list(form['choices'].subwidgets())
+    
+    if not subwidgets:
+        print("Other issues")
+        return
+    
+    # Check the id_for_label of the first subwidget
+    first_widget = subwidgets[0]
+    generated_id = first_widget.id_for_label()
+    
+    expected_id = "custom_id_0"  # This should match the auto_id format specified
+    
+    if generated_id == expected_id:
+        print("Issue resolved")
+    elif generated_id == 'id_choices_0':  # This is the current incorrect id being generated
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_boundwidget_id_for_label()
+```
+
+In this script:
+
+1. We define a form (`TestForm`) with a `MultipleChoiceField` using `CheckboxSelectMultiple` and set a custom ID.
+2. We instantiate the form and access the subwidgets of the `choices` field.
+3. We then verify if the `id_for_label` of the first subwidget matches the expected custom format.
+4. Finally, the script prints the appropriate message based on the outcome of the test.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.forms.widgets import CheckboxSelectMultiple
+
+def test_boundwidget_id_for_label():
+    class TestForm(forms.Form):
+        choices = forms.MultipleChoiceField(
+            choices=[('1', 'Option 1'), ('2', 'Option 2')],
+            widget=CheckboxSelectMultiple(attrs={'id': 'custom_id_%s'})
+        )
+    
+    form = TestForm(auto_id='custom_id_%s')
+    subwidgets = form['choices'].subwidgets()
+
+    try:
+        # Loop through subwidgets to test id_for_label
+        for i, subwidget in enumerate(subwidgets):
+            expected_id = f"custom_id_{i}"
+            if subwidget.id_for_label() != expected_id:
+                print("Issue reproduced")
+                return
+        print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+        return
+
+test_boundwidget_id_for_label()
+```
+
+In the above test:
+1. We import necessary modules from Django.
+2. We define a `TestForm` with a `MultipleChoiceField` that uses `CheckboxSelectMultiple` with a custom `id` format.
+3. We create an instance of the form with a custom `auto_id` format.
+4. We retrieve the subwidgets of the `choices` field.
+5. We check the `id_for_label` of each subwidget to see if it matches the expected `custom_id_%s` format.
+6. Depending on the outcome, we print "Issue reproduced", "Issue resolved", or "Other issues".
+
+This test will help you determine if the issue described has been reproduced or resolved based on the `id_for_label` output.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+
+class TestForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple,
+        choices=[('1', 'Option 1'), ('2', 'Option 2')]
+    )
+
+def test_boundwidget_id_for_label():
+    form = TestForm(auto_id='custom_id_%s')
+    bound_field = form['choices']
+    subwidget_ids = [widget.id_for_label() for widget in bound_field.subwidgets()]
+
+    try:
+        # Check if the IDs generated follow the incorrect format
+        for idx, _ in enumerate(form.fields['choices'].choices):
+            if subwidget_ids[idx] != f'custom_id_choices_{idx}':
+                print("Issue reproduced")
+                return
+
+        # If the IDs are correct
+        print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+        print(str(e))
+
+test_boundwidget_id_for_label()
+```
+
+This script sets up a Django form with a `CheckboxSelectMultiple` widget, and then creates a test function to check the `id_for_label` method of the `BoundWidget`. The test tries to ensure that the IDs are generated correctly based on the `auto_id` format provided. If they do not match the expected format, it prints "Issue reproduced". If everything is correct, it prints "Issue resolved". If any other issues occur, it catches the exception and prints "Other issues".
+2025-05-03 14:07:37,970 - INFO - raw output:
+Here's a complete test to reproduce and verify the issue described in the issue text:
+
+```python
+from django import forms
+
+def test_boundwidget_id_for_label():
+    # Custom ChoiceWidget to override id in options
+    class CustomChoiceWidget(forms.CheckboxSelectMultiple):
+        def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+            option = super().create_option(name, value, label, selected, index, subindex, attrs)
+            option['attrs']['id'] = f'custom_id_{index}'
+            return option
+
+    # Form using the custom widget
+    class TestForm(forms.Form):
+        choices = forms.MultipleChoiceField(
+            choices=[('1', 'Option 1'), ('2', 'Option 2')],
+            widget=CustomChoiceWidget,
+            widget_attrs={'id': 'custom_id_format'}
+        )
+
+    form = TestForm()
+
+    # Get the BoundField for the 'choices' field
+    bound_field = form['choices']
+
+    # Get the subwidgets
+    subwidgets = list(bound_field.subwidgets())
+
+    # Check the first subwidget's id_for_label
+    first_subwidget = subwidgets[0]
+    try:
+        if first_subwidget.id_for_label() == 'custom_id_0':
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except KeyError:
+        print("Other issues")
+
+test_boundwidget_id_for_label()
+```
+
+Explanation:
+1. We define a custom `ChoiceWidget` (as `CustomChoiceWidget`) that overrides the `create_option` method to set a custom id for each option.
+2. We define a form (`TestForm`) that uses this custom widget for its `choices` field.
+3. We instantiate the form and get the `BoundField` for the `choices` field.
+4. We get the subwidgets of this bound field.
+5. We check the `id_for_label` of the first subwidget to see if it matches the custom id format we set in the `create_option` method.
+6. Depending on the outcome, we print "Issue resolved", "Issue reproduced", or "Other issues".
+
+This test can be used to both reproduce the issue and verify if the issue has been fixed.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.forms.widgets import CheckboxSelectMultiple
+from django.test import SimpleTestCase
+
+class TestForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+    )
+
+def test_bound_widget_id_for_label():
+    form = TestForm()
+    bound_field = form['choices']
+    subwidgets = bound_field.subwidgets()
+
+    # Check the id for each subwidget
+    for index, subwidget in enumerate(subwidgets):
+        expected_id = f"custom_id_{index}"
+        try:
+            assert subwidget.id_for_label() == expected_id, \
+                f"Expected {expected_id}, but got {subwidget.id_for_label()}"
+        except AssertionError:
+            # Identify if the issue is reproduced or if there are other issues
+            if subwidget.id_for_label() == f"id_choices_{index}":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+
+    print("Issue resolved")
+
+test_bound_widget_id_for_label()
+```
+
+Explanation:
+1. **Necessary Imports**: The test imports necessary modules from Django.
+2. **Code to Reproduce the Issue**: 
+   - A form `TestForm` is created with a `MultipleChoiceField` that uses `CheckboxSelectMultiple` with a custom `id`.
+   - The test function `test_bound_widget_id_for_label()` initializes the form and fetches the subwidgets.
+   - The expected `id` for each subwidget is checked against the actual `id` produced by `id_for_label()`.
+3. **Print Statements**: 
+   - If the `id` does not match the expected format, it checks whether it matches the format that indicates the issue is reproduced.
+   - It prints "Issue reproduced" if the issue is verified.
+   - It prints "Other issues" if the mismatch does not conform to the expected reproducible issue.
+   - If all `id`s are correct, it prints "Issue resolved".
+```
+2025-05-03 14:07:37,970 - INFO - raw output:
+Certainly! Below is a complete test that can be used to reproduce the issue described in your issue text.
+
+```python
+from django import forms
+from django.forms.widgets import CheckboxSelectMultiple
+
+def test_checkbox_select_multiple_subwidgets_id():
+    class TestForm(forms.Form):
+        choices = forms.MultipleChoiceField(
+            choices=[('1', 'Option 1'), ('2', 'Option 2')],
+            widget=CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+        )
+
+    form = TestForm()
+
+    subwidgets = form['choices'].subwidgets
+
+    issue_reproduced = False
+    for subwidget in subwidgets:
+        if subwidget.id_for_label() != 'custom_id_0':
+            issue_reproduced = True
+            break
+
+    if issue_reproduced:
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+
+try:
+    test_checkbox_select_multiple_subwidgets_id()
+except Exception as e:
+    print("Other issues")
+    print(str(e))
+```
+
+This test does the following:
+
+1. It defines a simple Django form with a `MultipleChoiceField` using a `CheckboxSelectMultiple` widget, setting a custom `id` attribute.
+2. It retrieves the subwidgets from the form field.
+3. It checks if the `id_for_label()` of the subwidgets is not the expected `custom_id_0`. If it isn't, it indicates that the issue is reproduced.
+4. It prints "Issue reproduced" if the issue is found, "Issue resolved" if the issue seems fixed, and "Other issues" if there are any exceptions raised during the test.
+
+This test can be used to both reproduce the issue and verify that it has been fixed.
+2025-05-03 14:07:37,970 - INFO - raw output:
+```python
+from django import forms
+from django.test import SimpleTestCase
+
+class TestBoundWidget(SimpleTestCase):
+    def setUp(self):
+        choices = [(1, 'Option 1'), (2, 'Option 2')]
+        self.form = forms.Form()
+        self.form.fields['example'] = forms.MultipleChoiceField(
+            widget=forms.CheckboxSelectMultiple(attrs={'id': 'custom_id'}),
+            choices=choices
+        )
+    
+    def test_bound_widget_id_for_label(self):
+        bound_field = self.form['example']
+        subwidgets = list(bound_field.subwidgets())
+        
+        try:
+            if subwidgets[0].id_for_label() == 'custom_id_0':
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+        except Exception:
+            print("Other issues")
+        
+        return
+
+# Run the test
+test = TestBoundWidget()
+test.setUp()
+test.test_bound_widget_id_for_label()
+```
+
+In this test:
+1. We set up a form with a `MultipleChoiceField` and a `CheckboxSelectMultiple` widget with a custom `id` attribute.
+2. We fetch the subwidgets from `bound_field.subwidgets()`.
+3. We check whether `id_for_label` returns the expected custom `id` for the first subwidget.
+4. We print the appropriate message based on the outcome: "Issue resolved", "Issue reproduced", or "Other issues".
+2025-05-03 14:07:37,970 - INFO - raw output:
+Certainly! Below is a complete test that you can use to reproduce the issue described in the provided issue text, as well as to verify if the issue has been resolved.
+
+```python
+from django import forms
+from django.forms.widgets import CheckboxSelectMultiple
+
+def test_boundwidget_id_for_label_issue():
+    class TestForm(forms.Form):
+        choices_field = forms.MultipleChoiceField(
+            choices=[('1', 'Option 1'), ('2', 'Option 2')],
+            widget=CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+        )
+
+    form = TestForm()
+    bound_field = form['choices_field']
+    subwidgets = bound_field.subwidgets()
+
+    try:
+        # Fetch the first subwidget
+        first_widget = subwidgets[0]
+        generated_id = first_widget.id_for_label()
+
+        # Check if id_for_label() returns the correct id
+        if generated_id == 'custom_id_0':
+            print("Issue resolved")
+        elif generated_id == 'id_choices_field_0':
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+        print(f"Exception: {e}")
+
+test_boundwidget_id_for_label_issue()
+```
+
+Explanation:
+1. **Imports**: Necessary imports are included from `django`.
+2. **Reproduce Issue**:
+    - A `TestForm` class is defined with a `MultipleChoiceField` using `CheckboxSelectMultiple` widget where the `id` attribute is explicitly set.
+    - An instance of the form is created, and its bound field is fetched.
+    - Subwidgets are generated from the bound field.
+3. **Outcome Checks**:
+    - The first subwidget's `id_for_label` is fetched.
+    - The test checks if the `id_for_label` returns the correct id based on the custom id set (`custom_id_0`). If it does, it prints "Issue resolved".
+    - If the default id format (`id_choices_field_0`) is returned, it prints "Issue reproduced".
+    - If any other conditions or exceptions occur, it prints "Other issues".
+
+This test should help in verifying if the issue described is reproduced or resolved, and should aid in debugging further if there are any other issues.
+2025-05-03 14:07:37,971 - INFO - raw output:
+```python
+from django import forms
+from django.forms.widgets import CheckboxSelectMultiple
+
+class CustomForm(forms.Form):
+    choices = forms.MultipleChoiceField(
+        choices=[('1', 'Option 1'), ('2', 'Option 2')],
+        widget=CheckboxSelectMultiple(attrs={'id': 'custom_id'})
+    )
+
+def test_boundwidget_id_for_label():
+    form = CustomForm()
+    bound_field = form['choices']
+    subwidgets = bound_field.subwidgets()
+    
+    # Checking the id_for_label for each subwidget
+    ids_for_labels = [subwidget.id_for_label() for subwidget in subwidgets]
+    
+    expected_ids = ['custom_id_0', 'custom_id_1']
+    
+    try:
+        assert ids_for_labels == expected_ids
+        print("Issue resolved")
+    except AssertionError:
+        if any(id.startswith('id_choices_') for id in ids_for_labels):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+
+test_boundwidget_id_for_label()
+```
+
+Explanation:
+1. **Necessary imports**: Import necessary components from Django.
+2. **Code to reproduce the issue**: Define a `CustomForm` with a `MultipleChoiceField` using `CheckboxSelectMultiple` and set the `id` attribute.
+3. **Print statements**: Depending on the outcome of the test, print whether the issue is reproduced, resolved, or if there are other issues. The expected IDs check if the IDs generated are as expected.
+4. **Assertions**: Compare the actual IDs generated to the expected ones. If they match, the issue is resolved; if not, it checks if the IDs start with `id_choices_` to identify if the original issue is reproduced.
+
+Running this test will help in verifying whether the issue has been fixed or not.

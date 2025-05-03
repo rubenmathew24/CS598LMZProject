@@ -1,0 +1,2236 @@
+2025-05-02 17:20:56,863 - INFO - ================ generating test for scikit-learn__scikit-learn-14092 ================
+2025-05-02 17:20:56,954 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+NCA fails in GridSearch due to too strict parameter checks
+NCA checks its parameters to have a specific type, which can easily fail in a GridSearch due to how param grid is made.
+
+Here is an example:
+```python
+import numpy as np
+
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+X = np.random.random_sample((100, 10))
+y = np.random.randint(2, size=100)
+
+nca = NeighborhoodComponentsAnalysis()
+knn = KNeighborsClassifier()
+
+pipe = Pipeline([('nca', nca),
+                 ('knn', knn)])
+                
+params = {'nca__tol': [0.1, 0.5, 1],
+          'nca__n_components': np.arange(1, 10)}
+          
+gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+gs.fit(X,y)
+```
+
+The issue is that for `tol`: 1 is not a float, and for  `n_components`: np.int64 is not int
+
+Before proposing a fix for this specific situation, I'd like to have your general opinion about parameter checking.  
+I like this idea of common parameter checking tool introduced with the NCA PR. What do you think about extending it across the code-base (or at least for new or recent estimators) ?
+
+Currently parameter checking is not always done or often partially done, and is quite redundant. For instance, here is the input validation of lda:
+```python
+def _check_params(self):
+        """Check model parameters."""
+        if self.n_components <= 0:
+            raise ValueError("Invalid 'n_components' parameter: %r"
+                             % self.n_components)
+
+        if self.total_samples <= 0:
+            raise ValueError("Invalid 'total_samples' parameter: %r"
+                             % self.total_samples)
+
+        if self.learning_offset < 0:
+            raise ValueError("Invalid 'learning_offset' parameter: %r"
+                             % self.learning_offset)
+
+        if self.learning_method not in ("batch", "online"):
+            raise ValueError("Invalid 'learning_method' parameter: %r"
+                             % self.learning_method)
+```
+most params aren't checked and for those who are there's a lot of duplicated code.
+
+A propose to be upgrade the new tool to be able to check open/closed intervals (currently only closed) and list membership.
+
+The api would be something like that:
+```
+check_param(param, name, valid_options)
+```
+where valid_options would be a dict of `type: constraint`. e.g for the `beta_loss` param of `NMF`, it can be either a float or a string in a list, which would give
+```
+valid_options = {numbers.Real: None,  # None for no constraint
+                 str: ['frobenius', 'kullback-leibler', 'itakura-saito']}
+```
+Sometimes a parameter can only be positive or within a given interval, e.g. `l1_ratio` of `LogisticRegression` must be between 0 and 1, which would give
+```
+valid_options = {numbers.Real: Interval(0, 1, closed='both')}
+```
+positivity of e.g. `max_iter` would be `numbers.Integral: Interval(left=1)`.
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:56,963 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:23:45,302 - INFO - ================ generating test for scikit-learn__scikit-learn-14092 ================
+2025-05-03 14:23:45,318 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+NCA fails in GridSearch due to too strict parameter checks
+NCA checks its parameters to have a specific type, which can easily fail in a GridSearch due to how param grid is made.
+
+Here is an example:
+```python
+import numpy as np
+
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+X = np.random.random_sample((100, 10))
+y = np.random.randint(2, size=100)
+
+nca = NeighborhoodComponentsAnalysis()
+knn = KNeighborsClassifier()
+
+pipe = Pipeline([('nca', nca),
+                 ('knn', knn)])
+                
+params = {'nca__tol': [0.1, 0.5, 1],
+          'nca__n_components': np.arange(1, 10)}
+          
+gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+gs.fit(X,y)
+```
+
+The issue is that for `tol`: 1 is not a float, and for  `n_components`: np.int64 is not int
+
+Before proposing a fix for this specific situation, I'd like to have your general opinion about parameter checking.  
+I like this idea of common parameter checking tool introduced with the NCA PR. What do you think about extending it across the code-base (or at least for new or recent estimators) ?
+
+Currently parameter checking is not always done or often partially done, and is quite redundant. For instance, here is the input validation of lda:
+```python
+def _check_params(self):
+        """Check model parameters."""
+        if self.n_components <= 0:
+            raise ValueError("Invalid 'n_components' parameter: %r"
+                             % self.n_components)
+
+        if self.total_samples <= 0:
+            raise ValueError("Invalid 'total_samples' parameter: %r"
+                             % self.total_samples)
+
+        if self.learning_offset < 0:
+            raise ValueError("Invalid 'learning_offset' parameter: %r"
+                             % self.learning_offset)
+
+        if self.learning_method not in ("batch", "online"):
+            raise ValueError("Invalid 'learning_method' parameter: %r"
+                             % self.learning_method)
+```
+most params aren't checked and for those who are there's a lot of duplicated code.
+
+A propose to be upgrade the new tool to be able to check open/closed intervals (currently only closed) and list membership.
+
+The api would be something like that:
+```
+check_param(param, name, valid_options)
+```
+where valid_options would be a dict of `type: constraint`. e.g for the `beta_loss` param of `NMF`, it can be either a float or a string in a list, which would give
+```
+valid_options = {numbers.Real: None,  # None for no constraint
+                 str: ['frobenius', 'kullback-leibler', 'itakura-saito']}
+```
+Sometimes a parameter can only be positive or within a given interval, e.g. `l1_ratio` of `LogisticRegression` must be between 0 and 1, which would give
+```
+valid_options = {numbers.Real: Interval(0, 1, closed='both')}
+```
+positivity of e.g. `max_iter` would be `numbers.Integral: Interval(left=1)`.
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 14:23:45,318 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:23:45,325 - INFO - Creating API request
+2025-05-03 14:23:48,862 - INFO - API response ChatCompletion(id='chatcmpl-BTCkbJGs0fu0IhTernFYZovQBf9bc', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Define the pipeline\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Define the parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],  # 1 is an int, not a float\n                  \'nca__n_components\': np.arange(1, 10)}  # np.int64, not int\n\n        # Perform GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        \n        print("Issue resolved")\n    except ValueError as e:\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_nca_gridsearch_issue()\n```\n\nThis test script will:\n1. Import the necessary modules.\n2. Generate random data for the test.\n3. Define a pipeline with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.\n4. Set up a parameter grid that includes values that will trigger the issue.\n5. Perform a `GridSearchCV` with the pipeline and parameter grid.\n6. Print "Issue resolved" if the `GridSearchCV` completes without errors.\n7. Print "Issue reproduced" if a `ValueError` related to `tol` or `n_components` is raised.\n8. Print "Other issues" if any other exception is raised.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746300225, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=422, prompt_tokens=1064, total_tokens=1486, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:23:48,863 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:23:48,874 - INFO - Creating API request
+2025-05-03 14:24:52,729 - INFO - API response ChatCompletion(id='chatcmpl-BTCkf6i9CZKXd3KdPkQckU8Mfpffo', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_grid_search_issue():\n    try:\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        pipe = Pipeline([(\'nca\', nca),\n                         (\'knn\', knn)])\n                        \n        params = {\'nca__tol\': [0.1, 0.5, 1],\n                  \'nca__n_components\': np.arange(1, 10)}\n                  \n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        \n        print("Issue resolved")\n    except ValueError as e:\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_nca_grid_search_issue()\n```\n\nThis test script:\n1. Sets up a random dataset.\n2. Creates a pipeline with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.\n3. Sets the grid search parameters, including the problematic ones (`tol` and `n_components`).\n4. Executes the grid search and tries to fit the model.\n5. Prints messages depending on the outcome:\n   - "Issue resolved" if no exceptions are raised.\n   - "Issue reproduced" if a `ValueError` related to `tol` or `n_components` is raised.\n   - "Other issues" if any other exception occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='Certainly! Here is the complete test that can be used to reproduce the issue described in the issue text:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        # Generating random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Setting up the pipeline with NeighborhoodComponentsAnalysis and KNeighborsClassifier\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n        \n        # Defining parameter grid for GridSearch\n        params = {\'nca__tol\': [0.1, 0.5, 1],  # Note: 1 is not a float\n                  \'nca__n_components\': np.arange(1, 10)}  # Note: np.int64 not int\n        \n        # Performing GridSearch with the defined parameter grid\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n\n        # If fit is successful, the issue is resolved\n        print("Issue resolved")\n    except ValueError as e:\n        # Checking if the error is related to parameter type checking\n        if \'must be\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_nca_gridsearch_issue()\n```\n\nThis test sets up a pipeline using `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`, defines a parameter grid with values that will trigger the described issue, and runs a `GridSearchCV`. Depending on the outcome, it prints whether the issue has been reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='Certainly! Here is a complete test that can be used to reproduce the issue described in the issue text:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\n# Define the function to test the issue\ndef test_nca_grid_search_issue():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n        \n        # Set up NCA and KNN\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        \n        # Create a pipeline\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n        \n        # Define parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1], \'nca__n_components\': np.arange(1, 10)}\n        \n        # Set up GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        \n        # Fit the GridSearchCV\n        gs.fit(X, y)\n        \n        print("Issue resolved")\n    except ValueError as e:\n        if \'tol\' in str(e) or \'n_components\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\n# Run the test\ntest_nca_grid_search_issue()\n```\n\n### Explanation:\n1. **Necessary imports**: The test includes essential imports for numpy, the sklearn pipeline, GridSearchCV, NeighborhoodComponentsAnalysis, and KNeighborsClassifier.\n2. **Code to reproduce the issue**:\n   - It generates random data for `X` and `y`.\n   - It sets up the `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.\n   - It creates a pipeline using these two components.\n   - It defines a parameter grid with `tol` and `n_components` values.\n   - It sets up `GridSearchCV` with the pipeline and parameter grid, and fits the model on the data.\n3. **Outcome-based prints**:\n   - If the fit succeeds without any errors, it prints "Issue resolved".\n   - If a `ValueError` is raised specifically mentioning \'tol\' or \'n_components\', it prints "Issue reproduced".\n   - If any other exception occurs, it prints "Other issues".\n\nThis test function will help in both reproducing the issue described in the issue text and verifying if the issue has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='Certainly! Here is the test code that you can use to reproduce the issue:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Define the components of the pipeline\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        # Create the pipeline\n        pipe = Pipeline([(\'nca\', nca),\n                         (\'knn\', knn)])\n\n        # Define the parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],  # Note: 1 is an integer\n                  \'nca__n_components\': np.arange(1, 10)}  # np.int64 instead of int\n\n        # Set up GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n\n        # Fit the GridSearchCV\n        gs.fit(X, y)\n\n    except ValueError as e:\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    else:\n        print("Issue resolved")\n\ntest_nca_gridsearch_issue()\n```\n\nThis test script will generate random data and perform a `GridSearchCV` using a pipeline that includes `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`. The script will check for a `ValueError` caused by parameter type mismatches, specifically for `tol` and `n_components`.\n\n- If the error message contains specific mentions of `tol` or `n_components`, it prints "Issue reproduced".\n- If other `ValueError` messages are caught, it prints "Other issues".\n- If no exceptions occur, it prints "Issue resolved".\n\nYou can use this test both to reproduce the current issue and verify when the issue has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_grid_search_issue():\n    try:\n        # Generate random data for testing\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n        \n        # Define the estimators\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        \n        # Create a pipeline\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n        \n        # Define the parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],  # Including a non-float value\n                  \'nca__n_components\': np.arange(1, 10)}  # np.int64 values\n        \n        # Perform grid search with the pipeline\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        \n        # If we reach this point, the issue has been resolved\n        print("Issue resolved")\n    except ValueError as e:\n        # Check if the error is due to the parameter type checks\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\n# Run the test\ntest_nca_grid_search_issue()\n```\n\nThis test script aims to reproduce the issue described in the provided issue text. If the parameter type check issue is still present, it will print "Issue reproduced". If the code runs without issues, it means the problem has been resolved and it will print "Issue resolved". If any other issues arise, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_grid_search():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Initialize NCA and KNN\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        # Create a pipeline\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n        \n        # Define the parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],  # Issue: 1 is not a float\n                  \'nca__n_components\': np.arange(1, 10)}  # Issue: np.int64 is not int\n        \n        # Initialize GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        \n        # Fit the model\n        gs.fit(X, y)\n        \n        print("Issue resolved")\n    except ValueError as ve:\n        if "tol" in str(ve) or "n_components" in str(ve):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_nca_grid_search()\n```\n\nThis test script will:\n\n1. Import the necessary libraries and modules.\n2. Generate random data for `X` and `y`.\n3. Set up the `NeighborhoodComponentsAnalysis` (NCA) and `KNeighborsClassifier` (KNN) within a pipeline.\n4. Define a parameter grid that includes problematic values to trigger the issue.\n5. Initialize `GridSearchCV` with the pipeline and parameter grid, then fit the model.\n6. Catch specific `ValueError` exceptions related to the issue, printing "Issue reproduced" if the expected error occurs.\n7. Print "Issue resolved" if no errors occur and the grid search completes successfully.\n8. Print "Other issues" if any other unexpected exceptions are raised. \n\nThis approach ensures that you can both reproduce the issue and verify that a fix has been implemented effectively.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='Sure, I can help you construct a test to reproduce the issue described and check if the issue has been resolved or not. Below is the Python code for the test:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    X = np.random.random_sample((100, 10))\n    y = np.random.randint(2, size=100)\n\n    nca = NeighborhoodComponentsAnalysis()\n    knn = KNeighborsClassifier()\n\n    pipe = Pipeline([(\'nca\', nca),\n                     (\'knn\', knn)])\n                    \n    params = {\'nca__tol\': [0.1, 0.5, 1],\n              \'nca__n_components\': np.arange(1, 10)}\n\n    try:\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        print("Issue resolved")\n    except ValueError as e:\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_nca_gridsearch_issue()\n```\n\n### Explanation:\n1. **Necessary Imports:** We include the necessary imports for the test.\n2. **Code to Reproduce the Issue:** The test function `test_nca_gridsearch_issue` follows the steps outlined in the issue text to set up and run the `GridSearchCV` with the `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier` within a pipeline.\n3. **Handling Different Outcomes:**\n   - **If the GridSearchCV raises a `ValueError` due to the `tol` or `n_components` parameter type checks, it prints "Issue reproduced".**\n   - **If it completes successfully without raising an error, it prints "Issue resolved".**\n   - **If any other unexpected errors occur, it prints "Other issues".**\n\nThis test function is designed to help you determine if the issue described is still present or if it has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='Sure, I\'ll generate a complete test that can be used to reproduce the issue as described in the issue text. The test will include the necessary imports, the code to reproduce the issue, and the appropriate print statements based on the outcome.\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_parameter_checks():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Initialize NCA and KNN\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        # Create a pipeline\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Define parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],\n                  \'nca__n_components\': np.arange(1, 10)}\n\n        # Initialize GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        \n        # Fit the GridSearch\n        gs.fit(X, y)\n    except ValueError as e:\n        error_message = str(e)\n\n        if "float" in error_message or "int" in error_message:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    except Exception:\n        print("Other issues")\n        return\n\n    print("Issue resolved")\n\n# Run the test\ntest_nca_parameter_checks()\n```\n\nIn this test:\n- We generate random data for `X` and `y`.\n- We initialize instances of `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.\n- We create a pipeline that includes both `nca` and `knn`.\n- We define a parameter grid with some values that are likely to cause type issues.\n- We initialize `GridSearchCV` with the pipeline and the parameter grid and attempt to fit the model.\n- If a `ValueError` is raised that mentions type issues with `float` or `int`, we print "Issue reproduced".\n- If any other issue arises, we print "Other issues".\n- If no exceptions are raised, we print "Issue resolved".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='Sure, here is the complete test to reproduce the issue described in the issue text:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        # Data generation\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Pipeline creation\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Parameters for GridSearch\n        params = {\'nca__tol\': [0.1, 0.5, 1], \'nca__n_components\': np.arange(1, 10)}\n\n        # GridSearchCV instantiation and fitting\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        \n    except ValueError as e:\n        if \'tol\' in str(e) or \'n_components\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n\n    print("Issue resolved")\n\ntest_nca_gridsearch_issue()\n```\n\nThis test script will help you reproduce the issue if it exists and verify if the issue has been resolved. The script:\n1. Generates random data.\n2. Sets up a pipeline with NCA and KNN.\n3. Defines parameter grids including an integer for `tol` and `np.int64` for `n_components`.\n4. Runs `GridSearchCV` with the given parameters and catches ValueErrors.\n5. Prints "Issue reproduced" if the specific error related to the parameter type check is raised.\n6. Prints "Other issues" if other ValueErrors occur.\n7. Prints "Issue resolved" if the fit succeeds without errors.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='Certainly! Here is the complete test code to reproduce the issue described in the issue text:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_grid_search_issue():\n    # Generate synthetic data\n    X = np.random.random_sample((100, 10))\n    y = np.random.randint(2, size=100)\n\n    # Define the components of the pipeline\n    nca = NeighborhoodComponentsAnalysis()\n    knn = KNeighborsClassifier()\n    pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n    \n    # Define the parameter grid\n    params = {\'nca__tol\': [0.1, 0.5, 1],  # 1 is not a float\n              \'nca__n_components\': np.arange(1, 10)}  # np.int64 is not int\n\n    # Create the GridSearchCV object\n    gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n\n    try:\n        # Fit the GridSearchCV object\n        gs.fit(X, y)\n        print("Issue resolved")\n    except ValueError as e:\n        # Check if the error message is related to parameter type checking\n        if "parameter" in str(e) and ("tol" in str(e) or "n_components" in str(e)):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_nca_grid_search_issue()\n```\n\nThis test code:\n1. Imports the necessary modules and classes.\n2. Generates synthetic data.\n3. Defines the components of the pipeline (NCA and KNN classifier).\n4. Defines the parameter grid with the specific parameters that cause the issue (`nca__tol` and `nca__n_components`).\n5. Creates and fits the `GridSearchCV` object to the synthetic data.\n6. Catches exceptions to determine if the issue is reproduced, resolved, or if there are other issues.\n\nYou can run this test to check if the issue is present. If the issue is reproduced, it will print "Issue reproduced". If the issue is resolved, it will print "Issue resolved". If there are other issues, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test script that reproduces the issue as described in the issue text:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        pipe = Pipeline([(\'nca\', nca),\n                         (\'knn\', knn)])\n                        \n        params = {\'nca__tol\': [0.1, 0.5, 1],\n                  \'nca__n_components\': np.arange(1, 10)}\n                  \n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X,y)\n        \n        print("Issue resolved")\n    except ValueError as ve:\n        if \'tol\' in str(ve) or \'n_components\' in str(ve):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_nca_gridsearch_issue()\n```\n\n### Explanation:\n\n1. **Necessary imports**: The script imports required modules from `numpy`, `sklearn.pipeline`, `sklearn.model_selection`, and `sklearn.neighbors`.\n2. **Code to reproduce the issue**:\n   - The script generates random sample data `X` and labels `y`.\n   - It sets up a pipeline with `NeighborhoodComponentsAnalysis` (NCA) and `KNeighborsClassifier` (KNN).\n   - It defines a parameter grid `params` to pass to `GridSearchCV`.\n   - It initializes and fits `GridSearchCV` with the pipeline and parameter grid.\n3. **Outcome handling**:\n   - If `GridSearchCV` fitting raises a `ValueError` related to `tol` or `n_components`, it prints "Issue reproduced".\n   - If it raises any other `ValueError` or exception, it prints "Other issues".\n   - If no exceptions are raised, it prints "Issue resolved".\n\nThis test script will help verify whether the issue is still present or if it has been fixed in the repository.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    X = np.random.random_sample((100, 10))\n    y = np.random.randint(2, size=100)\n\n    nca = NeighborhoodComponentsAnalysis()\n    knn = KNeighborsClassifier()\n\n    pipe = Pipeline([(\'nca\', nca),\n                     (\'knn\', knn)])\n                    \n    params = {\'nca__tol\': [0.1, 0.5, 1],  # Issue: 1 is not a float\n              \'nca__n_components\': np.arange(1, 10)}  # Issue: np.int64 is not int\n              \n    gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n\n    try:\n        gs.fit(X, y)\n        print("Issue resolved")\n    except ValueError as e:\n        if \'tol\' in str(e) or \'n_components\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_nca_gridsearch_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        # Generate synthetic data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Create the pipeline\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Define parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],\n                  \'nca__n_components\': np.arange(1, 10)}\n\n        # Create and fit GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n\n        # If execution reaches this point without exception, the issue is resolved.\n        print("Issue resolved")\n    except ValueError as e:\n        if "tol must be a float" in str(e) or "n_components must be an int" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\n# Run the test\ntest_nca_gridsearch_issue()\n``` \n\nThis test script checks if the issue related to the strict parameter type checking in `NeighborhoodComponentsAnalysis` during `GridSearchCV` fitting is reproduced or resolved. It will print "Issue reproduced" if the specific value errors occur, "Issue resolved" if no exceptions occur, and "Other issues" for any other types of exceptions.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_grid_search_issue():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n        \n        # Create the pipeline with NCA and KNN\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n        \n        # Define the parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],\n                  \'nca__n_components\': np.arange(1, 10)}\n        \n        # Perform GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        \n        # If no exception is raised, print "Issue resolved"\n        print("Issue resolved")\n    except (ValueError, TypeError) as e:\n        # If the specific issue is reproduced, print "Issue reproduced"\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            # If another issue is encountered, print "Other issues"\n            print("Other issues")\n\n# Run the test function\ntest_nca_grid_search_issue()\n```\n\nThis test script will:\n1. Generate random data.\n2. Create a pipeline with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.\n3. Define the parameter grid with values that will trigger the specific issue.\n4. Perform a `GridSearchCV` using the pipeline and parameter grid.\n5. Catch exceptions and print the appropriate message based on the outcome. \n\nRun this script to verify if the issue is reproduced or if it has been resolved. If other issues are encountered, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='Sure! Below is the complete test that can be used to reproduce the issue described in the issue text:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    # Generate random data\n    X = np.random.random_sample((100, 10))\n    y = np.random.randint(2, size=100)\n\n    # Define the pipeline\n    nca = NeighborhoodComponentsAnalysis()\n    knn = KNeighborsClassifier()\n    pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n    \n    # Define the parameter grid\n    params = {\n        \'nca__tol\': [0.1, 0.5, 1],  # `1` is an int, which is not a float\n        \'nca__n_components\': np.arange(1, 10)  # np.int64 values\n    }\n    \n    # Perform GridSearchCV\n    gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n    \n    try:\n        gs.fit(X, y)\n    except ValueError as e:\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    \n    print("Issue resolved")\n\ntest_nca_gridsearch_issue()\n```\n\nThis test script does the following:\n1. Imports necessary modules.\n2. Generates random data for testing.\n3. Defines a pipeline with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.\n4. Sets up a parameter grid for `GridSearchCV` that is expected to cause the issue.\n5. Attempts to fit the `GridSearchCV` object and catches the `ValueError`.\n6. Prints "Issue reproduced" if the specific issue with parameter type checking is encountered.\n7. Prints "Other issues" if a different error is encountered.\n8. Prints "Issue resolved" if no error is encountered, indicating the issue has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        # Generate sample data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Define NCA and KNN\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        # Create pipeline\n        pipe = Pipeline([(\'nca\', nca),\n                         (\'knn\', knn)])\n        \n        # Define parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],\n                  \'nca__n_components\': np.arange(1, 10)}\n        \n        # Perform GridSearch\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n    \n    except ValueError as e:\n        error_message = str(e)\n        \n        # Check if the specific parameter type error is raised\n        if "tol" in error_message and "float" in error_message:\n            print("Issue reproduced")\n            return\n        if "n_components" in error_message and "int" in error_message:\n            print("Issue reproduced")\n            return\n        print("Other issues")\n        return\n    \n    print("Issue resolved")\n    return\n\ntest_nca_gridsearch_issue()\n```\n\nThis test script follows the outline you provided. It attempts to reproduce the issue by running a grid search with parameters that have types that might cause failures. If the errors related to type checking for \'tol\' or \'n_components\' are caught, it prints "Issue reproduced". If the function completes without errors, it prints "Issue resolved". If any other issues arise, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        # Generate synthetic data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n        \n        # Initialize components\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        \n        # Create a pipeline\n        pipe = Pipeline([(\'nca\', nca),\n                         (\'knn\', knn)])\n                        \n        # Parameter grid with types that may cause issues\n        params = {\'nca__tol\': [0.1, 0.5, 1],  # \'1\' is an int, not a float\n                  \'nca__n_components\': np.arange(1, 10)}  # np.int64 type\n        \n        # Setup GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        \n        # Fit the grid search\n        gs.fit(X, y)\n        \n        print("Issue resolved")\n    except ValueError as e:\n        # Check if the error is due to the parameter type checks\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\n# Run the test\ntest_nca_gridsearch_issue()\n```\n\nThis test script covers the following:\n1. Necessary imports.\n2. Code to reproduce the issue described in the issue text.\n3. Prints "Issue reproduced" if the outcome indicates that the issue is reproduced.\n4. Prints "Issue resolved" if the outcome indicates that the issue has been successfully resolved.\n5. Prints "Other issues" if the outcome indicates there are other issues with the source code.\n\nBy running this script, you\'ll be able to verify if the current implementation has the parameter type-checking issue and whether it has been fixed after applying any changes.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='Sure, here is a complete test that can be used to reproduce the issue described in the issue text:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch():\n    try:\n        # Generate synthetic data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Create NCA and kNN instances\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        # Create a pipeline\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Define parameter grid\n        params = {\n            \'nca__tol\': [0.1, 0.5, 1],  # \'1\' is an integer, not a float\n            \'nca__n_components\': np.arange(1, 10)  # np.int64 instead of int\n        }\n\n        # Create and fit GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        \n    except ValueError as e:\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    else:\n        print("Issue resolved")\n\ntest_nca_gridsearch()\n```\n\nThis test script does the following:\n1. Imports necessary modules.\n2. Generates synthetic data.\n3. Creates instances of NeighborhoodComponentsAnalysis and KNeighborsClassifier.\n4. Constructs a pipeline with these instances.\n5. Defines a parameter grid that includes both float and integer types for the parameters `tol` and `n_components`.\n6. Attempts to fit GridSearchCV with the defined pipeline and parameter grid.\n7. Catches a `ValueError` and checks if it is related to the parameters `tol` or `n_components`.\n8. Prints "Issue reproduced" if the error is due to the parameter type checks, "Issue resolved" if no error occurs, and "Other issues" if a different error occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Define the pipeline with NCA and KNN\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Define the parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],  # 1 is an int, should cause the issue\n                  \'nca__n_components\': np.arange(1, 10)}  # np.int64 type, should cause the issue\n\n        # Perform GridSearch\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        \n        # If no error occurs, print "Issue resolved"\n        print("Issue resolved")\n    except ValueError as e:\n        # Check if the issue is the one described (type error in parameters)\n        if \'tol\' in str(e) or \'n_components\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # Catch any other exceptions\n        print(f"Other issues: {e}")\n\ntest_nca_gridsearch()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_params_with_gridsearch():\n    try:\n        # Generate sample data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Define the pipeline components\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        # Create a pipeline with NCA and KNN\n        pipe = Pipeline([(\'nca\', nca),\n                         (\'knn\', knn)])\n                        \n        # Define the parameter grid for GridSearch\n        params = {\'nca__tol\': [0.1, 0.5, 1],  # 1 is int, not float\n                  \'nca__n_components\': np.arange(1, 10)}  # np.int64 instead of int\n                  \n        # Initialize GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        \n        # Fit the GridSearchCV\n        gs.fit(X, y)\n        \n    except ValueError as e:\n        # Check if the error message corresponds to the described issue\n        if "Tolerance for stopping criteria" in str(e) or "n_components must be an int" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    \n    print("Issue resolved")\n\ntest_nca_params_with_gridsearch()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        # Generating random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n        \n        # Defining the pipeline\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n        \n        # Defining the parameters grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],  # Note: 1 is an int\n                  \'nca__n_components\': np.arange(1, 10)}  # np.int64 from np.arange\n        \n        # Setting up and running GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        \n        print("Issue resolved")\n    except ValueError as e:\n        # Checking for the specific ValueError related to parameter type checking\n        if \'tol\' in str(e) or \'n_components\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_nca_gridsearch_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_NCA_parameter_check_issue():\n    try:\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        pipe = Pipeline([(\'nca\', nca),\n                         (\'knn\', knn)])\n                        \n        params = {\'nca__tol\': [0.1, 0.5, 1],  # 1 is an integer, not a float\n                  \'nca__n_components\': np.arange(1, 10)}  # np.int64 instead of int\n                  \n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n    except ValueError as e:\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    except Exception as e:\n        print("Other issues")\n        return\n    \n    print("Issue resolved")\n\ntest_NCA_parameter_check_issue()\n\n# Expected Output:\n# "Issue reproduced" if the issue is still present.\n# "Issue resolved" if the issue has been fixed.\n# "Other issues" if there are different issues with the source code.\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test code to reproduce the issue described in the issue text. This test will help you to identify if the issue is still present or if it has been resolved.\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Define the Pipeline\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n        \n        # Define parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],\n                  \'nca__n_components\': np.arange(1, 10)}\n        \n        # Setup GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        \n        # Fit the model\n        gs.fit(X, y)\n        \n        # If it reaches this point without exceptions, the issue is resolved\n        print("Issue resolved")\n    except ValueError as e:\n        # Check if the specific error related to parameter type checking occurs\n        if "float" in str(e) or "int" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # Catch any other unexpected exceptions\n        print("Other issues")\n\n# Run the test\ntest_nca_gridsearch_issue()\n```\n\n### Explanation:\n\n1. **Imports**: The necessary imports for the test.\n2. **Data Generation**: Random data for testing.\n3. **Pipeline Setup**: Initializes `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`, and then composes them into a `Pipeline`.\n4. **Parameter Grid**: Defines the parameter grid to be used in `GridSearchCV`. This grid is designed to potentially trigger the parameter type checking issue.\n5. **GridSearchCV Setup**: Configures `GridSearchCV` with the pipeline and parameter grid.\n6. **Fitting the Model**: Attempts to fit the model to the data. If this step fails due to strict parameter checks, it will raise a `ValueError`.\n7. **Issue Detection**:\n   - If the specific `ValueError` related to parameter type checking occurs, it prints "Issue reproduced".\n   - If it fits successfully, it means the issue has been resolved, and it prints "Issue resolved".\n   - Any other exceptions will print "Other issues".\n\nYou can run this test to check if the issue described in your repository is still present or if it has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='Here\'s a complete test script to reproduce the issue described in the issue text:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\nfrom sklearn.exceptions import ValidationError\n\ndef test_nca_gridsearch_param_checking() -> None:\n    X = np.random.random_sample((100, 10))\n    y = np.random.randint(2, size=100)\n\n    nca = NeighborhoodComponentsAnalysis()\n    knn = KNeighborsClassifier()\n\n    pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n    params = {\'nca__tol\': [0.1, 0.5, 1],\n              \'nca__n_components\': np.arange(1, 10)}\n\n    gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n\n    try:\n        gs.fit(X, y)\n    except ValidationError as e:\n        if "The \'tol\' parameter of NeighborhoodComponentsAnalysis must be a float in the range" in str(e) or \\\n           "The \'n_components\' parameter of NeighborhoodComponentsAnalysis must be an int in the range" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return\n\n    print("Issue resolved")\n\ntest_nca_gridsearch_param_checking()\n```\n\nThis script contains the necessary imports and the code needed to reproduce the described issue. It runs the grid search and catches specific validation errors related to the parameter checks for `tol` and `n_components`. Based on the caught exceptions, it prints whether the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='Sure, here\'s a complete test that reproduces the issue described in the issue text:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Create the NCA and KNN objects\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        # Create a pipeline with NCA and KNN\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Define parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],\n                  \'nca__n_components\': np.arange(1, 10)}\n\n        # Initialize GridSearchCV with the pipeline\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n\n        # Fit the GridSearchCV\n        gs.fit(X, y)\n\n    except ValueError as e:\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    else:\n        print("Issue resolved")\n\ntest_nca_gridsearch_issue()\n```\n\n### Explanation:\n1. **Necessary Imports**: Import necessary modules and classes such as `numpy`, `Pipeline`, `GridSearchCV`, `NeighborhoodComponentsAnalysis`, and `KNeighborsClassifier`.\n2. **Reproducing the Issue**:\n    - Generate random data for `X` and `y`.\n    - Create instances of `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.\n    - Create a pipeline that combines these two.\n    - Define a parameter grid where some values can cause type issues.\n    - Initialize `GridSearchCV` with the pipeline and parameter grid.\n    - Attempt to fit the `GridSearchCV` object, which should raise a `ValueError` due to type mismatches.\n3. **Output**:\n    - If the `ValueError` contains specific mentions of the problematic parameters, print "Issue reproduced".\n    - If the error message is unrelated, print "Other issues".\n    - If no error occurs, print "Issue resolved".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='Sure, here is a complete test that can be used to reproduce the issue described in your issue text:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\nfrom sklearn.exceptions import NotFittedError\n\ndef test_nca_gridsearch_param_check():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n        \n        # Define the pipeline with NeighborhoodComponentsAnalysis and KNeighborsClassifier\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n        \n        # Define the parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],\n                  \'nca__n_components\': np.arange(1, 10)}\n        \n        # Define the GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        \n        # Fit the GridSearchCV\n        gs.fit(X, y)\n        \n    except ValueError as e:\n        # Check if the ValueError is due to the parameter type\n        if \'tol\' in str(e) and \'float\' in str(e):\n            print("Issue reproduced")\n        elif \'n_components\' in str(e) and \'int\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # Catch any other exceptions\n        print("Other issues")\n    else:\n        # If no exceptions were raised, the issue is resolved\n        print("Issue resolved")\n\n# Run the test function\ntest_nca_gridsearch_param_check()\n```\n\nThis test script:\n\n1. Imports the necessary modules.\n2. Generates random data for the test.\n3. Sets up a pipeline with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.\n4. Defines a parameter grid that is intended to cause the issue.\n5. Sets up and fits a `GridSearchCV` with the pipeline and parameter grid.\n6. Handles exceptions to determine if the issue is reproduced, resolved, or if there are other issues.\n\nTo use this test:\n- If the ValueError indicates an issue with the parameter type for `tol` or `n_components`, it prints "Issue reproduced".\n- If no exceptions are raised, it prints "Issue resolved".\n- For any other exceptions, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\n\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_param_check():\n    try:\n        # Data preparation\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Model and pipeline setup\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n                \n        # Parameter grid with potential issues\n        params = {\n            \'nca__tol\': [0.1, 0.5, 1],             # 1 is not a float\n            \'nca__n_components\': np.arange(1, 10)  # np.int64 is not int\n        }\n          \n        # GridSearch setup\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        \n        # Attempt to fit the model\n        gs.fit(X, y)\n        \n    except ValueError as e:\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    except Exception as e:\n        print("Other issues")\n        return\n\n    print("Issue resolved")\n\n# Run the test\ntest_nca_gridsearch_param_check()\n```\n\nThis script will attempt to reproduce the issue by performing a grid search with parameters that are likely to cause type checking errors. If it encounters the expected `ValueError` related to the `tol` or `n_components` parameters, it will print "Issue reproduced". If it encounters any other exceptions, it will print "Other issues". If the grid search runs without errors, it will print "Issue resolved".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is a complete test that can be used to reproduce the issue described in the issue text. This test will attempt to run a `GridSearchCV` with a `Pipeline` containing `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`, and will print out the appropriate message based on the outcome.\n\n```python\nimport numpy as np\n\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    # Generate random data\n    X = np.random.random_sample((100, 10))\n    y = np.random.randint(2, size=100)\n    \n    # Define the pipeline with NCA and KNN\n    nca = NeighborhoodComponentsAnalysis()\n    knn = KNeighborsClassifier()\n    pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n    \n    # Define the parameter grid\n    params = {\n        \'nca__tol\': [0.1, 0.5, 1],  # 1 is not a float\n        \'nca__n_components\': np.arange(1, 10)  # np.int64 is not int\n    }\n    \n    # Initialize GridSearchCV\n    gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n    \n    try:\n        # Fit the GridSearchCV\n        gs.fit(X, y)\n        print("Issue resolved")\n    except ValueError as e:\n        # Check if the ValueError is due to type checking\n        if \'tol\' in str(e) or \'n_components\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_nca_gridsearch_issue()\n```\n\nThis test will:\n1. Import the necessary libraries.\n2. Create random data for fitting.\n3. Set up the pipeline with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.\n4. Define a parameter grid that includes values that will trigger the issue.\n5. Initialize and fit a `GridSearchCV` object with the pipeline and parameter grid.\n6. Print "Issue reproduced" if the expected `ValueError` is raised specifically due to the type checking of the `tol` or `n_components` parameters.\n7. Print "Issue resolved" if the `GridSearchCV` fit completes without errors.\n8. Print "Other issues" if any other issue arises.\n\nThe test is designed to detect if the type checking issue is present or has been fixed, allowing it to be used to verify both the reproduction and resolution of the issue.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='Sure, here is a complete test that can be used to reproduce the issue described in the issue text. This test checks if the issue with strict parameter checking in `NeighborhoodComponentsAnalysis` during a `GridSearchCV` is present.\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_grid_search_issue():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Define the pipeline with NCA and KNN\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n        \n        # Define the parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1],\n                  \'nca__n_components\': np.arange(1, 10)}\n\n        # Perform GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        print("Issue resolved")\n    except ValueError as e:\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_nca_grid_search_issue()\n```\n\nExplanation:\n1. **Imports**: The test includes necessary imports from `numpy`, `sklearn.pipeline`, `sklearn.model_selection`, and `sklearn.neighbors`.\n2. **Data Generation**: Random data is generated for the test.\n3. **Pipeline Setup**: A pipeline containing `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier` is set up.\n4. **Parameter Grid**: The parameter grid includes `tol` values and `n_components` values.\n5. **GridSearchCV**: The `GridSearchCV` is performed using the pipeline and parameter grid.\n6. **Exception Handling**:\n   - If a `ValueError` containing "tol" or "n_components" is raised, it prints "Issue reproduced".\n   - If any other exception or `ValueError` occurs, it prints "Other issues".\n   - If no exceptions occur, it prints "Issue resolved".\n\nBy running this test, you can determine if the issue with the parameter checking is present and if it has been resolved or not.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='Sure, here is a complete test to reproduce the described issue:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_grid_search():\n    try:\n        # Generate some random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Initialize the components of the pipeline\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Define the parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1], \'nca__n_components\': np.arange(1, 10)}\n\n        # Initialize GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n\n        # Fit the grid search\n        gs.fit(X, y)\n\n        # If no exception is raised, the issue is resolved\n        print("Issue resolved")\n\n    except ValueError as e:\n        # Check if the error is due to parameter type issues\n        if "float" in str(e) or "int" in str(e) or "np.int64" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_nca_grid_search()\n```\n\nThis test script does the following:\n1. Imports the necessary modules.\n2. Sets up the pipeline and parameter grid as described in the issue.\n3. Attempts to run a grid search with the defined pipeline and parameters.\n4. Catches `ValueError` exceptions that are likely related to the parameter type issues described.\n5. Prints "Issue reproduced" if the caught exception is due to the parameter type issue.\n6. Prints "Issue resolved" if no exception is raised, indicating the issue is fixed.\n7. Prints "Other issues" if any other exception is raised.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test code for reproducing the issue described in your provided issue text. This code includes all necessary imports, the example code to reproduce the issue, and the logic to print the appropriate messages based on the outcome.\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\nimport traceback\n\ndef test_nca_gridsearch_issue():\n    try:\n        # Create dummy data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Define the models and pipeline\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Define the parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1], \'nca__n_components\': np.arange(1, 10)}\n\n        # Initialize GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n\n        # Fit the model\n        gs.fit(X, y)\n        \n        # If no error is raised, the issue is resolved\n        print("Issue resolved")\n    except ValueError as e:\n        # Check if the error matches the expected issue\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # Print any other exception traceback for debugging purposes\n        print("Other issues")\n        traceback.print_exc()\n\n# Run the test\ntest_nca_gridsearch_issue()\n```\n\nExplanation of the test:\n1. **Necessary Imports**: Imports all the required libraries and modules.\n2. **Data Generation**: Generates random data for `X` and `y` to fit the model.\n3. **Pipeline and Parameter Grid**: Sets up the pipeline and the parameter grid with values that will trigger the issue.\n4. **GridSearchCV**: Initializes and fits the `GridSearchCV` to the data.\n5. **Exception Handling**:\n   - If a `ValueError` occurs and its message contains "tol" or "n_components", it prints "Issue reproduced".\n   - If a different error or no error occurs, it prints "Other issues".\n   - If the fitting completes successfully without any exceptions, it prints "Issue resolved".\n\nYou can use this test to verify if the issue is present or has been fixed in your repository.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_grid_search():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Define the pipeline\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Define the parameter grid\n        params = {\'nca__tol\': [0.1, 0.5, 1], \'nca__n_components\': np.arange(1, 10)}\n\n        # Initialize and fit the GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        \n        print("Issue resolved")\n    except ValueError as e:\n        # Check if the error is related to the type of `tol` or `n_components`\n        if \'tol\' in str(e) or \'n_components\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_nca_grid_search()\n```\n\nThis test script does the following:\n1. Imports the necessary modules.\n2. Generates random data to use as input.\n3. Defines a `Pipeline` with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.\n4. Sets up a parameter grid with values that are expected to cause the issue.\n5. Initializes and fits a `GridSearchCV` with the pipeline and parameter grid.\n6. Catches any `ValueError` exceptions to determine if they are related to the described issue.\n7. Prints "Issue resolved" if the GridSearchCV fit is successful, "Issue reproduced" if the expected `ValueError` is encountered, and "Other issues" for any other exceptions.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        pipe = Pipeline([(\'nca\', nca),\n                         (\'knn\', knn)])\n                        \n        params = {\'nca__tol\': [0.1, 0.5, 1],  # 1 is not a float\n                  \'nca__n_components\': np.arange(1, 10)}  # np.int64 is not int\n                  \n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n\n        gs.fit(X, y)\n    \n    except ValueError as e:\n        if \'tol\' in str(e) or \'n_components\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n\n    print("Issue resolved")\n\ntest_nca_gridsearch_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='Sure, here is the test code to reproduce and verify the issue described in the provided issue text:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_param_check():\n    # Generate random data\n    X = np.random.random_sample((100, 10))\n    y = np.random.randint(2, size=100)\n    \n    # Define the pipeline\n    nca = NeighborhoodComponentsAnalysis()\n    knn = KNeighborsClassifier()\n    pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n    \n    # Define the parameter grid\n    params = {\'nca__tol\': [0.1, 0.5, 1],  # 1 is not a float\n              \'nca__n_components\': np.arange(1, 10)}  # np.int64 is not int\n    \n    # Run GridSearchCV\n    try:\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n    except ValueError as e:\n        # Check if the ValueError is raised due to the parameter type issue\n        if \'tol\' in str(e) and \'float\' in str(e):\n            print("Issue reproduced")\n        elif \'n_components\' in str(e) and \'int\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n\n    print("Issue resolved")\n\n# Run the test\ntest_nca_gridsearch_param_check()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='Sure, here\'s a complete test script that adheres to the requirements:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_grid_search_issue():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Define NeighborhoodComponentsAnalysis and KNeighborsClassifier\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        # Create a pipeline with NCA and KNN\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Define the parameter grid with values that could cause issues\n        params = {\'nca__tol\': [0.1, 0.5, 1], \'nca__n_components\': np.arange(1, 10)}\n\n        # Create a GridSearchCV object with the pipeline and parameter grid\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n\n        # Fit the GridSearchCV to the data\n        gs.fit(X, y)\n\n        # If fit completes without an exception, print "Issue resolved"\n        print("Issue resolved")\n    except ValueError as e:\n        # If a ValueError occurs, check if it\'s due to the parameter type issue\n        if "Invalid parameter" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # Catch any other exceptions and print "Other issues"\n        print("Other issues")\n\n# Run the test function\ntest_nca_grid_search_issue()\n```\n\nThis script:\n1. Imports the necessary modules.\n2. Reproduces the issue described in the provided issue text.\n3. Prints "Issue reproduced" if the specific parameter type issue occurs.\n4. Prints "Issue resolved" if the fit completes without any exceptions.\n5. Prints "Other issues" if any other exceptions occur.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        # Generate random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Define the NCA and KNN models\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        # Create a pipeline with NCA and KNN\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Define the parameter grid for GridSearch\n        params = {\'nca__tol\': [0.1, 0.5, 1],  # 1 is an int\n                  \'nca__n_components\': np.arange(1, 10)}  # np.arange gives np.int64\n\n        # Create and fit the GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        \n        print("Issue resolved")\n    except ValueError as e:\n        if "tol" in str(e) or "n_components" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_nca_gridsearch_issue()\n```\n\nThis test script will:\n\n1. Import necessary modules.\n2. Create random data for the test.\n3. Define and create a pipeline using `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.\n4. Define a parameter grid with potential problematic types for `nca__tol` and `nca__n_components`.\n5. Use `GridSearchCV` to fit the pipeline with the parameter grid.\n6. Output the result as specified based on whether the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_parameter_checking_issue():\n    try:\n        # Create random data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n        \n        # Initialize the required models\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        \n        # Create a pipeline with NCA and KNN\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n        \n        # Define the parameter grid\n        params = {\n            \'nca__tol\': [0.1, 0.5, 1],\n            \'nca__n_components\': np.arange(1, 10)\n        }\n        \n        # Initialize GridSearchCV with the pipeline and parameter grid\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        \n        # Fit the GridSearchCV\n        gs.fit(X, y)\n        \n        # If no errors, print "Issue resolved"\n        print("Issue resolved")\n    except ValueError as e:\n        # Check if the error is due to the parameter type issue described\n        if "parameter" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # Catch any other exceptions and print "Other issues"\n        print("Other issues")\n\n# Run the test\ntest_parameter_checking_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is a complete test script that reproduces the issue described in the issue text. This script will attempt to run the `GridSearchCV` with `NeighborhoodComponentsAnalysis` and a parameter grid that includes incompatible types according to the current strict parameter checks. The script will print out statements indicating whether the issue is reproduced, resolved, or if there are other issues.\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_grid_search_issue():\n    try:\n        # Generating random sample data\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        # Defining the pipeline\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n        pipe = Pipeline([(\'nca\', nca), (\'knn\', knn)])\n\n        # Defining parameter grid with potential type issues\n        params = {\'nca__tol\': [0.1, 0.5, 1],  # Here, 1 is an int and should be a float\n                  \'nca__n_components\': np.arange(1, 10)}  # np.int64 type issue\n\n        # Running GridSearchCV\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n\n        # If no exception occurs, the issue is resolved\n        print("Issue resolved")\n    except ValueError as e:\n        # If a ValueError occurs, we need to check the message to confirm it\'s the same issue\n        expected_errors = [\n            "Parameter \'tol\' should be a float",\n            "Parameter \'n_components\' should be an integer"\n        ]\n        if any(error in str(e) for error in expected_errors):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # If any other exception occurs, we print "Other issues"\n        print("Other issues")\n\ntest_nca_grid_search_issue()\n```\n\n### Explanation:\n1. **Necessary Imports**: Import the required modules including `numpy`, `Pipeline`, `GridSearchCV`, `NeighborhoodComponentsAnalysis`, and `KNeighborsClassifier`.\n2. **Data Generation**: Create random sample data `X` and labels `y`.\n3. **Pipeline and Parameter Grid**:\n   - Define a pipeline with `NeighborhoodComponentsAnalysis` (NCA) and `KNeighborsClassifier`.\n   - Define a parameter grid that includes values which will cause type issues based on the current parameter checking in NCA.\n4. **GridSearchCV Execution**: Attempt to fit the `GridSearchCV` with the defined pipeline and parameters.\n5. **Output Handling**:\n   - If the grid search completes without errors, print "Issue resolved".\n   - If a `ValueError` is raised and matches the expected type-checking errors, print "Issue reproduced".\n   - For any other errors, print "Other issues".\n\nThis test script can be used to validate if the issue described is present or if it has been resolved after making modifications to the parameter checking mechanism.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='Sure, here is the complete test code to reproduce the issue described in the issue text:\n\n```python\nimport numpy as np\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.neighbors import NeighborhoodComponentsAnalysis\nfrom sklearn.neighbors import KNeighborsClassifier\n\ndef test_nca_gridsearch_issue():\n    try:\n        X = np.random.random_sample((100, 10))\n        y = np.random.randint(2, size=100)\n\n        nca = NeighborhoodComponentsAnalysis()\n        knn = KNeighborsClassifier()\n\n        pipe = Pipeline([(\'nca\', nca),\n                         (\'knn\', knn)])\n\n        params = {\'nca__tol\': [0.1, 0.5, 1],\n                  \'nca__n_components\': np.arange(1, 10)}\n\n        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score=\'raise\')\n        gs.fit(X, y)\n        \n    except ValueError as e:\n        error_message = str(e)\n        if "0.1 is not a float" in error_message or "np.int64 is not int" in error_message:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    except Exception as e:\n        print("Other issues")\n        return\n\n    print("Issue resolved")\n\ntest_nca_gridsearch_issue()\n```\n\nThis test does the following:\n1. Imports the necessary modules.\n2. Sets up the data and the pipeline, including the `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.\n3. Configures the `GridSearchCV` with parameters that include values that could cause type issues.\n4. Tries to fit the grid search to the data and catches any `ValueError` exceptions.\n5. Based on the caught exception, it prints "Issue reproduced," "Issue resolved," or "Other issues" depending on the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746300229, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=16919, prompt_tokens=1064, total_tokens=17983, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:24:52,730 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Define the pipeline
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Define the parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],  # 1 is an int, not a float
+                  'nca__n_components': np.arange(1, 10)}  # np.int64, not int
+
+        # Perform GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        
+        print("Issue resolved")
+    except ValueError as e:
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_nca_gridsearch_issue()
+```
+
+This test script will:
+1. Import the necessary modules.
+2. Generate random data for the test.
+3. Define a pipeline with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.
+4. Set up a parameter grid that includes values that will trigger the issue.
+5. Perform a `GridSearchCV` with the pipeline and parameter grid.
+6. Print "Issue resolved" if the `GridSearchCV` completes without errors.
+7. Print "Issue reproduced" if a `ValueError` related to `tol` or `n_components` is raised.
+8. Print "Other issues" if any other exception is raised.
+2025-05-03 14:24:52,731 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_grid_search_issue():
+    try:
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        pipe = Pipeline([('nca', nca),
+                         ('knn', knn)])
+                        
+        params = {'nca__tol': [0.1, 0.5, 1],
+                  'nca__n_components': np.arange(1, 10)}
+                  
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        
+        print("Issue resolved")
+    except ValueError as e:
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_nca_grid_search_issue()
+```
+
+This test script:
+1. Sets up a random dataset.
+2. Creates a pipeline with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.
+3. Sets the grid search parameters, including the problematic ones (`tol` and `n_components`).
+4. Executes the grid search and tries to fit the model.
+5. Prints messages depending on the outcome:
+   - "Issue resolved" if no exceptions are raised.
+   - "Issue reproduced" if a `ValueError` related to `tol` or `n_components` is raised.
+   - "Other issues" if any other exception occurs.
+2025-05-03 14:24:52,731 - INFO - raw output:
+Certainly! Here is the complete test that can be used to reproduce the issue described in the issue text:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        # Generating random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Setting up the pipeline with NeighborhoodComponentsAnalysis and KNeighborsClassifier
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+        
+        # Defining parameter grid for GridSearch
+        params = {'nca__tol': [0.1, 0.5, 1],  # Note: 1 is not a float
+                  'nca__n_components': np.arange(1, 10)}  # Note: np.int64 not int
+        
+        # Performing GridSearch with the defined parameter grid
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+
+        # If fit is successful, the issue is resolved
+        print("Issue resolved")
+    except ValueError as e:
+        # Checking if the error is related to parameter type checking
+        if 'must be' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_nca_gridsearch_issue()
+```
+
+This test sets up a pipeline using `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`, defines a parameter grid with values that will trigger the described issue, and runs a `GridSearchCV`. Depending on the outcome, it prints whether the issue has been reproduced, resolved, or if there are other issues.
+2025-05-03 14:24:52,731 - INFO - raw output:
+Certainly! Here is a complete test that can be used to reproduce the issue described in the issue text:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+# Define the function to test the issue
+def test_nca_grid_search_issue():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+        
+        # Set up NCA and KNN
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        
+        # Create a pipeline
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+        
+        # Define parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1], 'nca__n_components': np.arange(1, 10)}
+        
+        # Set up GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        
+        # Fit the GridSearchCV
+        gs.fit(X, y)
+        
+        print("Issue resolved")
+    except ValueError as e:
+        if 'tol' in str(e) or 'n_components' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+# Run the test
+test_nca_grid_search_issue()
+```
+
+### Explanation:
+1. **Necessary imports**: The test includes essential imports for numpy, the sklearn pipeline, GridSearchCV, NeighborhoodComponentsAnalysis, and KNeighborsClassifier.
+2. **Code to reproduce the issue**:
+   - It generates random data for `X` and `y`.
+   - It sets up the `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.
+   - It creates a pipeline using these two components.
+   - It defines a parameter grid with `tol` and `n_components` values.
+   - It sets up `GridSearchCV` with the pipeline and parameter grid, and fits the model on the data.
+3. **Outcome-based prints**:
+   - If the fit succeeds without any errors, it prints "Issue resolved".
+   - If a `ValueError` is raised specifically mentioning 'tol' or 'n_components', it prints "Issue reproduced".
+   - If any other exception occurs, it prints "Other issues".
+
+This test function will help in both reproducing the issue described in the issue text and verifying if the issue has been fixed.
+2025-05-03 14:24:52,731 - INFO - raw output:
+Certainly! Here is the test code that you can use to reproduce the issue:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Define the components of the pipeline
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        # Create the pipeline
+        pipe = Pipeline([('nca', nca),
+                         ('knn', knn)])
+
+        # Define the parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],  # Note: 1 is an integer
+                  'nca__n_components': np.arange(1, 10)}  # np.int64 instead of int
+
+        # Set up GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+
+        # Fit the GridSearchCV
+        gs.fit(X, y)
+
+    except ValueError as e:
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    else:
+        print("Issue resolved")
+
+test_nca_gridsearch_issue()
+```
+
+This test script will generate random data and perform a `GridSearchCV` using a pipeline that includes `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`. The script will check for a `ValueError` caused by parameter type mismatches, specifically for `tol` and `n_components`.
+
+- If the error message contains specific mentions of `tol` or `n_components`, it prints "Issue reproduced".
+- If other `ValueError` messages are caught, it prints "Other issues".
+- If no exceptions occur, it prints "Issue resolved".
+
+You can use this test both to reproduce the current issue and verify when the issue has been fixed.
+2025-05-03 14:24:52,731 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_grid_search_issue():
+    try:
+        # Generate random data for testing
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+        
+        # Define the estimators
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        
+        # Create a pipeline
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+        
+        # Define the parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],  # Including a non-float value
+                  'nca__n_components': np.arange(1, 10)}  # np.int64 values
+        
+        # Perform grid search with the pipeline
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        
+        # If we reach this point, the issue has been resolved
+        print("Issue resolved")
+    except ValueError as e:
+        # Check if the error is due to the parameter type checks
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+# Run the test
+test_nca_grid_search_issue()
+```
+
+This test script aims to reproduce the issue described in the provided issue text. If the parameter type check issue is still present, it will print "Issue reproduced". If the code runs without issues, it means the problem has been resolved and it will print "Issue resolved". If any other issues arise, it will print "Other issues".
+2025-05-03 14:24:52,731 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_grid_search():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Initialize NCA and KNN
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        # Create a pipeline
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+        
+        # Define the parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],  # Issue: 1 is not a float
+                  'nca__n_components': np.arange(1, 10)}  # Issue: np.int64 is not int
+        
+        # Initialize GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        
+        # Fit the model
+        gs.fit(X, y)
+        
+        print("Issue resolved")
+    except ValueError as ve:
+        if "tol" in str(ve) or "n_components" in str(ve):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_nca_grid_search()
+```
+
+This test script will:
+
+1. Import the necessary libraries and modules.
+2. Generate random data for `X` and `y`.
+3. Set up the `NeighborhoodComponentsAnalysis` (NCA) and `KNeighborsClassifier` (KNN) within a pipeline.
+4. Define a parameter grid that includes problematic values to trigger the issue.
+5. Initialize `GridSearchCV` with the pipeline and parameter grid, then fit the model.
+6. Catch specific `ValueError` exceptions related to the issue, printing "Issue reproduced" if the expected error occurs.
+7. Print "Issue resolved" if no errors occur and the grid search completes successfully.
+8. Print "Other issues" if any other unexpected exceptions are raised. 
+
+This approach ensures that you can both reproduce the issue and verify that a fix has been implemented effectively.
+2025-05-03 14:24:52,731 - INFO - raw output:
+Sure, I can help you construct a test to reproduce the issue described and check if the issue has been resolved or not. Below is the Python code for the test:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    X = np.random.random_sample((100, 10))
+    y = np.random.randint(2, size=100)
+
+    nca = NeighborhoodComponentsAnalysis()
+    knn = KNeighborsClassifier()
+
+    pipe = Pipeline([('nca', nca),
+                     ('knn', knn)])
+                    
+    params = {'nca__tol': [0.1, 0.5, 1],
+              'nca__n_components': np.arange(1, 10)}
+
+    try:
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        print("Issue resolved")
+    except ValueError as e:
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_nca_gridsearch_issue()
+```
+
+### Explanation:
+1. **Necessary Imports:** We include the necessary imports for the test.
+2. **Code to Reproduce the Issue:** The test function `test_nca_gridsearch_issue` follows the steps outlined in the issue text to set up and run the `GridSearchCV` with the `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier` within a pipeline.
+3. **Handling Different Outcomes:**
+   - **If the GridSearchCV raises a `ValueError` due to the `tol` or `n_components` parameter type checks, it prints "Issue reproduced".**
+   - **If it completes successfully without raising an error, it prints "Issue resolved".**
+   - **If any other unexpected errors occur, it prints "Other issues".**
+
+This test function is designed to help you determine if the issue described is still present or if it has been resolved.
+2025-05-03 14:24:52,731 - INFO - raw output:
+Sure, I'll generate a complete test that can be used to reproduce the issue as described in the issue text. The test will include the necessary imports, the code to reproduce the issue, and the appropriate print statements based on the outcome.
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_parameter_checks():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Initialize NCA and KNN
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        # Create a pipeline
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Define parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],
+                  'nca__n_components': np.arange(1, 10)}
+
+        # Initialize GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        
+        # Fit the GridSearch
+        gs.fit(X, y)
+    except ValueError as e:
+        error_message = str(e)
+
+        if "float" in error_message or "int" in error_message:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    except Exception:
+        print("Other issues")
+        return
+
+    print("Issue resolved")
+
+# Run the test
+test_nca_parameter_checks()
+```
+
+In this test:
+- We generate random data for `X` and `y`.
+- We initialize instances of `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.
+- We create a pipeline that includes both `nca` and `knn`.
+- We define a parameter grid with some values that are likely to cause type issues.
+- We initialize `GridSearchCV` with the pipeline and the parameter grid and attempt to fit the model.
+- If a `ValueError` is raised that mentions type issues with `float` or `int`, we print "Issue reproduced".
+- If any other issue arises, we print "Other issues".
+- If no exceptions are raised, we print "Issue resolved".
+2025-05-03 14:24:52,731 - INFO - raw output:
+Sure, here is the complete test to reproduce the issue described in the issue text:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        # Data generation
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Pipeline creation
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Parameters for GridSearch
+        params = {'nca__tol': [0.1, 0.5, 1], 'nca__n_components': np.arange(1, 10)}
+
+        # GridSearchCV instantiation and fitting
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        
+    except ValueError as e:
+        if 'tol' in str(e) or 'n_components' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+
+    print("Issue resolved")
+
+test_nca_gridsearch_issue()
+```
+
+This test script will help you reproduce the issue if it exists and verify if the issue has been resolved. The script:
+1. Generates random data.
+2. Sets up a pipeline with NCA and KNN.
+3. Defines parameter grids including an integer for `tol` and `np.int64` for `n_components`.
+4. Runs `GridSearchCV` with the given parameters and catches ValueErrors.
+5. Prints "Issue reproduced" if the specific error related to the parameter type check is raised.
+6. Prints "Other issues" if other ValueErrors occur.
+7. Prints "Issue resolved" if the fit succeeds without errors.
+2025-05-03 14:24:52,731 - INFO - raw output:
+Certainly! Here is the complete test code to reproduce the issue described in the issue text:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_grid_search_issue():
+    # Generate synthetic data
+    X = np.random.random_sample((100, 10))
+    y = np.random.randint(2, size=100)
+
+    # Define the components of the pipeline
+    nca = NeighborhoodComponentsAnalysis()
+    knn = KNeighborsClassifier()
+    pipe = Pipeline([('nca', nca), ('knn', knn)])
+    
+    # Define the parameter grid
+    params = {'nca__tol': [0.1, 0.5, 1],  # 1 is not a float
+              'nca__n_components': np.arange(1, 10)}  # np.int64 is not int
+
+    # Create the GridSearchCV object
+    gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+
+    try:
+        # Fit the GridSearchCV object
+        gs.fit(X, y)
+        print("Issue resolved")
+    except ValueError as e:
+        # Check if the error message is related to parameter type checking
+        if "parameter" in str(e) and ("tol" in str(e) or "n_components" in str(e)):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_nca_grid_search_issue()
+```
+
+This test code:
+1. Imports the necessary modules and classes.
+2. Generates synthetic data.
+3. Defines the components of the pipeline (NCA and KNN classifier).
+4. Defines the parameter grid with the specific parameters that cause the issue (`nca__tol` and `nca__n_components`).
+5. Creates and fits the `GridSearchCV` object to the synthetic data.
+6. Catches exceptions to determine if the issue is reproduced, resolved, or if there are other issues.
+
+You can run this test to check if the issue is present. If the issue is reproduced, it will print "Issue reproduced". If the issue is resolved, it will print "Issue resolved". If there are other issues, it will print "Other issues".
+2025-05-03 14:24:52,731 - INFO - raw output:
+Certainly! Below is the complete test script that reproduces the issue as described in the issue text:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        pipe = Pipeline([('nca', nca),
+                         ('knn', knn)])
+                        
+        params = {'nca__tol': [0.1, 0.5, 1],
+                  'nca__n_components': np.arange(1, 10)}
+                  
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X,y)
+        
+        print("Issue resolved")
+    except ValueError as ve:
+        if 'tol' in str(ve) or 'n_components' in str(ve):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_nca_gridsearch_issue()
+```
+
+### Explanation:
+
+1. **Necessary imports**: The script imports required modules from `numpy`, `sklearn.pipeline`, `sklearn.model_selection`, and `sklearn.neighbors`.
+2. **Code to reproduce the issue**:
+   - The script generates random sample data `X` and labels `y`.
+   - It sets up a pipeline with `NeighborhoodComponentsAnalysis` (NCA) and `KNeighborsClassifier` (KNN).
+   - It defines a parameter grid `params` to pass to `GridSearchCV`.
+   - It initializes and fits `GridSearchCV` with the pipeline and parameter grid.
+3. **Outcome handling**:
+   - If `GridSearchCV` fitting raises a `ValueError` related to `tol` or `n_components`, it prints "Issue reproduced".
+   - If it raises any other `ValueError` or exception, it prints "Other issues".
+   - If no exceptions are raised, it prints "Issue resolved".
+
+This test script will help verify whether the issue is still present or if it has been fixed in the repository.
+2025-05-03 14:24:52,731 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    X = np.random.random_sample((100, 10))
+    y = np.random.randint(2, size=100)
+
+    nca = NeighborhoodComponentsAnalysis()
+    knn = KNeighborsClassifier()
+
+    pipe = Pipeline([('nca', nca),
+                     ('knn', knn)])
+                    
+    params = {'nca__tol': [0.1, 0.5, 1],  # Issue: 1 is not a float
+              'nca__n_components': np.arange(1, 10)}  # Issue: np.int64 is not int
+              
+    gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+
+    try:
+        gs.fit(X, y)
+        print("Issue resolved")
+    except ValueError as e:
+        if 'tol' in str(e) or 'n_components' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_nca_gridsearch_issue()
+```
+2025-05-03 14:24:52,731 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        # Generate synthetic data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Create the pipeline
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Define parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],
+                  'nca__n_components': np.arange(1, 10)}
+
+        # Create and fit GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+
+        # If execution reaches this point without exception, the issue is resolved.
+        print("Issue resolved")
+    except ValueError as e:
+        if "tol must be a float" in str(e) or "n_components must be an int" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+# Run the test
+test_nca_gridsearch_issue()
+``` 
+
+This test script checks if the issue related to the strict parameter type checking in `NeighborhoodComponentsAnalysis` during `GridSearchCV` fitting is reproduced or resolved. It will print "Issue reproduced" if the specific value errors occur, "Issue resolved" if no exceptions occur, and "Other issues" for any other types of exceptions.
+2025-05-03 14:24:52,731 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_grid_search_issue():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+        
+        # Create the pipeline with NCA and KNN
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+        
+        # Define the parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],
+                  'nca__n_components': np.arange(1, 10)}
+        
+        # Perform GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        
+        # If no exception is raised, print "Issue resolved"
+        print("Issue resolved")
+    except (ValueError, TypeError) as e:
+        # If the specific issue is reproduced, print "Issue reproduced"
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            # If another issue is encountered, print "Other issues"
+            print("Other issues")
+
+# Run the test function
+test_nca_grid_search_issue()
+```
+
+This test script will:
+1. Generate random data.
+2. Create a pipeline with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.
+3. Define the parameter grid with values that will trigger the specific issue.
+4. Perform a `GridSearchCV` using the pipeline and parameter grid.
+5. Catch exceptions and print the appropriate message based on the outcome. 
+
+Run this script to verify if the issue is reproduced or if it has been resolved. If other issues are encountered, it will print "Other issues".
+2025-05-03 14:24:52,732 - INFO - raw output:
+Sure! Below is the complete test that can be used to reproduce the issue described in the issue text:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    # Generate random data
+    X = np.random.random_sample((100, 10))
+    y = np.random.randint(2, size=100)
+
+    # Define the pipeline
+    nca = NeighborhoodComponentsAnalysis()
+    knn = KNeighborsClassifier()
+    pipe = Pipeline([('nca', nca), ('knn', knn)])
+    
+    # Define the parameter grid
+    params = {
+        'nca__tol': [0.1, 0.5, 1],  # `1` is an int, which is not a float
+        'nca__n_components': np.arange(1, 10)  # np.int64 values
+    }
+    
+    # Perform GridSearchCV
+    gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+    
+    try:
+        gs.fit(X, y)
+    except ValueError as e:
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    
+    print("Issue resolved")
+
+test_nca_gridsearch_issue()
+```
+
+This test script does the following:
+1. Imports necessary modules.
+2. Generates random data for testing.
+3. Defines a pipeline with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.
+4. Sets up a parameter grid for `GridSearchCV` that is expected to cause the issue.
+5. Attempts to fit the `GridSearchCV` object and catches the `ValueError`.
+6. Prints "Issue reproduced" if the specific issue with parameter type checking is encountered.
+7. Prints "Other issues" if a different error is encountered.
+8. Prints "Issue resolved" if no error is encountered, indicating the issue has been fixed.
+2025-05-03 14:24:52,732 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        # Generate sample data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Define NCA and KNN
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        # Create pipeline
+        pipe = Pipeline([('nca', nca),
+                         ('knn', knn)])
+        
+        # Define parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],
+                  'nca__n_components': np.arange(1, 10)}
+        
+        # Perform GridSearch
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+    
+    except ValueError as e:
+        error_message = str(e)
+        
+        # Check if the specific parameter type error is raised
+        if "tol" in error_message and "float" in error_message:
+            print("Issue reproduced")
+            return
+        if "n_components" in error_message and "int" in error_message:
+            print("Issue reproduced")
+            return
+        print("Other issues")
+        return
+    
+    print("Issue resolved")
+    return
+
+test_nca_gridsearch_issue()
+```
+
+This test script follows the outline you provided. It attempts to reproduce the issue by running a grid search with parameters that have types that might cause failures. If the errors related to type checking for 'tol' or 'n_components' are caught, it prints "Issue reproduced". If the function completes without errors, it prints "Issue resolved". If any other issues arise, it prints "Other issues".
+2025-05-03 14:24:52,732 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        # Generate synthetic data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+        
+        # Initialize components
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        
+        # Create a pipeline
+        pipe = Pipeline([('nca', nca),
+                         ('knn', knn)])
+                        
+        # Parameter grid with types that may cause issues
+        params = {'nca__tol': [0.1, 0.5, 1],  # '1' is an int, not a float
+                  'nca__n_components': np.arange(1, 10)}  # np.int64 type
+        
+        # Setup GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        
+        # Fit the grid search
+        gs.fit(X, y)
+        
+        print("Issue resolved")
+    except ValueError as e:
+        # Check if the error is due to the parameter type checks
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+# Run the test
+test_nca_gridsearch_issue()
+```
+
+This test script covers the following:
+1. Necessary imports.
+2. Code to reproduce the issue described in the issue text.
+3. Prints "Issue reproduced" if the outcome indicates that the issue is reproduced.
+4. Prints "Issue resolved" if the outcome indicates that the issue has been successfully resolved.
+5. Prints "Other issues" if the outcome indicates there are other issues with the source code.
+
+By running this script, you'll be able to verify if the current implementation has the parameter type-checking issue and whether it has been fixed after applying any changes.
+2025-05-03 14:24:52,732 - INFO - raw output:
+Sure, here is a complete test that can be used to reproduce the issue described in the issue text:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch():
+    try:
+        # Generate synthetic data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Create NCA and kNN instances
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        # Create a pipeline
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Define parameter grid
+        params = {
+            'nca__tol': [0.1, 0.5, 1],  # '1' is an integer, not a float
+            'nca__n_components': np.arange(1, 10)  # np.int64 instead of int
+        }
+
+        # Create and fit GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        
+    except ValueError as e:
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    else:
+        print("Issue resolved")
+
+test_nca_gridsearch()
+```
+
+This test script does the following:
+1. Imports necessary modules.
+2. Generates synthetic data.
+3. Creates instances of NeighborhoodComponentsAnalysis and KNeighborsClassifier.
+4. Constructs a pipeline with these instances.
+5. Defines a parameter grid that includes both float and integer types for the parameters `tol` and `n_components`.
+6. Attempts to fit GridSearchCV with the defined pipeline and parameter grid.
+7. Catches a `ValueError` and checks if it is related to the parameters `tol` or `n_components`.
+8. Prints "Issue reproduced" if the error is due to the parameter type checks, "Issue resolved" if no error occurs, and "Other issues" if a different error occurs.
+2025-05-03 14:24:52,732 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Define the pipeline with NCA and KNN
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Define the parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],  # 1 is an int, should cause the issue
+                  'nca__n_components': np.arange(1, 10)}  # np.int64 type, should cause the issue
+
+        # Perform GridSearch
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        
+        # If no error occurs, print "Issue resolved"
+        print("Issue resolved")
+    except ValueError as e:
+        # Check if the issue is the one described (type error in parameters)
+        if 'tol' in str(e) or 'n_components' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # Catch any other exceptions
+        print(f"Other issues: {e}")
+
+test_nca_gridsearch()
+```
+2025-05-03 14:24:52,732 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_params_with_gridsearch():
+    try:
+        # Generate sample data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Define the pipeline components
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        # Create a pipeline with NCA and KNN
+        pipe = Pipeline([('nca', nca),
+                         ('knn', knn)])
+                        
+        # Define the parameter grid for GridSearch
+        params = {'nca__tol': [0.1, 0.5, 1],  # 1 is int, not float
+                  'nca__n_components': np.arange(1, 10)}  # np.int64 instead of int
+                  
+        # Initialize GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        
+        # Fit the GridSearchCV
+        gs.fit(X, y)
+        
+    except ValueError as e:
+        # Check if the error message corresponds to the described issue
+        if "Tolerance for stopping criteria" in str(e) or "n_components must be an int" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    
+    print("Issue resolved")
+
+test_nca_params_with_gridsearch()
+```
+2025-05-03 14:24:52,732 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        # Generating random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+        
+        # Defining the pipeline
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+        
+        # Defining the parameters grid
+        params = {'nca__tol': [0.1, 0.5, 1],  # Note: 1 is an int
+                  'nca__n_components': np.arange(1, 10)}  # np.int64 from np.arange
+        
+        # Setting up and running GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        
+        print("Issue resolved")
+    except ValueError as e:
+        # Checking for the specific ValueError related to parameter type checking
+        if 'tol' in str(e) or 'n_components' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_nca_gridsearch_issue()
+```
+2025-05-03 14:24:52,732 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_NCA_parameter_check_issue():
+    try:
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        pipe = Pipeline([('nca', nca),
+                         ('knn', knn)])
+                        
+        params = {'nca__tol': [0.1, 0.5, 1],  # 1 is an integer, not a float
+                  'nca__n_components': np.arange(1, 10)}  # np.int64 instead of int
+                  
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+    except ValueError as e:
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    except Exception as e:
+        print("Other issues")
+        return
+    
+    print("Issue resolved")
+
+test_NCA_parameter_check_issue()
+
+# Expected Output:
+# "Issue reproduced" if the issue is still present.
+# "Issue resolved" if the issue has been fixed.
+# "Other issues" if there are different issues with the source code.
+```
+2025-05-03 14:24:52,732 - INFO - raw output:
+Certainly! Below is the complete test code to reproduce the issue described in the issue text. This test will help you to identify if the issue is still present or if it has been resolved.
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Define the Pipeline
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+        
+        # Define parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],
+                  'nca__n_components': np.arange(1, 10)}
+        
+        # Setup GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        
+        # Fit the model
+        gs.fit(X, y)
+        
+        # If it reaches this point without exceptions, the issue is resolved
+        print("Issue resolved")
+    except ValueError as e:
+        # Check if the specific error related to parameter type checking occurs
+        if "float" in str(e) or "int" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # Catch any other unexpected exceptions
+        print("Other issues")
+
+# Run the test
+test_nca_gridsearch_issue()
+```
+
+### Explanation:
+
+1. **Imports**: The necessary imports for the test.
+2. **Data Generation**: Random data for testing.
+3. **Pipeline Setup**: Initializes `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`, and then composes them into a `Pipeline`.
+4. **Parameter Grid**: Defines the parameter grid to be used in `GridSearchCV`. This grid is designed to potentially trigger the parameter type checking issue.
+5. **GridSearchCV Setup**: Configures `GridSearchCV` with the pipeline and parameter grid.
+6. **Fitting the Model**: Attempts to fit the model to the data. If this step fails due to strict parameter checks, it will raise a `ValueError`.
+7. **Issue Detection**:
+   - If the specific `ValueError` related to parameter type checking occurs, it prints "Issue reproduced".
+   - If it fits successfully, it means the issue has been resolved, and it prints "Issue resolved".
+   - Any other exceptions will print "Other issues".
+
+You can run this test to check if the issue described in your repository is still present or if it has been resolved.
+2025-05-03 14:24:52,732 - INFO - raw output:
+Here's a complete test script to reproduce the issue described in the issue text:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.exceptions import ValidationError
+
+def test_nca_gridsearch_param_checking() -> None:
+    X = np.random.random_sample((100, 10))
+    y = np.random.randint(2, size=100)
+
+    nca = NeighborhoodComponentsAnalysis()
+    knn = KNeighborsClassifier()
+
+    pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+    params = {'nca__tol': [0.1, 0.5, 1],
+              'nca__n_components': np.arange(1, 10)}
+
+    gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+
+    try:
+        gs.fit(X, y)
+    except ValidationError as e:
+        if "The 'tol' parameter of NeighborhoodComponentsAnalysis must be a float in the range" in str(e) or \
+           "The 'n_components' parameter of NeighborhoodComponentsAnalysis must be an int in the range" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return
+
+    print("Issue resolved")
+
+test_nca_gridsearch_param_checking()
+```
+
+This script contains the necessary imports and the code needed to reproduce the described issue. It runs the grid search and catches specific validation errors related to the parameter checks for `tol` and `n_components`. Based on the caught exceptions, it prints whether the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:24:52,732 - INFO - raw output:
+Sure, here's a complete test that reproduces the issue described in the issue text:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Create the NCA and KNN objects
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        # Create a pipeline with NCA and KNN
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Define parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],
+                  'nca__n_components': np.arange(1, 10)}
+
+        # Initialize GridSearchCV with the pipeline
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+
+        # Fit the GridSearchCV
+        gs.fit(X, y)
+
+    except ValueError as e:
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    else:
+        print("Issue resolved")
+
+test_nca_gridsearch_issue()
+```
+
+### Explanation:
+1. **Necessary Imports**: Import necessary modules and classes such as `numpy`, `Pipeline`, `GridSearchCV`, `NeighborhoodComponentsAnalysis`, and `KNeighborsClassifier`.
+2. **Reproducing the Issue**:
+    - Generate random data for `X` and `y`.
+    - Create instances of `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.
+    - Create a pipeline that combines these two.
+    - Define a parameter grid where some values can cause type issues.
+    - Initialize `GridSearchCV` with the pipeline and parameter grid.
+    - Attempt to fit the `GridSearchCV` object, which should raise a `ValueError` due to type mismatches.
+3. **Output**:
+    - If the `ValueError` contains specific mentions of the problematic parameters, print "Issue reproduced".
+    - If the error message is unrelated, print "Other issues".
+    - If no error occurs, print "Issue resolved".
+2025-05-03 14:24:52,732 - INFO - raw output:
+Sure, here is a complete test that can be used to reproduce the issue described in your issue text:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.exceptions import NotFittedError
+
+def test_nca_gridsearch_param_check():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+        
+        # Define the pipeline with NeighborhoodComponentsAnalysis and KNeighborsClassifier
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+        
+        # Define the parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],
+                  'nca__n_components': np.arange(1, 10)}
+        
+        # Define the GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        
+        # Fit the GridSearchCV
+        gs.fit(X, y)
+        
+    except ValueError as e:
+        # Check if the ValueError is due to the parameter type
+        if 'tol' in str(e) and 'float' in str(e):
+            print("Issue reproduced")
+        elif 'n_components' in str(e) and 'int' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # Catch any other exceptions
+        print("Other issues")
+    else:
+        # If no exceptions were raised, the issue is resolved
+        print("Issue resolved")
+
+# Run the test function
+test_nca_gridsearch_param_check()
+```
+
+This test script:
+
+1. Imports the necessary modules.
+2. Generates random data for the test.
+3. Sets up a pipeline with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.
+4. Defines a parameter grid that is intended to cause the issue.
+5. Sets up and fits a `GridSearchCV` with the pipeline and parameter grid.
+6. Handles exceptions to determine if the issue is reproduced, resolved, or if there are other issues.
+
+To use this test:
+- If the ValueError indicates an issue with the parameter type for `tol` or `n_components`, it prints "Issue reproduced".
+- If no exceptions are raised, it prints "Issue resolved".
+- For any other exceptions, it prints "Other issues".
+2025-05-03 14:24:52,732 - INFO - raw output:
+```python
+import numpy as np
+
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_param_check():
+    try:
+        # Data preparation
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Model and pipeline setup
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+                
+        # Parameter grid with potential issues
+        params = {
+            'nca__tol': [0.1, 0.5, 1],             # 1 is not a float
+            'nca__n_components': np.arange(1, 10)  # np.int64 is not int
+        }
+          
+        # GridSearch setup
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        
+        # Attempt to fit the model
+        gs.fit(X, y)
+        
+    except ValueError as e:
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    except Exception as e:
+        print("Other issues")
+        return
+
+    print("Issue resolved")
+
+# Run the test
+test_nca_gridsearch_param_check()
+```
+
+This script will attempt to reproduce the issue by performing a grid search with parameters that are likely to cause type checking errors. If it encounters the expected `ValueError` related to the `tol` or `n_components` parameters, it will print "Issue reproduced". If it encounters any other exceptions, it will print "Other issues". If the grid search runs without errors, it will print "Issue resolved".
+2025-05-03 14:24:52,732 - INFO - raw output:
+Certainly! Below is a complete test that can be used to reproduce the issue described in the issue text. This test will attempt to run a `GridSearchCV` with a `Pipeline` containing `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`, and will print out the appropriate message based on the outcome.
+
+```python
+import numpy as np
+
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    # Generate random data
+    X = np.random.random_sample((100, 10))
+    y = np.random.randint(2, size=100)
+    
+    # Define the pipeline with NCA and KNN
+    nca = NeighborhoodComponentsAnalysis()
+    knn = KNeighborsClassifier()
+    pipe = Pipeline([('nca', nca), ('knn', knn)])
+    
+    # Define the parameter grid
+    params = {
+        'nca__tol': [0.1, 0.5, 1],  # 1 is not a float
+        'nca__n_components': np.arange(1, 10)  # np.int64 is not int
+    }
+    
+    # Initialize GridSearchCV
+    gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+    
+    try:
+        # Fit the GridSearchCV
+        gs.fit(X, y)
+        print("Issue resolved")
+    except ValueError as e:
+        # Check if the ValueError is due to type checking
+        if 'tol' in str(e) or 'n_components' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_nca_gridsearch_issue()
+```
+
+This test will:
+1. Import the necessary libraries.
+2. Create random data for fitting.
+3. Set up the pipeline with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.
+4. Define a parameter grid that includes values that will trigger the issue.
+5. Initialize and fit a `GridSearchCV` object with the pipeline and parameter grid.
+6. Print "Issue reproduced" if the expected `ValueError` is raised specifically due to the type checking of the `tol` or `n_components` parameters.
+7. Print "Issue resolved" if the `GridSearchCV` fit completes without errors.
+8. Print "Other issues" if any other issue arises.
+
+The test is designed to detect if the type checking issue is present or has been fixed, allowing it to be used to verify both the reproduction and resolution of the issue.
+2025-05-03 14:24:52,732 - INFO - raw output:
+Sure, here is a complete test that can be used to reproduce the issue described in the issue text. This test checks if the issue with strict parameter checking in `NeighborhoodComponentsAnalysis` during a `GridSearchCV` is present.
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_grid_search_issue():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Define the pipeline with NCA and KNN
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+        
+        # Define the parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1],
+                  'nca__n_components': np.arange(1, 10)}
+
+        # Perform GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        print("Issue resolved")
+    except ValueError as e:
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_nca_grid_search_issue()
+```
+
+Explanation:
+1. **Imports**: The test includes necessary imports from `numpy`, `sklearn.pipeline`, `sklearn.model_selection`, and `sklearn.neighbors`.
+2. **Data Generation**: Random data is generated for the test.
+3. **Pipeline Setup**: A pipeline containing `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier` is set up.
+4. **Parameter Grid**: The parameter grid includes `tol` values and `n_components` values.
+5. **GridSearchCV**: The `GridSearchCV` is performed using the pipeline and parameter grid.
+6. **Exception Handling**:
+   - If a `ValueError` containing "tol" or "n_components" is raised, it prints "Issue reproduced".
+   - If any other exception or `ValueError` occurs, it prints "Other issues".
+   - If no exceptions occur, it prints "Issue resolved".
+
+By running this test, you can determine if the issue with the parameter checking is present and if it has been resolved or not.
+2025-05-03 14:24:52,732 - INFO - raw output:
+Sure, here is a complete test to reproduce the described issue:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_grid_search():
+    try:
+        # Generate some random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Initialize the components of the pipeline
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Define the parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1], 'nca__n_components': np.arange(1, 10)}
+
+        # Initialize GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+
+        # Fit the grid search
+        gs.fit(X, y)
+
+        # If no exception is raised, the issue is resolved
+        print("Issue resolved")
+
+    except ValueError as e:
+        # Check if the error is due to parameter type issues
+        if "float" in str(e) or "int" in str(e) or "np.int64" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_nca_grid_search()
+```
+
+This test script does the following:
+1. Imports the necessary modules.
+2. Sets up the pipeline and parameter grid as described in the issue.
+3. Attempts to run a grid search with the defined pipeline and parameters.
+4. Catches `ValueError` exceptions that are likely related to the parameter type issues described.
+5. Prints "Issue reproduced" if the caught exception is due to the parameter type issue.
+6. Prints "Issue resolved" if no exception is raised, indicating the issue is fixed.
+7. Prints "Other issues" if any other exception is raised.
+2025-05-03 14:24:52,732 - INFO - raw output:
+Certainly! Below is the complete test code for reproducing the issue described in your provided issue text. This code includes all necessary imports, the example code to reproduce the issue, and the logic to print the appropriate messages based on the outcome.
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+import traceback
+
+def test_nca_gridsearch_issue():
+    try:
+        # Create dummy data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Define the models and pipeline
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Define the parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1], 'nca__n_components': np.arange(1, 10)}
+
+        # Initialize GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+
+        # Fit the model
+        gs.fit(X, y)
+        
+        # If no error is raised, the issue is resolved
+        print("Issue resolved")
+    except ValueError as e:
+        # Check if the error matches the expected issue
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # Print any other exception traceback for debugging purposes
+        print("Other issues")
+        traceback.print_exc()
+
+# Run the test
+test_nca_gridsearch_issue()
+```
+
+Explanation of the test:
+1. **Necessary Imports**: Imports all the required libraries and modules.
+2. **Data Generation**: Generates random data for `X` and `y` to fit the model.
+3. **Pipeline and Parameter Grid**: Sets up the pipeline and the parameter grid with values that will trigger the issue.
+4. **GridSearchCV**: Initializes and fits the `GridSearchCV` to the data.
+5. **Exception Handling**:
+   - If a `ValueError` occurs and its message contains "tol" or "n_components", it prints "Issue reproduced".
+   - If a different error or no error occurs, it prints "Other issues".
+   - If the fitting completes successfully without any exceptions, it prints "Issue resolved".
+
+You can use this test to verify if the issue is present or has been fixed in your repository.
+2025-05-03 14:24:52,732 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_grid_search():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Define the pipeline
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Define the parameter grid
+        params = {'nca__tol': [0.1, 0.5, 1], 'nca__n_components': np.arange(1, 10)}
+
+        # Initialize and fit the GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        
+        print("Issue resolved")
+    except ValueError as e:
+        # Check if the error is related to the type of `tol` or `n_components`
+        if 'tol' in str(e) or 'n_components' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_nca_grid_search()
+```
+
+This test script does the following:
+1. Imports the necessary modules.
+2. Generates random data to use as input.
+3. Defines a `Pipeline` with `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.
+4. Sets up a parameter grid with values that are expected to cause the issue.
+5. Initializes and fits a `GridSearchCV` with the pipeline and parameter grid.
+6. Catches any `ValueError` exceptions to determine if they are related to the described issue.
+7. Prints "Issue resolved" if the GridSearchCV fit is successful, "Issue reproduced" if the expected `ValueError` is encountered, and "Other issues" for any other exceptions.
+2025-05-03 14:24:52,733 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        pipe = Pipeline([('nca', nca),
+                         ('knn', knn)])
+                        
+        params = {'nca__tol': [0.1, 0.5, 1],  # 1 is not a float
+                  'nca__n_components': np.arange(1, 10)}  # np.int64 is not int
+                  
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+
+        gs.fit(X, y)
+    
+    except ValueError as e:
+        if 'tol' in str(e) or 'n_components' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+
+    print("Issue resolved")
+
+test_nca_gridsearch_issue()
+```
+2025-05-03 14:24:52,733 - INFO - raw output:
+Sure, here is the test code to reproduce and verify the issue described in the provided issue text:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_param_check():
+    # Generate random data
+    X = np.random.random_sample((100, 10))
+    y = np.random.randint(2, size=100)
+    
+    # Define the pipeline
+    nca = NeighborhoodComponentsAnalysis()
+    knn = KNeighborsClassifier()
+    pipe = Pipeline([('nca', nca), ('knn', knn)])
+    
+    # Define the parameter grid
+    params = {'nca__tol': [0.1, 0.5, 1],  # 1 is not a float
+              'nca__n_components': np.arange(1, 10)}  # np.int64 is not int
+    
+    # Run GridSearchCV
+    try:
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+    except ValueError as e:
+        # Check if the ValueError is raised due to the parameter type issue
+        if 'tol' in str(e) and 'float' in str(e):
+            print("Issue reproduced")
+        elif 'n_components' in str(e) and 'int' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+
+    print("Issue resolved")
+
+# Run the test
+test_nca_gridsearch_param_check()
+```
+2025-05-03 14:24:52,733 - INFO - raw output:
+Sure, here's a complete test script that adheres to the requirements:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_grid_search_issue():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Define NeighborhoodComponentsAnalysis and KNeighborsClassifier
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        # Create a pipeline with NCA and KNN
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Define the parameter grid with values that could cause issues
+        params = {'nca__tol': [0.1, 0.5, 1], 'nca__n_components': np.arange(1, 10)}
+
+        # Create a GridSearchCV object with the pipeline and parameter grid
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+
+        # Fit the GridSearchCV to the data
+        gs.fit(X, y)
+
+        # If fit completes without an exception, print "Issue resolved"
+        print("Issue resolved")
+    except ValueError as e:
+        # If a ValueError occurs, check if it's due to the parameter type issue
+        if "Invalid parameter" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # Catch any other exceptions and print "Other issues"
+        print("Other issues")
+
+# Run the test function
+test_nca_grid_search_issue()
+```
+
+This script:
+1. Imports the necessary modules.
+2. Reproduces the issue described in the provided issue text.
+3. Prints "Issue reproduced" if the specific parameter type issue occurs.
+4. Prints "Issue resolved" if the fit completes without any exceptions.
+5. Prints "Other issues" if any other exceptions occur.
+2025-05-03 14:24:52,733 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        # Generate random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Define the NCA and KNN models
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        # Create a pipeline with NCA and KNN
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Define the parameter grid for GridSearch
+        params = {'nca__tol': [0.1, 0.5, 1],  # 1 is an int
+                  'nca__n_components': np.arange(1, 10)}  # np.arange gives np.int64
+
+        # Create and fit the GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        
+        print("Issue resolved")
+    except ValueError as e:
+        if "tol" in str(e) or "n_components" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_nca_gridsearch_issue()
+```
+
+This test script will:
+
+1. Import necessary modules.
+2. Create random data for the test.
+3. Define and create a pipeline using `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.
+4. Define a parameter grid with potential problematic types for `nca__tol` and `nca__n_components`.
+5. Use `GridSearchCV` to fit the pipeline with the parameter grid.
+6. Output the result as specified based on whether the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:24:52,733 - INFO - raw output:
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_parameter_checking_issue():
+    try:
+        # Create random data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+        
+        # Initialize the required models
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        
+        # Create a pipeline with NCA and KNN
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+        
+        # Define the parameter grid
+        params = {
+            'nca__tol': [0.1, 0.5, 1],
+            'nca__n_components': np.arange(1, 10)
+        }
+        
+        # Initialize GridSearchCV with the pipeline and parameter grid
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        
+        # Fit the GridSearchCV
+        gs.fit(X, y)
+        
+        # If no errors, print "Issue resolved"
+        print("Issue resolved")
+    except ValueError as e:
+        # Check if the error is due to the parameter type issue described
+        if "parameter" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # Catch any other exceptions and print "Other issues"
+        print("Other issues")
+
+# Run the test
+test_parameter_checking_issue()
+```
+2025-05-03 14:24:52,733 - INFO - raw output:
+Certainly! Below is a complete test script that reproduces the issue described in the issue text. This script will attempt to run the `GridSearchCV` with `NeighborhoodComponentsAnalysis` and a parameter grid that includes incompatible types according to the current strict parameter checks. The script will print out statements indicating whether the issue is reproduced, resolved, or if there are other issues.
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_grid_search_issue():
+    try:
+        # Generating random sample data
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        # Defining the pipeline
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+        pipe = Pipeline([('nca', nca), ('knn', knn)])
+
+        # Defining parameter grid with potential type issues
+        params = {'nca__tol': [0.1, 0.5, 1],  # Here, 1 is an int and should be a float
+                  'nca__n_components': np.arange(1, 10)}  # np.int64 type issue
+
+        # Running GridSearchCV
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+
+        # If no exception occurs, the issue is resolved
+        print("Issue resolved")
+    except ValueError as e:
+        # If a ValueError occurs, we need to check the message to confirm it's the same issue
+        expected_errors = [
+            "Parameter 'tol' should be a float",
+            "Parameter 'n_components' should be an integer"
+        ]
+        if any(error in str(e) for error in expected_errors):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # If any other exception occurs, we print "Other issues"
+        print("Other issues")
+
+test_nca_grid_search_issue()
+```
+
+### Explanation:
+1. **Necessary Imports**: Import the required modules including `numpy`, `Pipeline`, `GridSearchCV`, `NeighborhoodComponentsAnalysis`, and `KNeighborsClassifier`.
+2. **Data Generation**: Create random sample data `X` and labels `y`.
+3. **Pipeline and Parameter Grid**:
+   - Define a pipeline with `NeighborhoodComponentsAnalysis` (NCA) and `KNeighborsClassifier`.
+   - Define a parameter grid that includes values which will cause type issues based on the current parameter checking in NCA.
+4. **GridSearchCV Execution**: Attempt to fit the `GridSearchCV` with the defined pipeline and parameters.
+5. **Output Handling**:
+   - If the grid search completes without errors, print "Issue resolved".
+   - If a `ValueError` is raised and matches the expected type-checking errors, print "Issue reproduced".
+   - For any other errors, print "Other issues".
+
+This test script can be used to validate if the issue described is present or if it has been resolved after making modifications to the parameter checking mechanism.
+2025-05-03 14:24:52,733 - INFO - raw output:
+Sure, here is the complete test code to reproduce the issue described in the issue text:
+
+```python
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+def test_nca_gridsearch_issue():
+    try:
+        X = np.random.random_sample((100, 10))
+        y = np.random.randint(2, size=100)
+
+        nca = NeighborhoodComponentsAnalysis()
+        knn = KNeighborsClassifier()
+
+        pipe = Pipeline([('nca', nca),
+                         ('knn', knn)])
+
+        params = {'nca__tol': [0.1, 0.5, 1],
+                  'nca__n_components': np.arange(1, 10)}
+
+        gs = GridSearchCV(estimator=pipe, param_grid=params, error_score='raise')
+        gs.fit(X, y)
+        
+    except ValueError as e:
+        error_message = str(e)
+        if "0.1 is not a float" in error_message or "np.int64 is not int" in error_message:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    except Exception as e:
+        print("Other issues")
+        return
+
+    print("Issue resolved")
+
+test_nca_gridsearch_issue()
+```
+
+This test does the following:
+1. Imports the necessary modules.
+2. Sets up the data and the pipeline, including the `NeighborhoodComponentsAnalysis` and `KNeighborsClassifier`.
+3. Configures the `GridSearchCV` with parameters that include values that could cause type issues.
+4. Tries to fit the grid search to the data and catches any `ValueError` exceptions.
+5. Based on the caught exception, it prints "Issue reproduced," "Issue resolved," or "Other issues" depending on the outcome.

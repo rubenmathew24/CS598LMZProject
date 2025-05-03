@@ -1,0 +1,2426 @@
+2025-05-02 17:20:54,817 - INFO - ================ generating test for django__django-13964 ================
+2025-05-02 17:20:54,942 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+Saving parent object after setting on child leads to data loss for parents with non-numeric primary key.
+Description
+	 
+		(last modified by Charlie DeTar)
+	 
+Given a model with a foreign key relation to another model that has a non-auto CharField as its primary key:
+class Product(models.Model):
+	sku = models.CharField(primary_key=True, max_length=50)
+class Order(models.Model):
+	product = models.ForeignKey(Product, on_delete=models.CASCADE)
+If the relation is initialized on the parent with an empty instance that does not yet specify its primary key, and the primary key is subsequently defined, the parent does not "see" the primary key's change:
+with transaction.atomic():
+	order = Order()
+	order.product = Product()
+	order.product.sku = "foo"
+	order.product.save()
+	order.save()
+	assert Order.objects.filter(product_id="").exists() # Succeeds, but shouldn't
+	assert Order.objects.filter(product=order.product).exists() # Fails
+Instead of product_id being populated with product.sku, it is set to emptystring. The foreign key constraint which would enforce the existence of a product with sku="" is deferred until the transaction commits. The transaction does correctly fail on commit with a ForeignKeyViolation due to the non-existence of a product with emptystring as its primary key.
+On the other hand, if the related unsaved instance is initialized with its primary key before assignment to the parent, it is persisted correctly:
+with transaction.atomic():
+	order = Order()
+	order.product = Product(sku="foo")
+	order.product.save()
+	order.save()
+	assert Order.objects.filter(product=order.product).exists() # succeeds
+Committing the transaction also succeeds.
+This may have something to do with how the Order.product_id field is handled at assignment, together with something about handling fetching of auto vs non-auto primary keys from the related instance.
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:54,967 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:05:10,092 - INFO - ================ generating test for django__django-13964 ================
+2025-05-03 14:05:10,107 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+Saving parent object after setting on child leads to data loss for parents with non-numeric primary key.
+Description
+	 
+		(last modified by Charlie DeTar)
+	 
+Given a model with a foreign key relation to another model that has a non-auto CharField as its primary key:
+class Product(models.Model):
+	sku = models.CharField(primary_key=True, max_length=50)
+class Order(models.Model):
+	product = models.ForeignKey(Product, on_delete=models.CASCADE)
+If the relation is initialized on the parent with an empty instance that does not yet specify its primary key, and the primary key is subsequently defined, the parent does not "see" the primary key's change:
+with transaction.atomic():
+	order = Order()
+	order.product = Product()
+	order.product.sku = "foo"
+	order.product.save()
+	order.save()
+	assert Order.objects.filter(product_id="").exists() # Succeeds, but shouldn't
+	assert Order.objects.filter(product=order.product).exists() # Fails
+Instead of product_id being populated with product.sku, it is set to emptystring. The foreign key constraint which would enforce the existence of a product with sku="" is deferred until the transaction commits. The transaction does correctly fail on commit with a ForeignKeyViolation due to the non-existence of a product with emptystring as its primary key.
+On the other hand, if the related unsaved instance is initialized with its primary key before assignment to the parent, it is persisted correctly:
+with transaction.atomic():
+	order = Order()
+	order.product = Product(sku="foo")
+	order.product.save()
+	order.save()
+	assert Order.objects.filter(product=order.product).exists() # succeeds
+Committing the transaction also succeeds.
+This may have something to do with how the Order.product_id field is handled at assignment, together with something about handling fetching of auto vs non-auto primary keys from the related instance.
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 14:05:10,107 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:05:10,114 - INFO - Creating API request
+2025-05-03 14:05:13,027 - INFO - API response ChatCompletion(id='chatcmpl-BTCScwnfbMNSf1Gze4MKX2nNoWs9P', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass ForeignKeyIssueTest(TestCase):\n    def test_foreign_key_issue(self):\n        # Reproduce the issue\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n        # Verify the issue is resolved\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n# Run the test\nForeignKeyIssueTest().test_foreign_key_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299110, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=280, prompt_tokens=732, total_tokens=1012, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:05:13,027 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:05:13,035 - INFO - Creating API request
+2025-05-03 14:05:59,266 - INFO - API response ChatCompletion(id='chatcmpl-BTCSfwfsjUPRCHELLtooF5KhCi9Ls', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Initialize Django (usually done in settings, but needed for testing)\ndjango.setup()\n\n# Define the models as described in the issue\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Create the test case to reproduce the issue\nclass ProductOrderTestCase(TestCase):\n    def test_product_assignment_issue(self):\n        # Code to reproduce the issue\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n                if not Order.objects.filter(product=order.product).exists():\n                    print("Issue reproduced")\n                    return\n                \n            print("Issue resolved")\n        except Exception as e:\n            print("Other issues")\n            print(e)\n\n    def test_product_assignment_resolved(self):\n        # Code to test the resolved issue\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n        except Exception as e:\n            print("Other issues")\n            print(e)\n\n# Run the tests\nProductOrderTestCase().test_product_assignment_issue()\nProductOrderTestCase().test_product_assignment_resolved()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueReproductionTestCase(TestCase):\n\n    def test_issue_reproduction(self):\n        # Reproduce the issue as described\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                    return\n                else:\n                    print("Other issues")\n                    return\n        except Exception as e:\n            print(f"Other issues: {e}")\n            return\n          \n        # Ensure the issue is not reproduced when the primary key is set before assignment\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        except Exception as e:\n            print(f"Other issues: {e}")\n            \nIssueReproductionTestCase().test_issue_reproduction()\n```\n\nThis test case should be run in a Django test environment. It attempts to reproduce the issue by creating and saving the `Order` and `Product` objects in the manner described in the issue. It prints "Issue reproduced" if it detects the issue, "Issue resolved" if the issue does not reproduce under correct conditions, and "Other issues" if any unexpected behavior occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='Certainly! Here is a complete test to reproduce the issue described in the provided issue text:\n\n```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Models defined in the issue text\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass TestForeignKeyIssue(TestCase):\n    \n    def setUp(self):\n        # Setting up the test environment\n        Product.objects.all().delete()\n        Order.objects.all().delete()\n\n    def test_issue_reproduction(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n    \n                # Check if the issue is reproduced\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        except Exception as e:\n            print("Other issues")\n            print(f"Exception: {e}")\n\n    def test_issue_resolution(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n    \n                # Check if the issue is resolved\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n        except Exception as e:\n            print("Other issues")\n            print(f"Exception: {e}")\n\n# Running the tests\nif __name__ == "__main__":\n    django.setup()\n    test_case = TestForeignKeyIssue()\n    test_case.setUp()\n    test_case.test_issue_reproduction()\n    test_case.test_issue_resolution()\n```\n\nIn this code:\n\n1. Necessary imports are included.\n2. Models `Product` and `Order` are defined as described in the issue.\n3. Two tests are created within a `TestForeignKeyIssue` class:\n   - `test_issue_reproduction`: This tests the scenario where the issue is supposed to occur.\n   - `test_issue_resolution`: This tests the scenario where the issue should not occur.\n4. The test outputs "Issue reproduced", "Issue resolved", or "Other issues" based on the outcome.\n5. The tests are run sequentially to verify both the existence and resolution of the issue.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is a Python script that tests the described issue. This script includes the necessary imports, sets up the models, and performs the tests as described:\n\n```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Setting up Django environment (usually done in settings.py, but for the sake of this example)\ndjango.setup()\n\n# Models\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Test case to reproduce the issue\nclass IssueReproductionTest(TestCase):\n\n    def test_issue_reproduction(self):\n        try:\n            with transaction.atomic():\n                # First scenario - should reproduce the issue\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                else:\n                    print("Other issues")\n                    return\n\n                if not Order.objects.filter(product=order.product).exists():\n                    print("Issue reproduced")\n                else:\n                    print("Other issues")\n                    return\n\n            with transaction.atomic():\n                # Second scenario - should not reproduce the issue\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n                    return\n\n        except Exception as e:\n            print("Other issues:", e)\n            return\n\n# Running the test\nif __name__ == \'__main__\':\n    IssueReproductionTest().test_issue_reproduction()\n```\n\nThis script sets up a Django test case to reproduce the issue. It checks whether the issue occurs as described, and then verifies that the correct behavior happens when the primary key is set before the object assignment. The output will indicate whether the issue is reproduced or resolved, or if there are other issues encountered during the test.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Ensure Django is configured correctly\ndjango.setup()\n\n# Define the models as described in the issue\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Define the test case to reproduce the issue\nclass IssueTestCase(TestCase):\n\n    def test_product_order_relationship_issue(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                    return\n                else:\n                    print("Other issues")\n                    return\n        except Exception as e:\n            print(f"Other issues: {e}")\n            return\n\n        # If no exception and none of the conditions above is met\n        print("Other issues")\n\n# Run the test\nIssueTestCase().test_product_order_relationship_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models, transaction, IntegrityError\nimport os\n\n# Setup a Django environment for testing without a full Django project\nos.environ[\'DJANGO_SETTINGS_MODULE\'] = \'test_settings\'\ndjango.setup()\n\n# Define the models according to the issue description\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Function to run the test according to the issue description\ndef test_reproduction():\n    try:\n        # Attempt to reproduce the issue\n        with transaction.atomic():\n            order = Order()\n            order.product = Product()\n            order.product.sku = "foo"\n            order.product.save()\n            order.save()\n        \n        if Order.objects.filter(product_id="").exists():\n            print("Issue reproduced")\n        elif Order.objects.filter(product=order.product).exists():\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n    except IntegrityError:\n        print("Issue reproduced")\n\n# Test settings necessary to run Django without a full project\nDATABASES = {\n    \'default\': {\n        \'ENGINE\': \'django.db.backends.sqlite3\',\n        \'NAME\': \':memory:\',\n    }\n}\n\nINSTALLED_APPS = [\n    \'__main__\',  # Register the current module as an app\n]\n\n# Apply the test settings\nfrom django.conf import settings\nsettings.configure(DATABASES=DATABASES, INSTALLED_APPS=INSTALLED_APPS)\n\n# Run the test\ntest_reproduction()\n```\n\n### Explanation:\n1. **Necessary Imports:** The script imports required modules from Django and sets up a minimal environment.\n2. **Models Definition:** The `Product` and `Order` models are defined.\n3. **Test Function:** The `test_reproduction` function follows the steps described in the issue to reproduce the problem.\n4. **Test Settings:** Django settings are configured to use an in-memory SQLite database to avoid the need for a full Django project.\n5. **Run the Test:** The test function is executed to check if the issue is reproduced.\n\nThis script will output "Issue reproduced" if the issue described is indeed present, "Issue resolved" if the issue is fixed, or "Other issues" if unexpected behavior is encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction, IntegrityError\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueReproductionTest(TestCase):\n    def test_issue_reproduction(self):\n        try:\n            # Scenario 1: Initializing related instance without primary key\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n\n                # Check if issue is reproduced\n                if Order.objects.filter(product_id="").exists() and not Order.objects.filter(product=order.product).exists():\n                    print("Issue reproduced")\n                    return\n                else:\n                    print("Other issues")\n                    return\n\n        except IntegrityError:\n            # This is expected due to ForeignKey constraint check\n            pass\n\n        try:\n            # Scenario 2: Initializing related instance with primary key\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n\n                # Check if issue is resolved\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n\n        except IntegrityError:\n            print("Other issues")\n\nIssueReproductionTest().test_issue_reproduction()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='Certainly! Here is the complete test that can be used to reproduce the issue described in your issue text:\n\n```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Defining the models as per the issue description\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Test case to reproduce and verify the issue\nclass ForeignKeyIssueTest(TestCase):\n    \n    def test_foreign_key_issue(self):\n        try:\n            # Step 1: Reproduce the issue\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product_id="").exists() and not Order.objects.filter(product=order.product).exists():\n                    print("Issue reproduced")\n                    return\n\n            # If the above block does not reproduce the issue, check further\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        \n        except Exception as e:\n            print("Other issues")\n            print(e)\n\n# Running the test\nForeignKeyIssueTest().test_foreign_key_issue()\n```\n\nThis test will:\n1. Try to reproduce the issue as described.\n2. Print "Issue reproduced" if the issue is correctly reproduced.\n3. Print "Issue resolved" if the issue has been resolved.\n4. Print "Other issues" if there are other unexpected issues.\n\nMake sure to include this code in a suitable test file within your Django project\'s test suite. Running this test will help you determine whether the issue still exists or has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Define the models as described in the issue\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Define the test case to reproduce and verify the issue\nclass ForeignKeyIssueTestCase(TestCase):\n    def test_foreign_key_issue(self):\n        try:\n            # Reproduce the issue\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n            print("Other issues")\n        except Exception as e:\n            print("Other issues")\n            return\n\n        try:\n            # Verify the issue is resolved\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                    return\n            print("Issue reproduced")\n        except Exception as e:\n            print("Other issues")\n            return\n\n# Run the test if this script is executed directly\nif __name__ == "__main__":\n    django.setup()  # Ensure Django is properly set up before running the test\n    ForeignKeyIssueTestCase().test_foreign_key_issue()\n```\n\nThis script defines the necessary models, sets up the test case, and includes the logic to reproduce the issue. The test case will print "Issue reproduced" if the problem is encountered and "Issue resolved" if the problem has been fixed. If other unexpected issues occur, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Define the models as described in the issue\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Create a test case to reproduce the described issue\nclass ForeignKeyTest(TestCase):\n    def setUp(self):\n        Product.objects.all().delete()\n        Order.objects.all().delete()\n\n    def test_foreign_key_assignment_issue(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n\n                # Check the conditions that should not occur if the bug is present\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n                if not Order.objects.filter(product=order.product).exists():\n                    print("Issue reproduced")\n                    return\n\n            # If the transaction succeeds without ForeignKeyViolation\n            print("Issue resolved")\n        except Exception as e:\n            if isinstance(e, django.db.utils.IntegrityError):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n\n# Run the test\nif __name__ == "__main__":\n    django.setup()\n    test_case = ForeignKeyTest()\n    test_case.setUp()\n    test_case.test_foreign_key_assignment_issue()\n```\n\nExplanation:\n1. **Necessary Imports**: The necessary Django modules are imported.\n2. **Model Definitions**: We define the `Product` and `Order` models as described in the issue.\n3. **Test Case**: We create a Django `TestCase` to encapsulate the test logic.\n4. **Test Logic**: The `test_foreign_key_assignment_issue` method follows the steps described in the issue text to reproduce the problem.\n5. **Assertions and Output**:\n   - If `Order.objects.filter(product_id="").exists()` returns `True`, it indicates the bug is present, and we print "Issue reproduced".\n   - If `Order.objects.filter(product=order.product).exists()` returns `False`, it indicates the bug is present, and we print "Issue reproduced".\n   - If no problem is detected, we print "Issue resolved".\n   - If an unexpected exception occurs, we print "Other issues".\n6. **Run the Test**: We set up Django, create an instance of the test case, and run the test.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Define the models as described in the issue text\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Test case to reproduce the issue\nclass ForeignKeyIssueTestCase(TestCase):\n    def test_foreign_key_issue(self):\n        # Scenario 1: Reproducing the issue\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                else:\n                    print("Other issues")\n                return\n        except Exception as e:\n            print(f"Other issues: {e}")\n            return\n\n        # Scenario 2: Verifying the issue has been fixed\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n# Run the test case\nif __name__ == "__main__":\n    django.setup()\n    ForeignKeyIssueTestCase().test_foreign_key_issue()\n```\n\nTo run the above test, you would need to set up a Django project with the necessary configurations. This script is designed to be run as part of a Django test suite, and it will print "Issue reproduced" if the problem described in the issue is present, "Issue resolved" if the problem has been fixed, and "Other issues" if there are any other unexpected problems.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is a complete test to reproduce and verify the described issue:\n\n```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Define the models as described in the issue text\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Define the test case\nclass ForeignKeyIssueTestCase(TestCase):\n    def test_foreign_key_issue(self):\n        try:\n            # Reproduce the issue\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                    return\n                else:\n                    print("Other issues")\n                    return\n\n        except Exception as e:\n            print(f"Other issues: {e}")\n            return\n\n# Run the test case\nif __name__ == "__main__":\n    django.setup()\n    ForeignKeyIssueTestCase().test_foreign_key_issue()\n```\n\nThis script does the following:\n1. Imports the necessary Django modules.\n2. Defines the `Product` and `Order` models as described in the issue text.\n3. Contains a test case class `ForeignKeyIssueTestCase` which has a method `test_foreign_key_issue` to reproduce the issue.\n4. The method tries to reproduce the issue and checks for the presence of an `Order` with an empty `product_id` or with the correct `product`.\n5. Prints "Issue reproduced" if the issue is present, "Issue resolved" if the issue is fixed, and "Other issues" if another error occurs.\n6. Runs the test case.\n\nEnsure you have Django and the necessary dependencies installed to execute this script.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueReproductionTest(TestCase):\n    def test_issue_reproduction(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        except Exception as e:\n            print("Other issues:", str(e))\n\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        except Exception as e:\n            print("Other issues:", str(e))\n\nIssueReproductionTest().test_issue_reproduction()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass ForeignKeyTest(TestCase):\n    def test_foreign_key_issue(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                    return\n\n            print("Other issues")\n        except Exception as e:\n            print("Other issues")\n            print(e)\n\n# To actually run the test, you would typically use a test runner, but for simplicity:\nif __name__ == "__main__":\n    ForeignKeyTest().test_foreign_key_issue()\n```\n\nThis code defines the necessary models, sets up the test case, and runs the exact scenarios described in the issue text. It prints "Issue reproduced" if the issue is present, "Issue resolved" if the problem has been fixed, and "Other issues" if there are any other problems encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Ensure Django settings are configured\nif not django.conf.settings.configured:\n    django.conf.settings.configure(\n        INSTALLED_APPS=[\n            __name__,\n        ],\n        DATABASES={\n            \'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }\n        }\n    )\n    django.setup()\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueTestCase(TestCase):\n    def test_issue_reproduction(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n    def test_no_issue_when_primary_key_set_before_assignment(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Issue not resolved")\n\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n# Running the tests\nif __name__ == "__main__":\n    test_case = IssueTestCase()\n    test_case.test_issue_reproduction()\n    test_case.test_no_issue_when_primary_key_set_before_assignment()\n```\n\nThis test script includes the necessary imports, defines the models (`Product` and `Order`), and contains two test cases:\n1. `test_issue_reproduction` to reproduce the issue as described.\n2. `test_no_issue_when_primary_key_set_before_assignment` to verify that the issue does not occur when the primary key is set before assignment.\n\nThe test will print "Issue reproduced" if the issue is successfully reproduced, "Issue resolved" if the scenario works correctly, and "Other issues" if there are any unexpected issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\ndjango.setup()\n\n# Define the models as per the issue description\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueTestCase(TestCase):\n    def test_issue_reproduction(self):\n        try:\n            # Step to reproduce the issue\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n\n            # Check if the issue is reproduced\n            if Order.objects.filter(product_id="").exists():\n                print("Issue reproduced")\n            elif Order.objects.filter(product=order.product).exists():\n                print("Issue resolved")\n            else:\n                print("Other issues")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n        try:\n            # Step to verify the issue is resolved\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n\n            # Check if the issue is resolved\n            if Order.objects.filter(product=order.product).exists():\n                print("Issue resolved")\n            else:\n                print("Other issues")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n# To run the test\nif __name__ == "__main__":\n    import django\n    from django.conf import settings\n\n    settings.configure(INSTALLED_APPS=[\n        \'django.contrib.contenttypes\',\n        \'__main__\',  # points to the current module\n    ])\n    django.setup()\n\n    import sys\n    from django.test.utils import get_runner\n\n    TestRunner = get_runner(settings)\n    test_runner = TestRunner()\n    failures = test_runner.run_tests(["__main__"])\n    if failures:\n        sys.exit(bool(failures))\n```\n\nIn this test:\n1. Necessary imports are included.\n2. The models `Product` and `Order` are defined as per the issue description.\n3. The `IssueTestCase` class contains a single test method `test_issue_reproduction` that reproduces the issue and prints the appropriate messages based on the outcome.\n4. The test is wrapped in a script that configures Django settings and runs the test if executed as the main script. This setup ensures the test is self-contained and can be run independently.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Define models\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueReproductionTest(TestCase):\n\n    def test_issue_reproduction(self):\n        try:\n            # Reproduce the issue\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        except Exception as e:\n            print("Other issues:", str(e))\n\n    def test_issue_resolved(self):\n        try:\n            # Verify the issue is resolved\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n        except Exception as e:\n            print("Other issues:", str(e))\n\n# Run the tests\nif __name__ == \'__main__\':\n    IssueReproductionTest().test_issue_reproduction()\n    IssueReproductionTest().test_issue_resolved()\n```\n\nThis test code defines the necessary `Product` and `Order` models, sets up a Django test case `IssueReproductionTest`, and includes two test methods:\n\n1. `test_issue_reproduction`: This method attempts to reproduce the issue by creating an `Order` and setting its `Product` without initially specifying the primary key for the `Product`. If the issue is reproduced, it prints "Issue reproduced"; if resolved, it prints "Issue resolved"; otherwise, it prints "Other issues".\n2. `test_issue_resolved`: This method attempts to verify if the issue has been resolved by creating an `Order` and setting its `Product` with a specified primary key before saving. It also prints corresponding messages based on the outcome.\n\nThese methods are run at the end of the script to test for the presence of the issue and verify if it has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction, IntegrityError\nimport django\n\n# Define the models as described in the issue\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Function to test the issue\ndef test_issue_reproduction():\n    # Setup Django environment\n    django.setup()\n\n    try:\n        with transaction.atomic():\n            order = Order()\n            order.product = Product()\n            order.product.sku = "foo"\n            order.product.save()\n            order.save()\n\n            if Order.objects.filter(product_id="").exists():\n                print("Issue reproduced")\n                return\n            elif Order.objects.filter(product=order.product).exists():\n                print("Issue resolved")\n                return\n            else:\n                print("Other issues")\n                return\n    except IntegrityError:\n        print("Issue reproduced")\n        return\n\n    print("Other issues")\n\n# Function to test the issue resolution\ndef test_issue_resolution():\n    # Setup Django environment\n    django.setup()\n\n    try:\n        with transaction.atomic():\n            order = Order()\n            order.product = Product(sku="foo")\n            order.product.save()\n            order.save()\n\n            if Order.objects.filter(product=order.product).exists():\n                print("Issue resolved")\n                return\n            else:\n                print("Issue reproduced")\n                return\n    except IntegrityError:\n        print("Issue reproduced")\n        return\n\n    print("Other issues")\n\n# Run the tests\ntest_issue_reproduction()\ntest_issue_resolution()\n```\n\nEnsure you have the necessary Django settings and environment configured to run this test. This will include setting up a Django project and configuring the database. The test functions are designed to be executed within this Django environment.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass ForeignKeyIssueTest(TestCase):\n    def test_foreign_key_issue(self):\n        # Test case to reproduce the issue\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n                if not Order.objects.filter(product=order.product).exists():\n                    print("Issue reproduced")\n                    return\n        except Exception as e:\n            print("Other issues")\n            return\n\n        # Test case to verify the issue is resolved\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                    return\n        except Exception as e:\n            print("Other issues")\n            return\n\ntest_case = ForeignKeyIssueTest()\ntest_case.test_foreign_key_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='```python\nimport os\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nos.environ.setdefault(\'DJANGO_SETTINGS_MODULE\', __name__)\ndjango.setup()\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass OrderProductTestCase(TestCase):\n\n    def test_order_product_issue(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        \n        except Exception as e:\n            print(f"Other issues: {e}")\n\nif __name__ == "__main__":\n    import sys\n    from django.conf import settings\n\n    settings.configure(\n        DATABASES={\n            \'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }\n        },\n        INSTALLED_APPS=[\n            __name__,\n        ]\n    )\n\n    django.setup()\n    django.test.utils.setup_test_environment()\n\n    try:\n        # Run the test\n        OrderProductTestCase().test_order_product_issue()\n    finally:\n        django.test.utils.teardown_test_environment()\n```\n\nThis script:\n1. Sets up an in-memory SQLite database for testing.\n2. Defines the `Product` and `Order` models as described in the issue.\n3. Implements a test case to reproduce the issue.\n4. Prints "Issue reproduced", "Issue resolved", or "Other issues" based on the test outcomes.\n\nTo run this test, save the script to a file and execute it with Python. Ensure Django is installed in your environment.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueTestCase(TestCase):\n    def test_issue_reproduction(self):\n        # Test case to reproduce the issue\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        except Exception as e:\n            print(f"Other issues: {e}")\n        \n        # Test case to verify the issue is resolved\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n# Run test cases\nif __name__ == "__main__":\n    IssueTestCase().test_issue_reproduction()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueReproductionTest(TestCase):\n    def test_issue_reproduction(self):\n        try:\n            # Reproduce the issue\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n            # Expected behavior: Order should be saved correctly with the product\'s sku as the product_id\n            self.assertTrue(Order.objects.filter(product=order.product).exists())\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n        try:\n            # Correct way to handle and verify no issues\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n            # Expected behavior: Order should be saved correctly with the product\'s sku as the product_id\n            self.assertTrue(Order.objects.filter(product=order.product).exists())\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n# Run the test\nif __name__ == "__main__":\n    import django\n    django.setup()  # Ensure Django is setup correctly\n    IssueReproductionTest().test_issue_reproduction()\n```\n\nThis code includes:\n1. Necessary imports (`models`, `transaction`, `TestCase` from `django.db` and `django.test`).\n2. Code to reproduce the issue described in the issue text.\n3. Printing "Issue reproduced" if the outcome indicates that the issue is reproduced.\n4. Printing "Issue resolved" if the outcome indicates that the issue has been successfully resolved.\n5. Printing "Other issues" if the outcome indicates there are other issues with the source code.\n\nThis test can be used to reproduce the issue and verify if it is resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction, IntegrityError\nimport django\n\ndjango.setup()\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\ndef test_non_numeric_primary_key_issue():\n    try:\n        with transaction.atomic():\n            order = Order()\n            order.product = Product()\n            order.product.sku = "foo"\n            order.product.save()\n            order.save()\n        \n        if Order.objects.filter(product_id="").exists():\n            print("Issue reproduced")\n        elif Order.objects.filter(product=order.product).exists():\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except IntegrityError:\n        print("Other issues")\n        return\n    \n    try:\n        with transaction.atomic():\n            order = Order()\n            order.product = Product(sku="foo")\n            order.product.save()\n            order.save()\n        \n        if Order.objects.filter(product=order.product).exists():\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except IntegrityError:\n        print("Other issues")\n        return\n\ntest_non_numeric_primary_key_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueTest(TestCase):\n\n    def test_issue_reproduced_or_resolved(self):\n        # Reproduction of the issue\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n                if not Order.objects.filter(product=order.product).exists():\n                    print("Issue reproduced")\n                    return\n        except Exception:\n            print("Other issues")\n            return\n\n        # Verification if issue is resolved\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                    return\n        except Exception:\n            print("Other issues")\n            return\n\n        # If neither condition was met\n        print("Other issues")\n\n# Running the test\nIssueTest().test_issue_reproduced_or_resolved()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='Sure! Here is a complete test that reproduces the issue described in your issue text:\n\n```python\nfrom django.db import models, transaction\nimport django\nfrom django.conf import settings\n\n# Setup Django\nsettings.configure(\n    DATABASES={\n        \'default\': {\n            \'ENGINE\': \'django.db.backends.sqlite3\',\n            \'NAME\': \':memory:\',\n        }\n    },\n    INSTALLED_APPS=[\n        \'__main__\',\n    ]\n)\ndjango.setup()\n\n# Define models\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Create tables\nwith transaction.atomic():\n    Product.objects.all().delete()\n    Order.objects.all().delete()\n    Product._meta.db_table = \'product\'\n    Order._meta.db_table = \'order\'\n    models.Model.create_model_tables([Product, Order])\n\ndef test_issue_reproduction():\n    try:\n        with transaction.atomic():\n            order = Order()\n            order.product = Product()\n            order.product.sku = "foo"\n            order.product.save()\n            order.save()\n            if Order.objects.filter(product_id="").exists():\n                print("Issue reproduced")\n            elif Order.objects.filter(product=order.product).exists():\n                print("Issue resolved")\n            else:\n                print("Other issues")\n        return\n    except Exception as e:\n        print("Other issues")\n        return\n\ntest_issue_reproduction()\n```\n\nThis test follows the steps described in the issue text and checks if the issue is reproduced. It will print "Issue reproduced" if the outcome indicates that the issue is reproduced, "Issue resolved" if the issue has been successfully resolved, and "Other issues" if there are other issues with the source code.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Ensure we configure Django for testing\ndjango.setup()\n\n# Define the models\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Define the test case\nclass ForeignKeyIssueTestCase(TestCase):\n\n    def test_issue_reproduction(self):\n        with transaction.atomic():\n            order = Order()\n            order.product = Product()\n            order.product.sku = "foo"\n            order.product.save()\n            order.save()\n            \n            if Order.objects.filter(product_id="").exists():\n                print("Issue reproduced")\n                return\n            elif Order.objects.filter(product=order.product).exists():\n                print("Issue resolved")\n                return\n            else:\n                print("Other issues")\n                return\n\n    def test_no_issue(self):\n        with transaction.atomic():\n            order = Order()\n            order.product = Product(sku="foo")\n            order.product.save()\n            order.save()\n            \n            if Order.objects.filter(product=order.product).exists():\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n                \n# Run the tests\nif __name__ == "__main__":\n    test_case = ForeignKeyIssueTestCase()\n    test_case.test_issue_reproduction()\n    test_case.test_no_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test script to reproduce the issue described in the issue text:\n\n```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n\nclass TestModelIssue(TestCase):\n\n    def test_product_order_relation(self):\n        # Reproducing the issue\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n\n                if not Order.objects.filter(product=order.product).exists():\n                    print("Issue reproduced")\n                    return\n\n            print("Issue resolved")\n\n        except Exception as e:\n            print(f"Other issues: {str(e)}")\n            return\n\n    def test_product_order_fixed(self):\n        # The correct way\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n\n        except Exception as e:\n            print(f"Other issues: {str(e)}")\n            return\n\n\n# Running the tests\nif __name__ == "__main__":\n    import django\n    from django.conf import settings\n\n    settings.configure(\n        DATABASES={\n            \'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }\n        },\n        INSTALLED_APPS=[\n            __name__,\n        ],\n    )\n    django.setup()\n\n    # Create the tables\n    models.Model._meta.apps.get_app_config(__name__).models_module = __name__\n    Product.objects.create(sku="test_sku")  # Ensure Product table is created\n    Order.objects.create(product_id="test_sku")  # Ensure Order table is created\n\n    # Run the tests\n    test = TestModelIssue()\n    test.test_product_order_relation()\n    test.test_product_order_fixed()\n```\n\nThis script includes:\n1. Necessary imports.\n2. Code to create the `Product` and `Order` models.\n3. A test case `TestModelIssue` with two methods:\n   - `test_product_order_relation` to reproduce the issue.\n   - `test_product_order_fixed` to verify the correct handling.\n4. Prints "Issue reproduced" if the issue is observed, "Issue resolved" if the test passes, and "Other issues" if there are any unexpected issues.\n\nTo run this script, ensure you have a Django environment set up and adjust the necessary configurations as required.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueTestCase(TestCase):\n    def test_issue_reproduction(self):\n        # Reproduce the issue\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n            if Order.objects.filter(product_id="").exists():\n                print("Issue reproduced")\n            else:\n                print("Issue resolved")\n        except Exception:\n            print("Other issues")\n            return\n\n        # Verify if properly initialized instance works correctly\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n            if Order.objects.filter(product=order.product).exists():\n                print("Issue resolved")\n            else:\n                print("Other issues")\n        except Exception:\n            print("Other issues")\n            return\n\n# Running the test\nIssueTestCase().test_issue_reproduction()\n```\n\nThis code sets up a Django test case class `IssueTestCase` that contains a method `test_issue_reproduction` to reproduce the issue described in the issue text. It will print "Issue reproduced" if the issue is found, "Issue resolved" if the issue is fixed, and "Other issues" if some other problem occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass ForeignKeyIssueTestCase(TestCase):\n    def test_foreign_key_issue(self):\n        # Setup to reproduce the issue\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                else:\n                    filtered_orders = Order.objects.filter(product=order.product)\n                    if filtered_orders.exists():\n                        print("Issue resolved")\n                    else:\n                        print("Other issues")\n        except Exception as e:\n            print(f"Error occurred: {e}")\n            print("Other issues")\n\nif __name__ == "__main__":\n    ForeignKeyIssueTestCase().test_foreign_key_issue()\n```\n\nThis test script sets up the models and the database transactions according to the issue description. It runs the test within a Django `TestCase`, attempting to reproduce the issue by creating instances of `Order` and `Product` following the problematic sequence described, and then checking the status of the `Order` entries to determine if the issue is reproduced, resolved, or if other issues are present. Make sure to place this script in a Django environment where your models and settings are correctly configured.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Ensure Django settings are configured\ndjango.setup()\n\n# Models\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Test case to reproduce the issue\nclass ForeignKeyTest(TestCase):\n    def test_foreign_key_issue(self):\n        # Step 1: Attempt to save an Order with a Product whose primary key is set after assignment\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                    return\n        except Exception as e:\n            print("Other issues")\n            return\n\n        # Step 2: Attempt to save an Order with a Product whose primary key is set before assignment\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                    return\n        except Exception as e:\n            print("Other issues")\n            return\n\nForeignKeyTest().test_foreign_key_issue()\n```\n\nExplanation:\n1. **Imports**: Import necessary modules from Django.\n2. **Models**: Define `Product` and `Order` models to reflect the issue described.\n3. **Test Case**: A `ForeignKeyTest` class that inherits from `TestCase` to leverage Django\'s testing framework.\n4. **Test Method**:\n   - **Step 1**: The method tries to reproduce the issue by assigning a `Product` instance to an `Order` before setting its primary key, saving both, and then checking if the issue conditions are met.\n   - **Step 2**: The method attempts to save an `Order` with a `Product` instance that has its primary key set before assignment. This step will help verify that the intended behavior works correctly.\n5. **Output**: Print statements are used to indicate if the issue is reproduced, resolved, or if there are other issues.\n\nThis test can be run in a Django environment to verify if the issue described is present and to check if any fixes applied resolve the issue.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction, IntegrityError\n\n# Define models\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n\ndef test_issue_reproduction():\n    # Clear any existing data\n    Product.objects.all().delete()\n    Order.objects.all().delete()\n\n    # Test to reproduce the issue\n    try:\n        with transaction.atomic():\n            order = Order()\n            order.product = Product()\n            order.product.sku = "foo"\n            order.product.save()\n            order.save()\n            if Order.objects.filter(product_id="").exists():\n                print("Issue reproduced")\n                return\n            if Order.objects.filter(product=order.product).exists():\n                print("Issue resolved")\n                return\n    except IntegrityError:\n        print("Issue reproduced")\n        return\n\n    # This part should only be reached if none of the assertions above fail\n    print("Other issues")\n\n# Run the test\ntest_issue_reproduction()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueReproductionTest(TestCase):\n    def test_issue_reproduction(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n                \n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                    return\n        except Exception as e:\n            print(f"Other issues: {e}")\n            return\n        \n        print("Other issues")\n\nIssueReproductionTest().test_issue_reproduction()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Define the models as described in the issue text\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Create the test case to reproduce and verify the issue\nclass ForeignKeyTestCase(TestCase):\n    def test_foreign_key_issue(self):\n        # Reproduce the issue\n        with transaction.atomic():\n            order = Order()\n            order.product = Product()\n            order.product.sku = "foo"\n            order.product.save()\n            order.save()\n\n            if Order.objects.filter(product_id="").exists():\n                # The issue is reproduced if the product_id is empty\n                print("Issue reproduced")\n            elif Order.objects.filter(product=order.product).exists():\n                # If the product_id is correctly set, the issue is resolved\n                print("Issue resolved")\n            else:\n                # If there are unexpected results, print other issues\n                print("Other issues")\n\n        # Verify the resolved case\n        with transaction.atomic():\n            order = Order()\n            order.product = Product(sku="foo")\n            order.product.save()\n            order.save()\n\n            if Order.objects.filter(product=order.product).exists():\n                # If the product_id is correctly set, the issue is resolved\n                print("Issue resolved")\n            else:\n                # If there are unexpected results, print other issues\n                print("Other issues")\n\n# Run the test case\nForeignKeyTestCase().test_foreign_key_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass ForeignKeyIssueTestCase(TestCase):\n    def test_fk_issue(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n                return\n        except:\n            print("Other issues")\n            return\n        \n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n            return\n        except:\n            print("Other issues")\n            return\n\nForeignKeyIssueTestCase().test_fk_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models, transaction\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass ProductOrderTestCase(TestCase):\n    def test_product_order_issue(self):\n        try:\n            # Attempt to reproduce the issue as described\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product_id="").exists() and not Order.objects.filter(product=order.product).exists():\n                    print("Issue reproduced")\n                else:\n                    print("Issue resolved")\n        except Exception as e:\n            print("Other issues")\n            return\n\n        try:\n            # Attempt to verify if the issue is resolved\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                \n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n        except Exception as e:\n            print("Other issues")\n            return\n\nProductOrderTestCase().test_product_order_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='Certainly! Here is the complete test with the necessary imports and code according to the issue description:\n\n```python\nimport django\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\n# Define the models\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\n# Define the test case\nclass ForeignKeyTest(TestCase):\n    def test_foreign_key_issue(self):\n        # Step to reproduce the issue\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                    return\n\n            # If we reach this point, it means the issue did not occur\n            print("Issue resolved")\n        except Exception as e:\n            print(f"Other issues: {e}")\n            return\n\n# Run the test\nif __name__ == "__main__":\n    django.setup()\n    ForeignKeyTest().test_foreign_key_issue()\n```\n\nThis test case will:\n1. Import necessary modules and classes.\n2. Define the `Product` and `Order` models as per the issue description.\n3. Include a test case `ForeignKeyTest` that:\n   - Attempts to reproduce the issue within an atomic transaction block.\n   - Checks if the `Order` object was created with an empty `product_id` field. If so, it prints "Issue reproduced".\n   - If no issues are found, it prints "Issue resolved".\n   - Catches any other exceptions and indicates "Other issues".\n\nYou can run this test to determine whether the issue is reproduced or resolved in your environment.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass ReproductionTestCase(TestCase):\n    def test_issue_reproduction(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n                # This should fail if the issue is reproduced\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n                # This should succeed if the issue is resolved\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n# Run the test case\nReproductionTestCase().test_issue_reproduction()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueTest(TestCase):\n\n    def test_issue_reproduction(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product_id="").exists():\n                    print("Issue reproduced")\n                elif Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Other issues")\n        except Exception as e:\n            print("Other issues:", str(e))\n\n    def test_issue_resolved(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n        except Exception as e:\n            print("Other issues:", str(e))\n\n# Running the tests\ntest_case = IssueTest()\ntest_case.test_issue_reproduction()\ntest_case.test_issue_resolved()\n```\n\nThis script contains the following:\n1. Necessary imports.\n2. Code to reproduce the issue described in the issue text.\n3. Print statements to indicate whether the issue is reproduced, resolved, or if there are other issues.\n4. The test is wrapped in a Django `TestCase` and will print the results when the test methods are called.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, transaction\nfrom django.test import TestCase\n\nclass Product(models.Model):\n    sku = models.CharField(primary_key=True, max_length=50)\n\nclass Order(models.Model):\n    product = models.ForeignKey(Product, on_delete=models.CASCADE)\n\nclass IssueTestCase(TestCase):\n    def test_issue_reproduction(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product()\n                order.product.sku = "foo"\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product_id="").exists() and not Order.objects.filter(product=order.product).exists():\n                    print("Issue reproduced")\n                else:\n                    print("Issue resolved")\n        except Exception as e:\n            if isinstance(e, models.deletion.ProtectedError):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n                return\n\n    def test_issue_resolution(self):\n        try:\n            with transaction.atomic():\n                order = Order()\n                order.product = Product(sku="foo")\n                order.product.save()\n                order.save()\n\n                if Order.objects.filter(product=order.product).exists():\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n        except Exception as e:\n            print("Other issues")\n            return\n\n# Run the tests\nIssueTestCase().test_issue_reproduction()\nIssueTestCase().test_issue_resolution()\n```\n\nThis test case does the following:\n1. Defines the `Product` and `Order` models as described in the issue text.\n2. Includes a `test_issue_reproduction` method which attempts to reproduce the issue by setting the `sku` after assigning the `Product` instance to the `Order` instance.\n3. Includes a `test_issue_resolution` method which assigns the `sku` before assigning the `Product` instance to the `Order` instance, which should not reproduce the issue.\n4. Prints "Issue reproduced" if the conditions described in the issue text are met.\n5. Prints "Issue resolved" if the conditions described in the expected behavior are met.\n6. Prints "Other issues" if an unexpected exception occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299113, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=14266, prompt_tokens=732, total_tokens=14998, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:05:59,267 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class ForeignKeyIssueTest(TestCase):
+    def test_foreign_key_issue(self):
+        # Reproduce the issue
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+        # Verify the issue is resolved
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+# Run the test
+ForeignKeyIssueTest().test_foreign_key_issue()
+```
+2025-05-03 14:05:59,267 - INFO - raw output:
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+# Initialize Django (usually done in settings, but needed for testing)
+django.setup()
+
+# Define the models as described in the issue
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Create the test case to reproduce the issue
+class ProductOrderTestCase(TestCase):
+    def test_product_assignment_issue(self):
+        # Code to reproduce the issue
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+                if not Order.objects.filter(product=order.product).exists():
+                    print("Issue reproduced")
+                    return
+                
+            print("Issue resolved")
+        except Exception as e:
+            print("Other issues")
+            print(e)
+
+    def test_product_assignment_resolved(self):
+        # Code to test the resolved issue
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+        except Exception as e:
+            print("Other issues")
+            print(e)
+
+# Run the tests
+ProductOrderTestCase().test_product_assignment_issue()
+ProductOrderTestCase().test_product_assignment_resolved()
+```
+2025-05-03 14:05:59,268 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueReproductionTestCase(TestCase):
+
+    def test_issue_reproduction(self):
+        # Reproduce the issue as described
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                    return
+                else:
+                    print("Other issues")
+                    return
+        except Exception as e:
+            print(f"Other issues: {e}")
+            return
+          
+        # Ensure the issue is not reproduced when the primary key is set before assignment
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        except Exception as e:
+            print(f"Other issues: {e}")
+            
+IssueReproductionTestCase().test_issue_reproduction()
+```
+
+This test case should be run in a Django test environment. It attempts to reproduce the issue by creating and saving the `Order` and `Product` objects in the manner described in the issue. It prints "Issue reproduced" if it detects the issue, "Issue resolved" if the issue does not reproduce under correct conditions, and "Other issues" if any unexpected behavior occurs.
+2025-05-03 14:05:59,268 - INFO - raw output:
+Certainly! Here is a complete test to reproduce the issue described in the provided issue text:
+
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+# Models defined in the issue text
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class TestForeignKeyIssue(TestCase):
+    
+    def setUp(self):
+        # Setting up the test environment
+        Product.objects.all().delete()
+        Order.objects.all().delete()
+
+    def test_issue_reproduction(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+    
+                # Check if the issue is reproduced
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        except Exception as e:
+            print("Other issues")
+            print(f"Exception: {e}")
+
+    def test_issue_resolution(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+    
+                # Check if the issue is resolved
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+        except Exception as e:
+            print("Other issues")
+            print(f"Exception: {e}")
+
+# Running the tests
+if __name__ == "__main__":
+    django.setup()
+    test_case = TestForeignKeyIssue()
+    test_case.setUp()
+    test_case.test_issue_reproduction()
+    test_case.test_issue_resolution()
+```
+
+In this code:
+
+1. Necessary imports are included.
+2. Models `Product` and `Order` are defined as described in the issue.
+3. Two tests are created within a `TestForeignKeyIssue` class:
+   - `test_issue_reproduction`: This tests the scenario where the issue is supposed to occur.
+   - `test_issue_resolution`: This tests the scenario where the issue should not occur.
+4. The test outputs "Issue reproduced", "Issue resolved", or "Other issues" based on the outcome.
+5. The tests are run sequentially to verify both the existence and resolution of the issue.
+2025-05-03 14:05:59,268 - INFO - raw output:
+Certainly! Below is a Python script that tests the described issue. This script includes the necessary imports, sets up the models, and performs the tests as described:
+
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+# Setting up Django environment (usually done in settings.py, but for the sake of this example)
+django.setup()
+
+# Models
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Test case to reproduce the issue
+class IssueReproductionTest(TestCase):
+
+    def test_issue_reproduction(self):
+        try:
+            with transaction.atomic():
+                # First scenario - should reproduce the issue
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                else:
+                    print("Other issues")
+                    return
+
+                if not Order.objects.filter(product=order.product).exists():
+                    print("Issue reproduced")
+                else:
+                    print("Other issues")
+                    return
+
+            with transaction.atomic():
+                # Second scenario - should not reproduce the issue
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+                    return
+
+        except Exception as e:
+            print("Other issues:", e)
+            return
+
+# Running the test
+if __name__ == '__main__':
+    IssueReproductionTest().test_issue_reproduction()
+```
+
+This script sets up a Django test case to reproduce the issue. It checks whether the issue occurs as described, and then verifies that the correct behavior happens when the primary key is set before the object assignment. The output will indicate whether the issue is reproduced or resolved, or if there are other issues encountered during the test.
+2025-05-03 14:05:59,268 - INFO - raw output:
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+# Ensure Django is configured correctly
+django.setup()
+
+# Define the models as described in the issue
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Define the test case to reproduce the issue
+class IssueTestCase(TestCase):
+
+    def test_product_order_relationship_issue(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                    return
+                else:
+                    print("Other issues")
+                    return
+        except Exception as e:
+            print(f"Other issues: {e}")
+            return
+
+        # If no exception and none of the conditions above is met
+        print("Other issues")
+
+# Run the test
+IssueTestCase().test_product_order_relationship_issue()
+```
+2025-05-03 14:05:59,268 - INFO - raw output:
+```python
+import django
+from django.db import models, transaction, IntegrityError
+import os
+
+# Setup a Django environment for testing without a full Django project
+os.environ['DJANGO_SETTINGS_MODULE'] = 'test_settings'
+django.setup()
+
+# Define the models according to the issue description
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Function to run the test according to the issue description
+def test_reproduction():
+    try:
+        # Attempt to reproduce the issue
+        with transaction.atomic():
+            order = Order()
+            order.product = Product()
+            order.product.sku = "foo"
+            order.product.save()
+            order.save()
+        
+        if Order.objects.filter(product_id="").exists():
+            print("Issue reproduced")
+        elif Order.objects.filter(product=order.product).exists():
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+    except IntegrityError:
+        print("Issue reproduced")
+
+# Test settings necessary to run Django without a full project
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
+}
+
+INSTALLED_APPS = [
+    '__main__',  # Register the current module as an app
+]
+
+# Apply the test settings
+from django.conf import settings
+settings.configure(DATABASES=DATABASES, INSTALLED_APPS=INSTALLED_APPS)
+
+# Run the test
+test_reproduction()
+```
+
+### Explanation:
+1. **Necessary Imports:** The script imports required modules from Django and sets up a minimal environment.
+2. **Models Definition:** The `Product` and `Order` models are defined.
+3. **Test Function:** The `test_reproduction` function follows the steps described in the issue to reproduce the problem.
+4. **Test Settings:** Django settings are configured to use an in-memory SQLite database to avoid the need for a full Django project.
+5. **Run the Test:** The test function is executed to check if the issue is reproduced.
+
+This script will output "Issue reproduced" if the issue described is indeed present, "Issue resolved" if the issue is fixed, or "Other issues" if unexpected behavior is encountered.
+2025-05-03 14:05:59,268 - INFO - raw output:
+```python
+from django.db import models, transaction, IntegrityError
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueReproductionTest(TestCase):
+    def test_issue_reproduction(self):
+        try:
+            # Scenario 1: Initializing related instance without primary key
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+
+                # Check if issue is reproduced
+                if Order.objects.filter(product_id="").exists() and not Order.objects.filter(product=order.product).exists():
+                    print("Issue reproduced")
+                    return
+                else:
+                    print("Other issues")
+                    return
+
+        except IntegrityError:
+            # This is expected due to ForeignKey constraint check
+            pass
+
+        try:
+            # Scenario 2: Initializing related instance with primary key
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+
+                # Check if issue is resolved
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+
+        except IntegrityError:
+            print("Other issues")
+
+IssueReproductionTest().test_issue_reproduction()
+```
+2025-05-03 14:05:59,268 - INFO - raw output:
+Certainly! Here is the complete test that can be used to reproduce the issue described in your issue text:
+
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+# Defining the models as per the issue description
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Test case to reproduce and verify the issue
+class ForeignKeyIssueTest(TestCase):
+    
+    def test_foreign_key_issue(self):
+        try:
+            # Step 1: Reproduce the issue
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product_id="").exists() and not Order.objects.filter(product=order.product).exists():
+                    print("Issue reproduced")
+                    return
+
+            # If the above block does not reproduce the issue, check further
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        
+        except Exception as e:
+            print("Other issues")
+            print(e)
+
+# Running the test
+ForeignKeyIssueTest().test_foreign_key_issue()
+```
+
+This test will:
+1. Try to reproduce the issue as described.
+2. Print "Issue reproduced" if the issue is correctly reproduced.
+3. Print "Issue resolved" if the issue has been resolved.
+4. Print "Other issues" if there are other unexpected issues.
+
+Make sure to include this code in a suitable test file within your Django project's test suite. Running this test will help you determine whether the issue still exists or has been fixed.
+2025-05-03 14:05:59,268 - INFO - raw output:
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+# Define the models as described in the issue
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Define the test case to reproduce and verify the issue
+class ForeignKeyIssueTestCase(TestCase):
+    def test_foreign_key_issue(self):
+        try:
+            # Reproduce the issue
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+            print("Other issues")
+        except Exception as e:
+            print("Other issues")
+            return
+
+        try:
+            # Verify the issue is resolved
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                    return
+            print("Issue reproduced")
+        except Exception as e:
+            print("Other issues")
+            return
+
+# Run the test if this script is executed directly
+if __name__ == "__main__":
+    django.setup()  # Ensure Django is properly set up before running the test
+    ForeignKeyIssueTestCase().test_foreign_key_issue()
+```
+
+This script defines the necessary models, sets up the test case, and includes the logic to reproduce the issue. The test case will print "Issue reproduced" if the problem is encountered and "Issue resolved" if the problem has been fixed. If other unexpected issues occur, it will print "Other issues".
+2025-05-03 14:05:59,268 - INFO - raw output:
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+# Define the models as described in the issue
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Create a test case to reproduce the described issue
+class ForeignKeyTest(TestCase):
+    def setUp(self):
+        Product.objects.all().delete()
+        Order.objects.all().delete()
+
+    def test_foreign_key_assignment_issue(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+
+                # Check the conditions that should not occur if the bug is present
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+                if not Order.objects.filter(product=order.product).exists():
+                    print("Issue reproduced")
+                    return
+
+            # If the transaction succeeds without ForeignKeyViolation
+            print("Issue resolved")
+        except Exception as e:
+            if isinstance(e, django.db.utils.IntegrityError):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+
+# Run the test
+if __name__ == "__main__":
+    django.setup()
+    test_case = ForeignKeyTest()
+    test_case.setUp()
+    test_case.test_foreign_key_assignment_issue()
+```
+
+Explanation:
+1. **Necessary Imports**: The necessary Django modules are imported.
+2. **Model Definitions**: We define the `Product` and `Order` models as described in the issue.
+3. **Test Case**: We create a Django `TestCase` to encapsulate the test logic.
+4. **Test Logic**: The `test_foreign_key_assignment_issue` method follows the steps described in the issue text to reproduce the problem.
+5. **Assertions and Output**:
+   - If `Order.objects.filter(product_id="").exists()` returns `True`, it indicates the bug is present, and we print "Issue reproduced".
+   - If `Order.objects.filter(product=order.product).exists()` returns `False`, it indicates the bug is present, and we print "Issue reproduced".
+   - If no problem is detected, we print "Issue resolved".
+   - If an unexpected exception occurs, we print "Other issues".
+6. **Run the Test**: We set up Django, create an instance of the test case, and run the test.
+2025-05-03 14:05:59,268 - INFO - raw output:
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+# Define the models as described in the issue text
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Test case to reproduce the issue
+class ForeignKeyIssueTestCase(TestCase):
+    def test_foreign_key_issue(self):
+        # Scenario 1: Reproducing the issue
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                else:
+                    print("Other issues")
+                return
+        except Exception as e:
+            print(f"Other issues: {e}")
+            return
+
+        # Scenario 2: Verifying the issue has been fixed
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+# Run the test case
+if __name__ == "__main__":
+    django.setup()
+    ForeignKeyIssueTestCase().test_foreign_key_issue()
+```
+
+To run the above test, you would need to set up a Django project with the necessary configurations. This script is designed to be run as part of a Django test suite, and it will print "Issue reproduced" if the problem described in the issue is present, "Issue resolved" if the problem has been fixed, and "Other issues" if there are any other unexpected problems.
+2025-05-03 14:05:59,269 - INFO - raw output:
+Certainly! Below is a complete test to reproduce and verify the described issue:
+
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+# Define the models as described in the issue text
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Define the test case
+class ForeignKeyIssueTestCase(TestCase):
+    def test_foreign_key_issue(self):
+        try:
+            # Reproduce the issue
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                    return
+                else:
+                    print("Other issues")
+                    return
+
+        except Exception as e:
+            print(f"Other issues: {e}")
+            return
+
+# Run the test case
+if __name__ == "__main__":
+    django.setup()
+    ForeignKeyIssueTestCase().test_foreign_key_issue()
+```
+
+This script does the following:
+1. Imports the necessary Django modules.
+2. Defines the `Product` and `Order` models as described in the issue text.
+3. Contains a test case class `ForeignKeyIssueTestCase` which has a method `test_foreign_key_issue` to reproduce the issue.
+4. The method tries to reproduce the issue and checks for the presence of an `Order` with an empty `product_id` or with the correct `product`.
+5. Prints "Issue reproduced" if the issue is present, "Issue resolved" if the issue is fixed, and "Other issues" if another error occurs.
+6. Runs the test case.
+
+Ensure you have Django and the necessary dependencies installed to execute this script.
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueReproductionTest(TestCase):
+    def test_issue_reproduction(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        except Exception as e:
+            print("Other issues:", str(e))
+
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        except Exception as e:
+            print("Other issues:", str(e))
+
+IssueReproductionTest().test_issue_reproduction()
+```
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class ForeignKeyTest(TestCase):
+    def test_foreign_key_issue(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                    return
+
+            print("Other issues")
+        except Exception as e:
+            print("Other issues")
+            print(e)
+
+# To actually run the test, you would typically use a test runner, but for simplicity:
+if __name__ == "__main__":
+    ForeignKeyTest().test_foreign_key_issue()
+```
+
+This code defines the necessary models, sets up the test case, and runs the exact scenarios described in the issue text. It prints "Issue reproduced" if the issue is present, "Issue resolved" if the problem has been fixed, and "Other issues" if there are any other problems encountered.
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+# Ensure Django settings are configured
+if not django.conf.settings.configured:
+    django.conf.settings.configure(
+        INSTALLED_APPS=[
+            __name__,
+        ],
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        }
+    )
+    django.setup()
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueTestCase(TestCase):
+    def test_issue_reproduction(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+    def test_no_issue_when_primary_key_set_before_assignment(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Issue not resolved")
+
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+# Running the tests
+if __name__ == "__main__":
+    test_case = IssueTestCase()
+    test_case.test_issue_reproduction()
+    test_case.test_no_issue_when_primary_key_set_before_assignment()
+```
+
+This test script includes the necessary imports, defines the models (`Product` and `Order`), and contains two test cases:
+1. `test_issue_reproduction` to reproduce the issue as described.
+2. `test_no_issue_when_primary_key_set_before_assignment` to verify that the issue does not occur when the primary key is set before assignment.
+
+The test will print "Issue reproduced" if the issue is successfully reproduced, "Issue resolved" if the scenario works correctly, and "Other issues" if there are any unexpected issues.
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+django.setup()
+
+# Define the models as per the issue description
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueTestCase(TestCase):
+    def test_issue_reproduction(self):
+        try:
+            # Step to reproduce the issue
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+
+            # Check if the issue is reproduced
+            if Order.objects.filter(product_id="").exists():
+                print("Issue reproduced")
+            elif Order.objects.filter(product=order.product).exists():
+                print("Issue resolved")
+            else:
+                print("Other issues")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+        try:
+            # Step to verify the issue is resolved
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+
+            # Check if the issue is resolved
+            if Order.objects.filter(product=order.product).exists():
+                print("Issue resolved")
+            else:
+                print("Other issues")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+# To run the test
+if __name__ == "__main__":
+    import django
+    from django.conf import settings
+
+    settings.configure(INSTALLED_APPS=[
+        'django.contrib.contenttypes',
+        '__main__',  # points to the current module
+    ])
+    django.setup()
+
+    import sys
+    from django.test.utils import get_runner
+
+    TestRunner = get_runner(settings)
+    test_runner = TestRunner()
+    failures = test_runner.run_tests(["__main__"])
+    if failures:
+        sys.exit(bool(failures))
+```
+
+In this test:
+1. Necessary imports are included.
+2. The models `Product` and `Order` are defined as per the issue description.
+3. The `IssueTestCase` class contains a single test method `test_issue_reproduction` that reproduces the issue and prints the appropriate messages based on the outcome.
+4. The test is wrapped in a script that configures Django settings and runs the test if executed as the main script. This setup ensures the test is self-contained and can be run independently.
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+# Define models
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueReproductionTest(TestCase):
+
+    def test_issue_reproduction(self):
+        try:
+            # Reproduce the issue
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        except Exception as e:
+            print("Other issues:", str(e))
+
+    def test_issue_resolved(self):
+        try:
+            # Verify the issue is resolved
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+        except Exception as e:
+            print("Other issues:", str(e))
+
+# Run the tests
+if __name__ == '__main__':
+    IssueReproductionTest().test_issue_reproduction()
+    IssueReproductionTest().test_issue_resolved()
+```
+
+This test code defines the necessary `Product` and `Order` models, sets up a Django test case `IssueReproductionTest`, and includes two test methods:
+
+1. `test_issue_reproduction`: This method attempts to reproduce the issue by creating an `Order` and setting its `Product` without initially specifying the primary key for the `Product`. If the issue is reproduced, it prints "Issue reproduced"; if resolved, it prints "Issue resolved"; otherwise, it prints "Other issues".
+2. `test_issue_resolved`: This method attempts to verify if the issue has been resolved by creating an `Order` and setting its `Product` with a specified primary key before saving. It also prints corresponding messages based on the outcome.
+
+These methods are run at the end of the script to test for the presence of the issue and verify if it has been resolved.
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+from django.db import models, transaction, IntegrityError
+import django
+
+# Define the models as described in the issue
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Function to test the issue
+def test_issue_reproduction():
+    # Setup Django environment
+    django.setup()
+
+    try:
+        with transaction.atomic():
+            order = Order()
+            order.product = Product()
+            order.product.sku = "foo"
+            order.product.save()
+            order.save()
+
+            if Order.objects.filter(product_id="").exists():
+                print("Issue reproduced")
+                return
+            elif Order.objects.filter(product=order.product).exists():
+                print("Issue resolved")
+                return
+            else:
+                print("Other issues")
+                return
+    except IntegrityError:
+        print("Issue reproduced")
+        return
+
+    print("Other issues")
+
+# Function to test the issue resolution
+def test_issue_resolution():
+    # Setup Django environment
+    django.setup()
+
+    try:
+        with transaction.atomic():
+            order = Order()
+            order.product = Product(sku="foo")
+            order.product.save()
+            order.save()
+
+            if Order.objects.filter(product=order.product).exists():
+                print("Issue resolved")
+                return
+            else:
+                print("Issue reproduced")
+                return
+    except IntegrityError:
+        print("Issue reproduced")
+        return
+
+    print("Other issues")
+
+# Run the tests
+test_issue_reproduction()
+test_issue_resolution()
+```
+
+Ensure you have the necessary Django settings and environment configured to run this test. This will include setting up a Django project and configuring the database. The test functions are designed to be executed within this Django environment.
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class ForeignKeyIssueTest(TestCase):
+    def test_foreign_key_issue(self):
+        # Test case to reproduce the issue
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+                if not Order.objects.filter(product=order.product).exists():
+                    print("Issue reproduced")
+                    return
+        except Exception as e:
+            print("Other issues")
+            return
+
+        # Test case to verify the issue is resolved
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                    return
+        except Exception as e:
+            print("Other issues")
+            return
+
+test_case = ForeignKeyIssueTest()
+test_case.test_foreign_key_issue()
+```
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+import os
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', __name__)
+django.setup()
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class OrderProductTestCase(TestCase):
+
+    def test_order_product_issue(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+if __name__ == "__main__":
+    import sys
+    from django.conf import settings
+
+    settings.configure(
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        INSTALLED_APPS=[
+            __name__,
+        ]
+    )
+
+    django.setup()
+    django.test.utils.setup_test_environment()
+
+    try:
+        # Run the test
+        OrderProductTestCase().test_order_product_issue()
+    finally:
+        django.test.utils.teardown_test_environment()
+```
+
+This script:
+1. Sets up an in-memory SQLite database for testing.
+2. Defines the `Product` and `Order` models as described in the issue.
+3. Implements a test case to reproduce the issue.
+4. Prints "Issue reproduced", "Issue resolved", or "Other issues" based on the test outcomes.
+
+To run this test, save the script to a file and execute it with Python. Ensure Django is installed in your environment.
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueTestCase(TestCase):
+    def test_issue_reproduction(self):
+        # Test case to reproduce the issue
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        except Exception as e:
+            print(f"Other issues: {e}")
+        
+        # Test case to verify the issue is resolved
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+# Run test cases
+if __name__ == "__main__":
+    IssueTestCase().test_issue_reproduction()
+```
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueReproductionTest(TestCase):
+    def test_issue_reproduction(self):
+        try:
+            # Reproduce the issue
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+            # Expected behavior: Order should be saved correctly with the product's sku as the product_id
+            self.assertTrue(Order.objects.filter(product=order.product).exists())
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+        try:
+            # Correct way to handle and verify no issues
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+            # Expected behavior: Order should be saved correctly with the product's sku as the product_id
+            self.assertTrue(Order.objects.filter(product=order.product).exists())
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+# Run the test
+if __name__ == "__main__":
+    import django
+    django.setup()  # Ensure Django is setup correctly
+    IssueReproductionTest().test_issue_reproduction()
+```
+
+This code includes:
+1. Necessary imports (`models`, `transaction`, `TestCase` from `django.db` and `django.test`).
+2. Code to reproduce the issue described in the issue text.
+3. Printing "Issue reproduced" if the outcome indicates that the issue is reproduced.
+4. Printing "Issue resolved" if the outcome indicates that the issue has been successfully resolved.
+5. Printing "Other issues" if the outcome indicates there are other issues with the source code.
+
+This test can be used to reproduce the issue and verify if it is resolved.
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+from django.db import models, transaction, IntegrityError
+import django
+
+django.setup()
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+def test_non_numeric_primary_key_issue():
+    try:
+        with transaction.atomic():
+            order = Order()
+            order.product = Product()
+            order.product.sku = "foo"
+            order.product.save()
+            order.save()
+        
+        if Order.objects.filter(product_id="").exists():
+            print("Issue reproduced")
+        elif Order.objects.filter(product=order.product).exists():
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except IntegrityError:
+        print("Other issues")
+        return
+    
+    try:
+        with transaction.atomic():
+            order = Order()
+            order.product = Product(sku="foo")
+            order.product.save()
+            order.save()
+        
+        if Order.objects.filter(product=order.product).exists():
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except IntegrityError:
+        print("Other issues")
+        return
+
+test_non_numeric_primary_key_issue()
+```
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueTest(TestCase):
+
+    def test_issue_reproduced_or_resolved(self):
+        # Reproduction of the issue
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+                if not Order.objects.filter(product=order.product).exists():
+                    print("Issue reproduced")
+                    return
+        except Exception:
+            print("Other issues")
+            return
+
+        # Verification if issue is resolved
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                    return
+        except Exception:
+            print("Other issues")
+            return
+
+        # If neither condition was met
+        print("Other issues")
+
+# Running the test
+IssueTest().test_issue_reproduced_or_resolved()
+```
+2025-05-03 14:05:59,269 - INFO - raw output:
+Sure! Here is a complete test that reproduces the issue described in your issue text:
+
+```python
+from django.db import models, transaction
+import django
+from django.conf import settings
+
+# Setup Django
+settings.configure(
+    DATABASES={
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    },
+    INSTALLED_APPS=[
+        '__main__',
+    ]
+)
+django.setup()
+
+# Define models
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Create tables
+with transaction.atomic():
+    Product.objects.all().delete()
+    Order.objects.all().delete()
+    Product._meta.db_table = 'product'
+    Order._meta.db_table = 'order'
+    models.Model.create_model_tables([Product, Order])
+
+def test_issue_reproduction():
+    try:
+        with transaction.atomic():
+            order = Order()
+            order.product = Product()
+            order.product.sku = "foo"
+            order.product.save()
+            order.save()
+            if Order.objects.filter(product_id="").exists():
+                print("Issue reproduced")
+            elif Order.objects.filter(product=order.product).exists():
+                print("Issue resolved")
+            else:
+                print("Other issues")
+        return
+    except Exception as e:
+        print("Other issues")
+        return
+
+test_issue_reproduction()
+```
+
+This test follows the steps described in the issue text and checks if the issue is reproduced. It will print "Issue reproduced" if the outcome indicates that the issue is reproduced, "Issue resolved" if the issue has been successfully resolved, and "Other issues" if there are other issues with the source code.
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+# Ensure we configure Django for testing
+django.setup()
+
+# Define the models
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Define the test case
+class ForeignKeyIssueTestCase(TestCase):
+
+    def test_issue_reproduction(self):
+        with transaction.atomic():
+            order = Order()
+            order.product = Product()
+            order.product.sku = "foo"
+            order.product.save()
+            order.save()
+            
+            if Order.objects.filter(product_id="").exists():
+                print("Issue reproduced")
+                return
+            elif Order.objects.filter(product=order.product).exists():
+                print("Issue resolved")
+                return
+            else:
+                print("Other issues")
+                return
+
+    def test_no_issue(self):
+        with transaction.atomic():
+            order = Order()
+            order.product = Product(sku="foo")
+            order.product.save()
+            order.save()
+            
+            if Order.objects.filter(product=order.product).exists():
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+                
+# Run the tests
+if __name__ == "__main__":
+    test_case = ForeignKeyIssueTestCase()
+    test_case.test_issue_reproduction()
+    test_case.test_no_issue()
+```
+2025-05-03 14:05:59,269 - INFO - raw output:
+Certainly! Below is the complete test script to reproduce the issue described in the issue text:
+
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+
+class TestModelIssue(TestCase):
+
+    def test_product_order_relation(self):
+        # Reproducing the issue
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+
+                if not Order.objects.filter(product=order.product).exists():
+                    print("Issue reproduced")
+                    return
+
+            print("Issue resolved")
+
+        except Exception as e:
+            print(f"Other issues: {str(e)}")
+            return
+
+    def test_product_order_fixed(self):
+        # The correct way
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+
+        except Exception as e:
+            print(f"Other issues: {str(e)}")
+            return
+
+
+# Running the tests
+if __name__ == "__main__":
+    import django
+    from django.conf import settings
+
+    settings.configure(
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        INSTALLED_APPS=[
+            __name__,
+        ],
+    )
+    django.setup()
+
+    # Create the tables
+    models.Model._meta.apps.get_app_config(__name__).models_module = __name__
+    Product.objects.create(sku="test_sku")  # Ensure Product table is created
+    Order.objects.create(product_id="test_sku")  # Ensure Order table is created
+
+    # Run the tests
+    test = TestModelIssue()
+    test.test_product_order_relation()
+    test.test_product_order_fixed()
+```
+
+This script includes:
+1. Necessary imports.
+2. Code to create the `Product` and `Order` models.
+3. A test case `TestModelIssue` with two methods:
+   - `test_product_order_relation` to reproduce the issue.
+   - `test_product_order_fixed` to verify the correct handling.
+4. Prints "Issue reproduced" if the issue is observed, "Issue resolved" if the test passes, and "Other issues" if there are any unexpected issues.
+
+To run this script, ensure you have a Django environment set up and adjust the necessary configurations as required.
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueTestCase(TestCase):
+    def test_issue_reproduction(self):
+        # Reproduce the issue
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+            if Order.objects.filter(product_id="").exists():
+                print("Issue reproduced")
+            else:
+                print("Issue resolved")
+        except Exception:
+            print("Other issues")
+            return
+
+        # Verify if properly initialized instance works correctly
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+            if Order.objects.filter(product=order.product).exists():
+                print("Issue resolved")
+            else:
+                print("Other issues")
+        except Exception:
+            print("Other issues")
+            return
+
+# Running the test
+IssueTestCase().test_issue_reproduction()
+```
+
+This code sets up a Django test case class `IssueTestCase` that contains a method `test_issue_reproduction` to reproduce the issue described in the issue text. It will print "Issue reproduced" if the issue is found, "Issue resolved" if the issue is fixed, and "Other issues" if some other problem occurs.
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class ForeignKeyIssueTestCase(TestCase):
+    def test_foreign_key_issue(self):
+        # Setup to reproduce the issue
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                else:
+                    filtered_orders = Order.objects.filter(product=order.product)
+                    if filtered_orders.exists():
+                        print("Issue resolved")
+                    else:
+                        print("Other issues")
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            print("Other issues")
+
+if __name__ == "__main__":
+    ForeignKeyIssueTestCase().test_foreign_key_issue()
+```
+
+This test script sets up the models and the database transactions according to the issue description. It runs the test within a Django `TestCase`, attempting to reproduce the issue by creating instances of `Order` and `Product` following the problematic sequence described, and then checking the status of the `Order` entries to determine if the issue is reproduced, resolved, or if other issues are present. Make sure to place this script in a Django environment where your models and settings are correctly configured.
+2025-05-03 14:05:59,269 - INFO - raw output:
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+# Ensure Django settings are configured
+django.setup()
+
+# Models
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Test case to reproduce the issue
+class ForeignKeyTest(TestCase):
+    def test_foreign_key_issue(self):
+        # Step 1: Attempt to save an Order with a Product whose primary key is set after assignment
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                    return
+        except Exception as e:
+            print("Other issues")
+            return
+
+        # Step 2: Attempt to save an Order with a Product whose primary key is set before assignment
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                    return
+        except Exception as e:
+            print("Other issues")
+            return
+
+ForeignKeyTest().test_foreign_key_issue()
+```
+
+Explanation:
+1. **Imports**: Import necessary modules from Django.
+2. **Models**: Define `Product` and `Order` models to reflect the issue described.
+3. **Test Case**: A `ForeignKeyTest` class that inherits from `TestCase` to leverage Django's testing framework.
+4. **Test Method**:
+   - **Step 1**: The method tries to reproduce the issue by assigning a `Product` instance to an `Order` before setting its primary key, saving both, and then checking if the issue conditions are met.
+   - **Step 2**: The method attempts to save an `Order` with a `Product` instance that has its primary key set before assignment. This step will help verify that the intended behavior works correctly.
+5. **Output**: Print statements are used to indicate if the issue is reproduced, resolved, or if there are other issues.
+
+This test can be run in a Django environment to verify if the issue described is present and to check if any fixes applied resolve the issue.
+2025-05-03 14:05:59,270 - INFO - raw output:
+```python
+from django.db import models, transaction, IntegrityError
+
+# Define models
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+
+def test_issue_reproduction():
+    # Clear any existing data
+    Product.objects.all().delete()
+    Order.objects.all().delete()
+
+    # Test to reproduce the issue
+    try:
+        with transaction.atomic():
+            order = Order()
+            order.product = Product()
+            order.product.sku = "foo"
+            order.product.save()
+            order.save()
+            if Order.objects.filter(product_id="").exists():
+                print("Issue reproduced")
+                return
+            if Order.objects.filter(product=order.product).exists():
+                print("Issue resolved")
+                return
+    except IntegrityError:
+        print("Issue reproduced")
+        return
+
+    # This part should only be reached if none of the assertions above fail
+    print("Other issues")
+
+# Run the test
+test_issue_reproduction()
+```
+2025-05-03 14:05:59,270 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueReproductionTest(TestCase):
+    def test_issue_reproduction(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+                
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                    return
+        except Exception as e:
+            print(f"Other issues: {e}")
+            return
+        
+        print("Other issues")
+
+IssueReproductionTest().test_issue_reproduction()
+```
+2025-05-03 14:05:59,270 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+# Define the models as described in the issue text
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Create the test case to reproduce and verify the issue
+class ForeignKeyTestCase(TestCase):
+    def test_foreign_key_issue(self):
+        # Reproduce the issue
+        with transaction.atomic():
+            order = Order()
+            order.product = Product()
+            order.product.sku = "foo"
+            order.product.save()
+            order.save()
+
+            if Order.objects.filter(product_id="").exists():
+                # The issue is reproduced if the product_id is empty
+                print("Issue reproduced")
+            elif Order.objects.filter(product=order.product).exists():
+                # If the product_id is correctly set, the issue is resolved
+                print("Issue resolved")
+            else:
+                # If there are unexpected results, print other issues
+                print("Other issues")
+
+        # Verify the resolved case
+        with transaction.atomic():
+            order = Order()
+            order.product = Product(sku="foo")
+            order.product.save()
+            order.save()
+
+            if Order.objects.filter(product=order.product).exists():
+                # If the product_id is correctly set, the issue is resolved
+                print("Issue resolved")
+            else:
+                # If there are unexpected results, print other issues
+                print("Other issues")
+
+# Run the test case
+ForeignKeyTestCase().test_foreign_key_issue()
+```
+2025-05-03 14:05:59,270 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class ForeignKeyIssueTestCase(TestCase):
+    def test_fk_issue(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+                return
+        except:
+            print("Other issues")
+            return
+        
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+            return
+        except:
+            print("Other issues")
+            return
+
+ForeignKeyIssueTestCase().test_fk_issue()
+```
+2025-05-03 14:05:59,270 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models, transaction
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class ProductOrderTestCase(TestCase):
+    def test_product_order_issue(self):
+        try:
+            # Attempt to reproduce the issue as described
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product_id="").exists() and not Order.objects.filter(product=order.product).exists():
+                    print("Issue reproduced")
+                else:
+                    print("Issue resolved")
+        except Exception as e:
+            print("Other issues")
+            return
+
+        try:
+            # Attempt to verify if the issue is resolved
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+        except Exception as e:
+            print("Other issues")
+            return
+
+ProductOrderTestCase().test_product_order_issue()
+```
+2025-05-03 14:05:59,270 - INFO - raw output:
+Certainly! Here is the complete test with the necessary imports and code according to the issue description:
+
+```python
+import django
+from django.db import models, transaction
+from django.test import TestCase
+
+# Define the models
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+# Define the test case
+class ForeignKeyTest(TestCase):
+    def test_foreign_key_issue(self):
+        # Step to reproduce the issue
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                    return
+
+            # If we reach this point, it means the issue did not occur
+            print("Issue resolved")
+        except Exception as e:
+            print(f"Other issues: {e}")
+            return
+
+# Run the test
+if __name__ == "__main__":
+    django.setup()
+    ForeignKeyTest().test_foreign_key_issue()
+```
+
+This test case will:
+1. Import necessary modules and classes.
+2. Define the `Product` and `Order` models as per the issue description.
+3. Include a test case `ForeignKeyTest` that:
+   - Attempts to reproduce the issue within an atomic transaction block.
+   - Checks if the `Order` object was created with an empty `product_id` field. If so, it prints "Issue reproduced".
+   - If no issues are found, it prints "Issue resolved".
+   - Catches any other exceptions and indicates "Other issues".
+
+You can run this test to determine whether the issue is reproduced or resolved in your environment.
+2025-05-03 14:05:59,270 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class ReproductionTestCase(TestCase):
+    def test_issue_reproduction(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+                # This should fail if the issue is reproduced
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+                # This should succeed if the issue is resolved
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+# Run the test case
+ReproductionTestCase().test_issue_reproduction()
+```
+2025-05-03 14:05:59,270 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueTest(TestCase):
+
+    def test_issue_reproduction(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product_id="").exists():
+                    print("Issue reproduced")
+                elif Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Other issues")
+        except Exception as e:
+            print("Other issues:", str(e))
+
+    def test_issue_resolved(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+        except Exception as e:
+            print("Other issues:", str(e))
+
+# Running the tests
+test_case = IssueTest()
+test_case.test_issue_reproduction()
+test_case.test_issue_resolved()
+```
+
+This script contains the following:
+1. Necessary imports.
+2. Code to reproduce the issue described in the issue text.
+3. Print statements to indicate whether the issue is reproduced, resolved, or if there are other issues.
+4. The test is wrapped in a Django `TestCase` and will print the results when the test methods are called.
+2025-05-03 14:05:59,270 - INFO - raw output:
+```python
+from django.db import models, transaction
+from django.test import TestCase
+
+class Product(models.Model):
+    sku = models.CharField(primary_key=True, max_length=50)
+
+class Order(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class IssueTestCase(TestCase):
+    def test_issue_reproduction(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product()
+                order.product.sku = "foo"
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product_id="").exists() and not Order.objects.filter(product=order.product).exists():
+                    print("Issue reproduced")
+                else:
+                    print("Issue resolved")
+        except Exception as e:
+            if isinstance(e, models.deletion.ProtectedError):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+                return
+
+    def test_issue_resolution(self):
+        try:
+            with transaction.atomic():
+                order = Order()
+                order.product = Product(sku="foo")
+                order.product.save()
+                order.save()
+
+                if Order.objects.filter(product=order.product).exists():
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+        except Exception as e:
+            print("Other issues")
+            return
+
+# Run the tests
+IssueTestCase().test_issue_reproduction()
+IssueTestCase().test_issue_resolution()
+```
+
+This test case does the following:
+1. Defines the `Product` and `Order` models as described in the issue text.
+2. Includes a `test_issue_reproduction` method which attempts to reproduce the issue by setting the `sku` after assigning the `Product` instance to the `Order` instance.
+3. Includes a `test_issue_resolution` method which assigns the `sku` before assigning the `Product` instance to the `Order` instance, which should not reproduce the issue.
+4. Prints "Issue reproduced" if the conditions described in the issue text are met.
+5. Prints "Issue resolved" if the conditions described in the expected behavior are met.
+6. Prints "Other issues" if an unexpected exception occurs.

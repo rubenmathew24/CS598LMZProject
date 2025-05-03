@@ -1,0 +1,2313 @@
+2025-05-02 17:20:56,979 - INFO - ================ generating test for scikit-learn__scikit-learn-25747 ================
+2025-05-02 17:20:57,149 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+FeatureUnion not working when aggregating data and pandas transform output selected
+### Describe the bug
+
+I would like to use `pandas` transform output and use a custom transformer in a feature union which aggregates data. When I'm using this combination I got an error. When I use default `numpy` output it works fine.
+
+### Steps/Code to Reproduce
+
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+data["date"] = index.date
+
+
+class MyTransformer(BaseEstimator, TransformerMixin):
+    def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+        return self
+
+    def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+        return X["value"].groupby(X["date"]).sum()
+
+
+# This works.
+set_config(transform_output="default")
+print(make_union(MyTransformer()).fit_transform(data))
+
+# This does not work.
+set_config(transform_output="pandas")
+print(make_union(MyTransformer()).fit_transform(data))
+```
+
+### Expected Results
+
+No error is thrown when using `pandas` transform output.
+
+### Actual Results
+
+```python
+---------------------------------------------------------------------------
+ValueError                                Traceback (most recent call last)
+Cell In[5], line 25
+     23 # This does not work.
+     24 set_config(transform_output="pandas")
+---> 25 print(make_union(MyTransformer()).fit_transform(data))
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/sklearn/utils/_set_output.py:150, in _wrap_method_output.<locals>.wrapped(self, X, *args, **kwargs)
+    143 if isinstance(data_to_wrap, tuple):
+    144     # only wrap the first output for cross decomposition
+    145     return (
+    146         _wrap_data_with_container(method, data_to_wrap[0], X, self),
+    147         *data_to_wrap[1:],
+    148     )
+--> 150 return _wrap_data_with_container(method, data_to_wrap, X, self)
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/sklearn/utils/_set_output.py:130, in _wrap_data_with_container(method, data_to_wrap, original_input, estimator)
+    127     return data_to_wrap
+    129 # dense_config == "pandas"
+--> 130 return _wrap_in_pandas_container(
+    131     data_to_wrap=data_to_wrap,
+    132     index=getattr(original_input, "index", None),
+    133     columns=estimator.get_feature_names_out,
+    134 )
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/sklearn/utils/_set_output.py:59, in _wrap_in_pandas_container(data_to_wrap, columns, index)
+     57         data_to_wrap.columns = columns
+     58     if index is not None:
+---> 59         data_to_wrap.index = index
+     60     return data_to_wrap
+     62 return pd.DataFrame(data_to_wrap, index=index, columns=columns)
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/pandas/core/generic.py:5588, in NDFrame.__setattr__(self, name, value)
+   5586 try:
+   5587     object.__getattribute__(self, name)
+-> 5588     return object.__setattr__(self, name, value)
+   5589 except AttributeError:
+   5590     pass
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/pandas/_libs/properties.pyx:70, in pandas._libs.properties.AxisProperty.__set__()
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/pandas/core/generic.py:769, in NDFrame._set_axis(self, axis, labels)
+    767 def _set_axis(self, axis: int, labels: Index) -> None:
+    768     labels = ensure_index(labels)
+--> 769     self._mgr.set_axis(axis, labels)
+    770     self._clear_item_cache()
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/pandas/core/internals/managers.py:214, in BaseBlockManager.set_axis(self, axis, new_labels)
+    212 def set_axis(self, axis: int, new_labels: Index) -> None:
+    213     # Caller is responsible for ensuring we have an Index object.
+--> 214     self._validate_set_axis(axis, new_labels)
+    215     self.axes[axis] = new_labels
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/pandas/core/internals/base.py:69, in DataManager._validate_set_axis(self, axis, new_labels)
+     66     pass
+     68 elif new_len != old_len:
+---> 69     raise ValueError(
+     70         f"Length mismatch: Expected axis has {old_len} elements, new "
+     71         f"values have {new_len} elements"
+     72     )
+
+ValueError: Length mismatch: Expected axis has 4 elements, new values have 96 elements
+```
+
+### Versions
+
+```shell
+System:
+    python: 3.10.6 (main, Aug 30 2022, 05:11:14) [Clang 13.0.0 (clang-1300.0.29.30)]
+executable: /Users/macbookpro/.local/share/virtualenvs/3e_VBrf2/bin/python
+   machine: macOS-11.3-x86_64-i386-64bit
+
+Python dependencies:
+      sklearn: 1.2.1
+          pip: 22.3.1
+   setuptools: 67.3.2
+        numpy: 1.23.5
+        scipy: 1.10.1
+       Cython: None
+       pandas: 1.4.4
+   matplotlib: 3.7.0
+       joblib: 1.2.0
+threadpoolctl: 3.1.0
+
+Built with OpenMP: True
+
+threadpoolctl info:
+       user_api: blas
+   internal_api: openblas
+         prefix: libopenblas
+       filepath: /Users/macbookpro/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/numpy/.dylibs/libopenblas64_.0.dylib
+        version: 0.3.20
+threading_layer: pthreads
+   architecture: Haswell
+    num_threads: 4
+
+       user_api: openmp
+   internal_api: openmp
+         prefix: libomp
+       filepath: /Users/macbookpro/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/sklearn/.dylibs/libomp.dylib
+        version: None
+    num_threads: 8
+
+       user_api: blas
+   internal_api: openblas
+         prefix: libopenblas
+       filepath: /Users/macbookpro/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/scipy/.dylibs/libopenblas.0.dylib
+        version: 0.3.18
+threading_layer: pthreads
+   architecture: Haswell
+    num_threads: 4
+```
+
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:57,150 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:24:38,205 - INFO - ================ generating test for scikit-learn__scikit-learn-25747 ================
+2025-05-03 14:24:38,220 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+FeatureUnion not working when aggregating data and pandas transform output selected
+### Describe the bug
+
+I would like to use `pandas` transform output and use a custom transformer in a feature union which aggregates data. When I'm using this combination I got an error. When I use default `numpy` output it works fine.
+
+### Steps/Code to Reproduce
+
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+data["date"] = index.date
+
+
+class MyTransformer(BaseEstimator, TransformerMixin):
+    def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+        return self
+
+    def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+        return X["value"].groupby(X["date"]).sum()
+
+
+# This works.
+set_config(transform_output="default")
+print(make_union(MyTransformer()).fit_transform(data))
+
+# This does not work.
+set_config(transform_output="pandas")
+print(make_union(MyTransformer()).fit_transform(data))
+```
+
+### Expected Results
+
+No error is thrown when using `pandas` transform output.
+
+### Actual Results
+
+```python
+---------------------------------------------------------------------------
+ValueError                                Traceback (most recent call last)
+Cell In[5], line 25
+     23 # This does not work.
+     24 set_config(transform_output="pandas")
+---> 25 print(make_union(MyTransformer()).fit_transform(data))
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/sklearn/utils/_set_output.py:150, in _wrap_method_output.<locals>.wrapped(self, X, *args, **kwargs)
+    143 if isinstance(data_to_wrap, tuple):
+    144     # only wrap the first output for cross decomposition
+    145     return (
+    146         _wrap_data_with_container(method, data_to_wrap[0], X, self),
+    147         *data_to_wrap[1:],
+    148     )
+--> 150 return _wrap_data_with_container(method, data_to_wrap, X, self)
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/sklearn/utils/_set_output.py:130, in _wrap_data_with_container(method, data_to_wrap, original_input, estimator)
+    127     return data_to_wrap
+    129 # dense_config == "pandas"
+--> 130 return _wrap_in_pandas_container(
+    131     data_to_wrap=data_to_wrap,
+    132     index=getattr(original_input, "index", None),
+    133     columns=estimator.get_feature_names_out,
+    134 )
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/sklearn/utils/_set_output.py:59, in _wrap_in_pandas_container(data_to_wrap, columns, index)
+     57         data_to_wrap.columns = columns
+     58     if index is not None:
+---> 59         data_to_wrap.index = index
+     60     return data_to_wrap
+     62 return pd.DataFrame(data_to_wrap, index=index, columns=columns)
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/pandas/core/generic.py:5588, in NDFrame.__setattr__(self, name, value)
+   5586 try:
+   5587     object.__getattribute__(self, name)
+-> 5588     return object.__setattr__(self, name, value)
+   5589 except AttributeError:
+   5590     pass
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/pandas/_libs/properties.pyx:70, in pandas._libs.properties.AxisProperty.__set__()
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/pandas/core/generic.py:769, in NDFrame._set_axis(self, axis, labels)
+    767 def _set_axis(self, axis: int, labels: Index) -> None:
+    768     labels = ensure_index(labels)
+--> 769     self._mgr.set_axis(axis, labels)
+    770     self._clear_item_cache()
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/pandas/core/internals/managers.py:214, in BaseBlockManager.set_axis(self, axis, new_labels)
+    212 def set_axis(self, axis: int, new_labels: Index) -> None:
+    213     # Caller is responsible for ensuring we have an Index object.
+--> 214     self._validate_set_axis(axis, new_labels)
+    215     self.axes[axis] = new_labels
+
+File ~/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/pandas/core/internals/base.py:69, in DataManager._validate_set_axis(self, axis, new_labels)
+     66     pass
+     68 elif new_len != old_len:
+---> 69     raise ValueError(
+     70         f"Length mismatch: Expected axis has {old_len} elements, new "
+     71         f"values have {new_len} elements"
+     72     )
+
+ValueError: Length mismatch: Expected axis has 4 elements, new values have 96 elements
+```
+
+### Versions
+
+```shell
+System:
+    python: 3.10.6 (main, Aug 30 2022, 05:11:14) [Clang 13.0.0 (clang-1300.0.29.30)]
+executable: /Users/macbookpro/.local/share/virtualenvs/3e_VBrf2/bin/python
+   machine: macOS-11.3-x86_64-i386-64bit
+
+Python dependencies:
+      sklearn: 1.2.1
+          pip: 22.3.1
+   setuptools: 67.3.2
+        numpy: 1.23.5
+        scipy: 1.10.1
+       Cython: None
+       pandas: 1.4.4
+   matplotlib: 3.7.0
+       joblib: 1.2.0
+threadpoolctl: 3.1.0
+
+Built with OpenMP: True
+
+threadpoolctl info:
+       user_api: blas
+   internal_api: openblas
+         prefix: libopenblas
+       filepath: /Users/macbookpro/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/numpy/.dylibs/libopenblas64_.0.dylib
+        version: 0.3.20
+threading_layer: pthreads
+   architecture: Haswell
+    num_threads: 4
+
+       user_api: openmp
+   internal_api: openmp
+         prefix: libomp
+       filepath: /Users/macbookpro/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/sklearn/.dylibs/libomp.dylib
+        version: None
+    num_threads: 8
+
+       user_api: blas
+   internal_api: openblas
+         prefix: libopenblas
+       filepath: /Users/macbookpro/.local/share/virtualenvs/3e_VBrf2/lib/python3.10/site-packages/scipy/.dylibs/libopenblas.0.dylib
+        version: 0.3.18
+threading_layer: pthreads
+   architecture: Haswell
+    num_threads: 4
+```
+
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 14:24:38,221 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:24:38,231 - INFO - Creating API request
+2025-05-03 14:24:41,614 - INFO - API response ChatCompletion(id='chatcmpl-BTClSXCARiEet7jC7zsGSS0UVwAI6', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works.\n        set_config(transform_output="default")\n        result_default = make_union(MyTransformer()).fit_transform(data)\n        print(result_default)\n    except Exception as e:\n        print("Other issues")\n        print(e)\n        return\n\n    try:\n        # This does not work.\n        set_config(transform_output="pandas")\n        result_pandas = make_union(MyTransformer()).fit_transform(data)\n        print(result_pandas)\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n            print(e)\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\ntest_feature_union_with_pandas_output()\n```\n\nThis test script will:\n1. Import the necessary modules.\n2. Define the data and the custom transformer as described in the issue.\n3. Attempt to run the transformation with the default configuration and print the result.\n4. Attempt to run the transformation with the pandas configuration and handle the expected error.\n5. Print "Issue reproduced" if the specific error is encountered, "Issue resolved" if no error occurs, and "Other issues" if any other error occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746300278, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=433, prompt_tokens=2058, total_tokens=2491, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:24:41,614 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:24:41,621 - INFO - Creating API request
+2025-05-03 14:25:58,434 - INFO - API response ChatCompletion(id='chatcmpl-BTClVsmeEkgyJDctNv6hVJ4KHsmD2', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        set_config(transform_output="pandas")\n        result = make_union(MyTransformer()).fit_transform(data)\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_with_pandas_output()\n```\n\nThe provided test script will:\n1. Import the necessary modules.\n2. Include the code to reproduce the issue described in the issue text.\n3. Print "Issue reproduced" if the specific `ValueError` indicating a length mismatch is raised.\n4. Print "Issue resolved" if no error is raised.\n5. Print "Other issues" if any other exception is raised.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output_issue():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works\n        set_config(transform_output="default")\n        result_default = make_union(MyTransformer()).fit_transform(data)\n        \n        # This does not work\n        set_config(transform_output="pandas")\n        result_pandas = make_union(MyTransformer()).fit_transform(data)\n\n        print("Issue resolved")\n    except ValueError as e:\n        if str(e).startswith("Length mismatch"):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_with_pandas_output_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test script to reproduce the issue described in the issue text and to verify whether the issue has been resolved or if there are other issues.\n\n```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works.\n        set_config(transform_output="default")\n        make_union(MyTransformer()).fit_transform(data)\n    except Exception as e:\n        print("Other issues")\n        return\n\n    try:\n        # This does not work.\n        set_config(transform_output="pandas")\n        make_union(MyTransformer()).fit_transform(data)\n        \n        # If no exception is raised and we get here, then the issue is resolved\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_with_pandas_output()\n```\n\nThis script sets up the test environment, attempts to reproduce the issue, and prints the appropriate message based on the outcome. Use this script to verify if the issue is still present or has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_pandas_transform_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # This works.\n        set_config(transform_output="default")\n        default_output = make_union(MyTransformer()).fit_transform(data)\n        print(default_output)\n\n        # This does not work.\n        set_config(transform_output="pandas")\n        pandas_output = make_union(MyTransformer()).fit_transform(data)\n        print(pandas_output)\n\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_feature_union_pandas_transform_output()\n```\n\nThis test will:\n1. Attempt to reproduce the issue described in the issue text.\n2. Print "Issue resolved" if the code executes without error under both configurations.\n3. Print "Issue reproduced" if the specific ValueError related to length mismatch is encountered.\n4. Print "Other issues" if any other unexpected issues are encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works\n        set_config(transform_output="default")\n        make_union(MyTransformer()).fit_transform(data)\n    except Exception as e:\n        print("Other issues")\n        return\n\n    try:\n        # This should reproduce the issue\n        set_config(transform_output="pandas")\n        make_union(MyTransformer()).fit_transform(data)\n        print("Issue resolved")\n    except ValueError as e:\n        if \'Length mismatch\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_pandas_output()\n```\n\nThis test script does the following:\n\n1. Imports the necessary modules.\n2. Defines the custom transformer and the data to be used in the test.\n3. Attempts to execute the pipeline with the default output configuration (which should work).\n4. Attempts to execute the pipeline with the pandas output configuration.\n5. Catches exceptions to determine if the issue has been reproduced, resolved, or if there are any other issues. \n\nBy executing this test, you should be able to verify if the issue described in the provided issue text has been reproduced or resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # Test with default output configuration\n        set_config(transform_output="default")\n        try:\n            default_output = make_union(MyTransformer()).fit_transform(data)\n        except Exception as e:\n            print("Other issues")\n            return\n\n        # Test with pandas output configuration\n        set_config(transform_output="pandas")\n        try:\n            pandas_output = make_union(MyTransformer()).fit_transform(data)\n            print("Issue resolved")\n        except ValueError as e:\n            if "Length mismatch" in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n        except Exception as e:\n            print("Other issues")\n\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works.\n        set_config(transform_output="default")\n        result_default = make_union(MyTransformer()).fit_transform(data)\n        print(result_default)\n        \n        # This does not work.\n        set_config(transform_output="pandas")\n        result_pandas = make_union(MyTransformer()).fit_transform(data)\n        print(result_pandas)\n        \n        print("Issue resolved")\n    except ValueError as e:\n        error_message = str(e)\n        if "Length mismatch" in error_message:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues", str(e))\n\ntest_feature_union_with_pandas_output()\n```\n\nThis test script sets up the environment described in the issue, attempts to reproduce the issue, and provides feedback depending on the outcome:\n\n1. **"Issue resolved"**: If the code runs without any issues.\n2. **"Issue reproduced"**: If the specific error related to length mismatch is encountered.\n3. **"Other issues"**: For any other exceptions or errors that might arise.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    try:\n        # Data setup\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # Test with default (numpy) output\n        set_config(transform_output="default")\n        try:\n            result = make_union(MyTransformer()).fit_transform(data)\n            print("Default output test passed")\n        except Exception:\n            print("Other issues")\n            return\n\n        # Test with pandas output\n        set_config(transform_output="pandas")\n        try:\n            result = make_union(MyTransformer()).fit_transform(data)\n            print("Issue resolved")\n        except ValueError as e:\n            if "Length mismatch" in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n        except Exception:\n            print("Other issues")\n    except Exception:\n        print("Other issues")\n\ntest_feature_union_with_pandas_output()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    # This works.\n    try:\n        set_config(transform_output="default")\n        print(make_union(MyTransformer()).fit_transform(data))\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return\n\n    # This does not work.\n    try:\n        set_config(transform_output="pandas")\n        print(make_union(MyTransformer()).fit_transform(data))\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print(f"Other issues: {e}")\n\ntest_feature_union_with_pandas_output()\n```\n\nThis test script sets up the environment, creates the data and the transformer as described in the issue, and attempts to run the transformations with both default and pandas output settings. It prints "Issue reproduced" if the specific length mismatch error is encountered, indicating the issue is still present. If no error is encountered when using `pandas` output, it prints "Issue resolved". Any other issues encountered will print "Other issues" with the corresponding error message.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_pandas_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # This works.\n        set_config(transform_output="default")\n        try:\n            output_default = make_union(MyTransformer()).fit_transform(data)\n            print("Output for default transform:", output_default)\n        except Exception as e:\n            print("Other issues in default transform:", e)\n            return\n\n        # This does not work.\n        set_config(transform_output="pandas")\n        try:\n            output_pandas = make_union(MyTransformer()).fit_transform(data)\n            print("Output for pandas transform:", output_pandas)\n            print("Issue resolved")\n        except ValueError as ve:\n            print("Issue reproduced")\n            print("ValueError:", ve)\n            return\n        except Exception as e:\n            print("Other issues:", e)\n            return\n\n    except Exception as e:\n        print("Other issues:", e)\n        return\n\ntest_feature_union_pandas_output()\n```\n\nThis test script includes:\n1. Necessary imports for pandas and scikit-learn.\n2. Code to reproduce the issue described in the issue text.\n3. Print statements to indicate the outcome: "Issue reproduced", "Issue resolved", or "Other issues".\n\nThe script first tests the default output configuration to confirm it works without issues. Then, it switches to the pandas output configuration to check if the issue is reproduced.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works.\n        set_config(transform_output="default")\n        result_default = make_union(MyTransformer()).fit_transform(data)\n        \n        # This does not work.\n        set_config(transform_output="pandas")\n        result_pandas = make_union(MyTransformer()).fit_transform(data)\n        \n        # If we reach here, it means no error was thrown\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_with_pandas_output()\n```\n\nThis test script does the following:\n1. Imports the necessary libraries.\n2. Sets up the data and the custom transformer as described in the issue text.\n3. Tries to run the pipeline with the default numpy output and then with the pandas output.\n4. Based on the outcome, it prints "Issue resolved", "Issue reproduced", or "Other issues" to reflect the status. \n\nThe script is designed to both reproduce the issue and verify if the issue has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # This works.\n        set_config(transform_output="default")\n        make_union(MyTransformer()).fit_transform(data)\n\n        # This does not work.\n        set_config(transform_output="pandas")\n        make_union(MyTransformer()).fit_transform(data)\n        \n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n            return\n        else:\n            print("Other issues")\n            return\n    except Exception as e:\n        print("Other issues")\n        return\n\n    print("Issue resolved")\n\ntest_feature_union_with_pandas_output()\n```\n\nThis test code follows the structure of your example and includes the necessary imports, code to reproduce the issue described in the issue text, and the appropriate print statements to indicate the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_issue():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    # This works.\n    try:\n        set_config(transform_output="default")\n        result_default = make_union(MyTransformer()).fit_transform(data)\n        print(result_default)\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return\n\n    # This does not work.\n    try:\n        set_config(transform_output="pandas")\n        result_pandas = make_union(MyTransformer()).fit_transform(data)\n        print(result_pandas)\n        print("Issue resolved")\n    except ValueError as ve:\n        print("Issue reproduced")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_feature_union_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_transform_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    # This works.\n    set_config(transform_output="default")\n    try:\n        result_default = make_union(MyTransformer()).fit_transform(data)\n        print(result_default)\n    except Exception:\n        print("Other issues")\n        return\n\n    # This does not work.\n    set_config(transform_output="pandas")\n    try:\n        result_pandas = make_union(MyTransformer()).fit_transform(data)\n        print(result_pandas)\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception:\n        print("Other issues")\n\ntest_feature_union_with_pandas_transform_output()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_pandas_transform_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works.\n        set_config(transform_output="default")\n        result_default = make_union(MyTransformer()).fit_transform(data)\n        assert result_default is not None\n\n        # This does not work.\n        set_config(transform_output="pandas")\n        result_pandas = make_union(MyTransformer()).fit_transform(data)\n        print("Issue resolved")\n    except ValueError as e:\n        if \'Length mismatch\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception:\n        print("Other issues")\n\ntest_feature_union_pandas_transform_output()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_pandas_output():\n    # Sample data setup\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    # Custom transformer class\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # Scenario 1: Using default numpy output\n        set_config(transform_output="default")\n        make_union_output_default = make_union(MyTransformer()).fit_transform(data)\n\n        # Scenario 2: Using pandas output\n        set_config(transform_output="pandas")\n        make_union_output_pandas = make_union(MyTransformer()).fit_transform(data)\n\n        # If no exception is raised, this means the issue is resolved\n        print("Issue resolved")\n    except ValueError as e:\n        # Checking if ValueError is due to length mismatch\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # Any other exceptions indicate other issues\n        print("Other issues")\n\n# Run the test\ntest_feature_union_pandas_output()\n```\n\nThis code sets up the necessary imports and defines a test function `test_feature_union_pandas_output` that reproduces the issue described. It will print "Issue resolved" if the issue is fixed, "Issue reproduced" if the issue is still present, and "Other issues" if any other exceptions are encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_issue():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n        \n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works.\n        set_config(transform_output="default")\n        output_default = make_union(MyTransformer()).fit_transform(data)\n\n        # This does not work.\n        set_config(transform_output="pandas")\n        output_pandas = make_union(MyTransformer()).fit_transform(data)\n        \n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='Sure, here\'s a complete test script that can be used to reproduce the issue described in the issue text. This test script follows the structure you requested:\n\n```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works with default numpy output\n        set_config(transform_output="default")\n        default_result = make_union(MyTransformer()).fit_transform(data)\n        print(default_result)\n\n        # This does not work with pandas output\n        set_config(transform_output="pandas")\n        pandas_result = make_union(MyTransformer()).fit_transform(data)\n        print(pandas_result)\n        \n        # If no error is raised, the issue is resolved\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            # If the specific error occurs, the issue is reproduced\n            print("Issue reproduced")\n        else:\n            # If a different error occurs, there are other issues\n            print("Other issues")\n    except Exception as e:\n        # Catch any other unexpected exceptions\n        print("Other issues")\n\n# Run the test\ntest_feature_union_pandas_output()\n```\n\nExplanation:\n1. Necessary imports: The script imports necessary modules like `pandas`, `BaseEstimator`, `TransformerMixin`, `set_config`, and `make_union`.\n2. Code to reproduce the issue described in the issue text: The script defines a test function `test_feature_union_pandas_output` which contains the code to reproduce the issue.\n3. Print statements to indicate the outcome: The script contains print statements to indicate whether the issue is reproduced, resolved, or if there are other issues.\n\nYou can run this script in your environment to verify if the issue is still present or if it has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_issue():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works.\n        set_config(transform_output="default")\n        make_union(MyTransformer()).fit_transform(data)\n    except Exception:\n        print("Other issues")\n        return\n\n    try:\n        # This does not work.\n        set_config(transform_output="pandas")\n        make_union(MyTransformer()).fit_transform(data)\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception:\n        print("Other issues")\n\ntest_feature_union_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_aggregation_with_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    # Test with default numpy output\n    try:\n        set_config(transform_output="default")\n        result_default = make_union(MyTransformer()).fit_transform(data)\n    except Exception:\n        print("Other issues")\n        return\n\n    # Test with pandas output\n    try:\n        set_config(transform_output="pandas")\n        result_pandas = make_union(MyTransformer()).fit_transform(data)\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception:\n        print("Other issues")\n\ntest_feature_union_aggregation_with_pandas_output()\n```\n\nThis test script:\n\n1. Imports necessary libraries and sets up the data.\n2. Defines a custom transformer `MyTransformer`.\n3. Attempts to use `FeatureUnion` with the default `numpy` output to ensure there are no other issues.\n4. Attempts to use `FeatureUnion` with `pandas` output and checks for the specific error message.\n5. Prints "Issue resolved", "Issue reproduced", or "Other issues" based on the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test to reproduce the issue described in the provided issue text. This test will indicate whether the issue is reproduced, resolved, or if there are other issues.\n\n```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn.pipeline import make_union\nfrom sklearn import set_config\n\ndef test_feature_union_pandas_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # This works.\n        set_config(transform_output="default")\n        try:\n            result_default = make_union(MyTransformer()).fit_transform(data)\n        except Exception as e:\n            print("Other issues")\n            return\n\n        # This does not work.\n        set_config(transform_output="pandas")\n        try:\n            result_pandas = make_union(MyTransformer()).fit_transform(data)\n            print("Issue resolved")\n        except ValueError as e:\n            if "Length mismatch" in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n        except Exception as e:\n            print("Other issues")\n\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_pandas_output()\n```\n\nThis test script will:\n1. Import necessary modules and classes.\n2. Define the transformer class `MyTransformer`.\n3. Attempt to reproduce the issue under the different configurations (`transform_output="default"` and `transform_output="pandas"`).\n4. Print "Issue reproduced" if the expected `ValueError` with the "Length mismatch" message is encountered.\n5. Print "Issue resolved" if no error occurs under the `pandas` configuration.\n6. Print "Other issues" if any other unexpected error is encountered.\n\nYou can run this script to validate whether the current issue is still present or has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # This works.\n        set_config(transform_output="default")\n        make_union(MyTransformer()).fit_transform(data)\n\n        # This does not work.\n        set_config(transform_output="pandas")\n        make_union(MyTransformer()).fit_transform(data)\n\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception:\n        print("Other issues")\n\ntest_feature_union_with_pandas_output()\n```\n\nThis script includes the necessary imports and reproduces the issue described in the provided issue text. It prints "Issue resolved" if the code runs without errors, "Issue reproduced" if the specific error related to the issue is encountered, and "Other issues" if any other exceptions occur.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_pandas_transform_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # This works.\n        set_config(transform_output="default")\n        try:\n            _ = make_union(MyTransformer()).fit_transform(data)\n        except Exception as e:\n            print("Other issues")\n            print(e)\n            return\n        \n        # This does not work.\n        set_config(transform_output="pandas")\n        try:\n            _ = make_union(MyTransformer()).fit_transform(data)\n            print("Issue resolved")\n        except ValueError as e:\n            if "Length mismatch" in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n                print(e)\n        except Exception as e:\n            print("Other issues")\n            print(e)\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\ntest_feature_union_pandas_transform_output()\n```\n\nThis script performs the following steps:\n1. Sets up the necessary imports and data.\n2. Defines the `MyTransformer` class as described in the issue.\n3. Tests the code with the default `numpy` transform output configuration to ensure there are no other issues.\n4. Tests the code with the `pandas` transform output configuration to check if the issue is reproduced.\n5. Prints "Issue reproduced" if the `ValueError` related to length mismatch is caught.\n6. Prints "Issue resolved" if no errors are raised with the `pandas` transform output configuration.\n7. Prints "Other issues" if any other unexpected errors are encountered.\n\nYou can run this script to confirm the presence of the issue and to verify when the issue gets resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n\n        # This works.\n        set_config(transform_output="default")\n        try:\n            default_output = make_union(MyTransformer()).fit_transform(data)\n            print("Default output:\\n", default_output)\n        except Exception as e:\n            print("Other issues")\n            return\n\n        # This does not work.\n        set_config(transform_output="pandas")\n        try:\n            pandas_output = make_union(MyTransformer()).fit_transform(data)\n            print("Pandas output:\\n", pandas_output)\n            print("Issue resolved")\n        except ValueError as ve:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n        return\n\ntest_feature_union_with_pandas_output()\n```\n\nThis script is designed to reproduce the issue described in the provided text. It runs the code using both the default and pandas transform output configurations and checks for the expected ValueError. The script prints "Issue reproduced" if the error occurs as expected, "Issue resolved" if no error occurs, and "Other issues" if any other exception is raised, allowing for comprehensive testing and validation.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_pandas_transform_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # This works.\n        set_config(transform_output="default")\n        make_union(MyTransformer()).fit_transform(data)\n\n        # This does not work.\n        set_config(transform_output="pandas")\n        try:\n            make_union(MyTransformer()).fit_transform(data)\n            print("Issue resolved")\n        except ValueError as e:\n            if "Length mismatch" in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n    except Exception as e:\n        print("Other issues")\n        print(str(e))\n\ntest_feature_union_pandas_transform_output()\n```\n\nThis test script follows the outlined structure to reproduce and verify the issue:\n\n1. Imports necessary modules.\n2. Recreates the issue scenario using the code provided.\n3. Checks if the issue occurs when `transform_output` is set to `"pandas"`.\n4. Prints "Issue reproduced" if the expected error occurs, "Issue resolved" if no error occurs, and "Other issues" if there are any other unexpected errors.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_pandas_transform():\n    # Prepare test data\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n        \n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works with default numpy output\n        set_config(transform_output="default")\n        make_union(MyTransformer()).fit_transform(data)\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return\n\n    try:\n        # This should work with pandas transform output\n        set_config(transform_output="pandas")\n        make_union(MyTransformer()).fit_transform(data)\n        print("Issue resolved")\n    except ValueError as ve:\n        if "Length mismatch" in str(ve):\n            print("Issue reproduced")\n        else:\n            print(f"Other issues: {ve}")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\n# Run the test function\ntest_feature_union_pandas_transform()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works.\n        set_config(transform_output="default")\n        np_output = make_union(MyTransformer()).fit_transform(data)\n        \n        # This does not work.\n        set_config(transform_output="pandas")\n        pd_output = make_union(MyTransformer()).fit_transform(data)\n        \n        # If both configurations work without errors, print "Issue resolved"\n        print("Issue resolved")\n        \n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n# Run the test\ntest_feature_union_with_pandas_output()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_pandas_transform():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    # This works.\n    set_config(transform_output="default")\n    try:\n        result_default = make_union(MyTransformer()).fit_transform(data)\n        assert result_default is not None\n    except Exception as e:\n        print("Other issues")\n        return\n\n    # This does not work.\n    set_config(transform_output="pandas")\n    try:\n        result_pandas = make_union(MyTransformer()).fit_transform(data)\n        assert result_pandas is not None\n        print("Issue resolved")\n    except ValueError as ve:\n        if "Length mismatch" in str(ve):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_pandas_transform()\n```\n\nThis test script will:\n1. Create the necessary data and transformer as described in the issue.\n2. Attempt to transform the data using both default and pandas transform outputs.\n3. Check for the specific issue described (length mismatch error) and print the appropriate message based on the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works.\n        set_config(transform_output="default")\n        result_default = make_union(MyTransformer()).fit_transform(data)\n        \n        # This does not work.\n        set_config(transform_output="pandas")\n        try:\n            result_pandas = make_union(MyTransformer()).fit_transform(data)\n            print("Issue resolved")\n        except ValueError as e:\n            if "Length mismatch" in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_with_pandas_output()\n```\n\nIn this test script, we follow these steps:\n\n1. Import necessary libraries.\n2. Define the data and custom transformer as described in the issue.\n3. Test the code path that uses the default numpy output to ensure that it works.\n4. Test the code path that uses the pandas output to see if it raises the expected `ValueError`.\n5. Print appropriate messages based on the outcomes of the tests.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    # Test with default config (numpy output)\n    set_config(transform_output="default")\n    try:\n        result_default = make_union(MyTransformer()).fit_transform(data)\n        print("Default output (numpy) test passed.")\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return\n\n    # Test with pandas config (pandas output)\n    set_config(transform_output="pandas")\n    try:\n        result_pandas = make_union(MyTransformer()).fit_transform(data)\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print(f"Other issues: {e}")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_feature_union_with_pandas_output()\n```\n\nThis test:\n1. Sets up the environment with the necessary imports.\n2. Creates a DataFrame to simulate the data described in the issue.\n3. Defines the `MyTransformer` class.\n4. Tests the transformer first with the default configuration (numpy output).\n5. Tests the transformer with the pandas configuration.\n6. Prints "Issue reproduced" if the specific issue with the length mismatch is encountered.\n7. Prints "Issue resolved" if no errors are encountered with the pandas output.\n8. Prints "Other issues" if other exceptions are raised.\n\nYou can run this test script to both reproduce the issue and verify if the issue is resolved after implementing any fixes.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_transform_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    # Test with default numpy output\n    set_config(transform_output="default")\n    try:\n        _ = make_union(MyTransformer()).fit_transform(data)\n    except Exception as e:\n        print("Other issues")\n        return\n\n    # Test with pandas transform output\n    set_config(transform_output="pandas")\n    try:\n        _ = make_union(MyTransformer()).fit_transform(data)\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_with_pandas_transform_output()\n```\n\nThis test script does the following:\n1. Imports the necessary modules.\n2. Sets up the data and the custom transformer as described in the issue.\n3. Tests the functionality with the default numpy output configuration to ensure there are no other issues.\n4. Tests the functionality with the pandas transform output configuration.\n5. Prints "Issue resolved" if no error is thrown.\n6. Prints "Issue reproduced" if the specific ValueError related to length mismatch is thrown.\n7. Prints "Other issues" if any other exception is thrown.\n\nYou can use this test script to reproduce the issue and verify if it has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # This works.\n        set_config(transform_output="default")\n        try:\n            make_union(MyTransformer()).fit_transform(data)\n        except Exception:\n            print("Other issues")\n            return\n\n        # This does not work.\n        set_config(transform_output="pandas")\n        try:\n            make_union(MyTransformer()).fit_transform(data)\n            print("Issue resolved")\n        except ValueError as e:\n            if "Length mismatch" in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n    except Exception:\n        print("Other issues")\n\ntest_feature_union_with_pandas_output()\n```\n\nThis test script follows these steps:\n1. Imports the necessary modules.\n2. Defines the custom transformer `MyTransformer`.\n3. Sets up the input data.\n4. Tests the `make_union` pipeline using the default transform output.\n5. Tests the `make_union` pipeline using the pandas transform output.\n6. Checks the outcomes and prints the appropriate message based on the observed behavior.\n\nYou can run this script to determine if the issue described in the provided issue text is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # This works.\n        set_config(transform_output="default")\n        try:\n            default_output = make_union(MyTransformer()).fit_transform(data)\n        except Exception as e:\n            print("Other issues")\n            return\n\n        # This does not work.\n        set_config(transform_output="pandas")\n        try:\n            pandas_output = make_union(MyTransformer()).fit_transform(data)\n            print("Issue resolved")\n        except ValueError as e:\n            if "Length mismatch" in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_with_pandas_output()\n```\n\nThis script will:\n1. Set up the data and transformer.\n2. Test with the default `numpy` output setting to ensure it works without issues.\n3. Switch to the `pandas` output setting and attempt to reproduce the issue.\n4. Print "Issue reproduced" if the `ValueError` with "Length mismatch" is raised.\n5. Print "Issue resolved" if the transformation completes without errors.\n6. Print "Other issues" if any other exceptions are raised.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works.\n        set_config(transform_output="default")\n        numpy_output = make_union(MyTransformer()).fit_transform(data)\n        print("Default numpy output:")\n        print(numpy_output)\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return\n\n    try:\n        # This does not work and should reproduce the issue.\n        set_config(transform_output="pandas")\n        pandas_output = make_union(MyTransformer()).fit_transform(data)\n        print("Pandas output:")\n        print(pandas_output)\n        print("Issue resolved")\n    except ValueError as ve:\n        if "Length mismatch" in str(ve):\n            print("Issue reproduced")\n        else:\n            print(f"Other issues: {ve}")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_feature_union_with_pandas_output()\n```\n\nIn this test:\n1. We reproduce the setup described in the issue.\n2. We attempt to run the existing code with both `default` and `pandas` output configurations.\n3. The test checks if the specific error related to the length mismatch is raised, indicating that the issue has been reproduced.\n4. The test will print "Issue resolved" if the `pandas` output works without errors, "Issue reproduced" if the specific error occurs, and "Other issues" if any other unexpected issues arise.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works.\n        set_config(transform_output="default")\n        default_output = make_union(MyTransformer()).fit_transform(data)\n        \n        # This does not work.\n        set_config(transform_output="pandas")\n        pandas_output = make_union(MyTransformer()).fit_transform(data)\n        \n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_with_pandas_output()\n```\n\nThis script contains the necessary imports, the code to reproduce the issue, and conditions to print the appropriate messages based on the outcome. When executed, it will print "Issue reproduced" if the described issue occurs, "Issue resolved" if the issue no longer occurs, and "Other issues" if any other exception is thrown.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # This works.\n        set_config(transform_output="default")\n        default_output = make_union(MyTransformer()).fit_transform(data)\n        print("Default output:")\n        print(default_output)\n\n        # This does not work.\n        set_config(transform_output="pandas")\n\n        try:\n            pandas_output = make_union(MyTransformer()).fit_transform(data)\n            print("Pandas output:")\n            print(pandas_output)\n            print("Issue resolved")\n        except ValueError as e:\n            if "Length mismatch" in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_feature_union_with_pandas_output()\n```\n\nThe provided test script follows the requested structure:\n\n1. Necessary imports are included.\n2. The code from the issue description is used to reproduce the issue.\n3. It prints "Issue reproduced" if the specific length mismatch error occurs when the `pandas` transform output is set.\n4. It prints "Issue resolved" if the code executes without errors for the `pandas` transform output.\n5. It prints "Other issues" for any other exceptions that might occur.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_issue():\n    try:\n        # Define the data and transformer\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # Test with default output (should work)\n        set_config(transform_output="default")\n        try:\n            make_union(MyTransformer()).fit_transform(data)\n        except Exception as e:\n            print("Other issues")\n            return\n\n        # Test with pandas output (should raise the issue)\n        set_config(transform_output="pandas")\n        try:\n            make_union(MyTransformer()).fit_transform(data)\n            print("Issue resolved")\n        except ValueError as e:\n            if "Length mismatch" in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_feature_union_issue()\n```\n\nThis script does the following:\n1. Imports the necessary libraries.\n2. Defines the data and the custom transformer.\n3. Tests the scenario with the default output configuration to ensure it works without errors.\n4. Tests the scenario with the pandas output configuration to reproduce the issue.\n5. Prints "Issue resolved" if no error is raised, "Issue reproduced" if the specific error is raised, and "Other issues" if any other error is encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_pandas_transform_output():\n    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n    data["date"] = index.date\n\n    class MyTransformer(BaseEstimator, TransformerMixin):\n        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n            return self\n\n        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n            return X["value"].groupby(X["date"]).sum()\n\n    try:\n        # This works.\n        set_config(transform_output="default")\n        result_default = make_union(MyTransformer()).fit_transform(data)\n        \n        # This does not work.\n        set_config(transform_output="pandas")\n        result_pandas = make_union(MyTransformer()).fit_transform(data)\n\n        # If no exceptions, the issue is resolved\n        print("Issue resolved")\n    except ValueError as e:\n        if "Length mismatch" in str(e):\n            # Specific error indicating the issue\n            print("Issue reproduced")\n        else:\n            # Some other issue with the source code\n            print("Other issues")\n    except Exception as e:\n        # Some other issue with the source code\n        print("Other issues")\n\ntest_feature_union_pandas_transform_output()\n```\n\nThis script includes all necessary imports and simulates the issue described in the issue text. The test checks both configurations (`default` and `pandas`) and prints the relevant message based on the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pandas as pd\nfrom sklearn.base import BaseEstimator, TransformerMixin\nfrom sklearn import set_config\nfrom sklearn.pipeline import make_union\n\ndef test_feature_union_with_pandas_set_output():\n    try:\n        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")\n        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])\n        data["date"] = index.date\n\n        class MyTransformer(BaseEstimator, TransformerMixin):\n            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):\n                return self\n\n            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:\n                return X["value"].groupby(X["date"]).sum()\n\n        # This works.\n        set_config(transform_output="default")\n        default_output = make_union(MyTransformer()).fit_transform(data)\n        print("Default output:", default_output)\n\n        # This does not work.\n        set_config(transform_output="pandas")\n        pandas_output = make_union(MyTransformer()).fit_transform(data)\n        print("Pandas output:", pandas_output)\n        \n        print("Issue resolved")\n\n    except ValueError as e:\n        if "Length mismatch: Expected axis has" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_feature_union_with_pandas_set_output()\n```\n\nThis script sets up the test environment, reproduces the issue as described, and provides output based on whether the issue is reproduced, resolved, or if there are other issues. The expected behavior is:\n- If the "Length mismatch" error occurs, it will print "Issue reproduced".\n- If no errors occur, it will print "Issue resolved".\n- Any other exceptions will result in "Other issues" being printed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746300281, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=15132, prompt_tokens=2058, total_tokens=17190, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works.
+        set_config(transform_output="default")
+        result_default = make_union(MyTransformer()).fit_transform(data)
+        print(result_default)
+    except Exception as e:
+        print("Other issues")
+        print(e)
+        return
+
+    try:
+        # This does not work.
+        set_config(transform_output="pandas")
+        result_pandas = make_union(MyTransformer()).fit_transform(data)
+        print(result_pandas)
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+            print(e)
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+test_feature_union_with_pandas_output()
+```
+
+This test script will:
+1. Import the necessary modules.
+2. Define the data and the custom transformer as described in the issue.
+3. Attempt to run the transformation with the default configuration and print the result.
+4. Attempt to run the transformation with the pandas configuration and handle the expected error.
+5. Print "Issue reproduced" if the specific error is encountered, "Issue resolved" if no error occurs, and "Other issues" if any other error occurs.
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        set_config(transform_output="pandas")
+        result = make_union(MyTransformer()).fit_transform(data)
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_with_pandas_output()
+```
+
+The provided test script will:
+1. Import the necessary modules.
+2. Include the code to reproduce the issue described in the issue text.
+3. Print "Issue reproduced" if the specific `ValueError` indicating a length mismatch is raised.
+4. Print "Issue resolved" if no error is raised.
+5. Print "Other issues" if any other exception is raised.
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output_issue():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works
+        set_config(transform_output="default")
+        result_default = make_union(MyTransformer()).fit_transform(data)
+        
+        # This does not work
+        set_config(transform_output="pandas")
+        result_pandas = make_union(MyTransformer()).fit_transform(data)
+
+        print("Issue resolved")
+    except ValueError as e:
+        if str(e).startswith("Length mismatch"):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_with_pandas_output_issue()
+```
+2025-05-03 14:25:58,435 - INFO - raw output:
+Certainly! Below is the complete test script to reproduce the issue described in the issue text and to verify whether the issue has been resolved or if there are other issues.
+
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works.
+        set_config(transform_output="default")
+        make_union(MyTransformer()).fit_transform(data)
+    except Exception as e:
+        print("Other issues")
+        return
+
+    try:
+        # This does not work.
+        set_config(transform_output="pandas")
+        make_union(MyTransformer()).fit_transform(data)
+        
+        # If no exception is raised and we get here, then the issue is resolved
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_with_pandas_output()
+```
+
+This script sets up the test environment, attempts to reproduce the issue, and prints the appropriate message based on the outcome. Use this script to verify if the issue is still present or has been resolved.
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_pandas_transform_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # This works.
+        set_config(transform_output="default")
+        default_output = make_union(MyTransformer()).fit_transform(data)
+        print(default_output)
+
+        # This does not work.
+        set_config(transform_output="pandas")
+        pandas_output = make_union(MyTransformer()).fit_transform(data)
+        print(pandas_output)
+
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_feature_union_pandas_transform_output()
+```
+
+This test will:
+1. Attempt to reproduce the issue described in the issue text.
+2. Print "Issue resolved" if the code executes without error under both configurations.
+3. Print "Issue reproduced" if the specific ValueError related to length mismatch is encountered.
+4. Print "Other issues" if any other unexpected issues are encountered.
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works
+        set_config(transform_output="default")
+        make_union(MyTransformer()).fit_transform(data)
+    except Exception as e:
+        print("Other issues")
+        return
+
+    try:
+        # This should reproduce the issue
+        set_config(transform_output="pandas")
+        make_union(MyTransformer()).fit_transform(data)
+        print("Issue resolved")
+    except ValueError as e:
+        if 'Length mismatch' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_pandas_output()
+```
+
+This test script does the following:
+
+1. Imports the necessary modules.
+2. Defines the custom transformer and the data to be used in the test.
+3. Attempts to execute the pipeline with the default output configuration (which should work).
+4. Attempts to execute the pipeline with the pandas output configuration.
+5. Catches exceptions to determine if the issue has been reproduced, resolved, or if there are any other issues. 
+
+By executing this test, you should be able to verify if the issue described in the provided issue text has been reproduced or resolved.
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # Test with default output configuration
+        set_config(transform_output="default")
+        try:
+            default_output = make_union(MyTransformer()).fit_transform(data)
+        except Exception as e:
+            print("Other issues")
+            return
+
+        # Test with pandas output configuration
+        set_config(transform_output="pandas")
+        try:
+            pandas_output = make_union(MyTransformer()).fit_transform(data)
+            print("Issue resolved")
+        except ValueError as e:
+            if "Length mismatch" in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+        except Exception as e:
+            print("Other issues")
+
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union()
+```
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works.
+        set_config(transform_output="default")
+        result_default = make_union(MyTransformer()).fit_transform(data)
+        print(result_default)
+        
+        # This does not work.
+        set_config(transform_output="pandas")
+        result_pandas = make_union(MyTransformer()).fit_transform(data)
+        print(result_pandas)
+        
+        print("Issue resolved")
+    except ValueError as e:
+        error_message = str(e)
+        if "Length mismatch" in error_message:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues", str(e))
+
+test_feature_union_with_pandas_output()
+```
+
+This test script sets up the environment described in the issue, attempts to reproduce the issue, and provides feedback depending on the outcome:
+
+1. **"Issue resolved"**: If the code runs without any issues.
+2. **"Issue reproduced"**: If the specific error related to length mismatch is encountered.
+3. **"Other issues"**: For any other exceptions or errors that might arise.
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    try:
+        # Data setup
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # Test with default (numpy) output
+        set_config(transform_output="default")
+        try:
+            result = make_union(MyTransformer()).fit_transform(data)
+            print("Default output test passed")
+        except Exception:
+            print("Other issues")
+            return
+
+        # Test with pandas output
+        set_config(transform_output="pandas")
+        try:
+            result = make_union(MyTransformer()).fit_transform(data)
+            print("Issue resolved")
+        except ValueError as e:
+            if "Length mismatch" in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+        except Exception:
+            print("Other issues")
+    except Exception:
+        print("Other issues")
+
+test_feature_union_with_pandas_output()
+```
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    # This works.
+    try:
+        set_config(transform_output="default")
+        print(make_union(MyTransformer()).fit_transform(data))
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return
+
+    # This does not work.
+    try:
+        set_config(transform_output="pandas")
+        print(make_union(MyTransformer()).fit_transform(data))
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print(f"Other issues: {e}")
+
+test_feature_union_with_pandas_output()
+```
+
+This test script sets up the environment, creates the data and the transformer as described in the issue, and attempts to run the transformations with both default and pandas output settings. It prints "Issue reproduced" if the specific length mismatch error is encountered, indicating the issue is still present. If no error is encountered when using `pandas` output, it prints "Issue resolved". Any other issues encountered will print "Other issues" with the corresponding error message.
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_pandas_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # This works.
+        set_config(transform_output="default")
+        try:
+            output_default = make_union(MyTransformer()).fit_transform(data)
+            print("Output for default transform:", output_default)
+        except Exception as e:
+            print("Other issues in default transform:", e)
+            return
+
+        # This does not work.
+        set_config(transform_output="pandas")
+        try:
+            output_pandas = make_union(MyTransformer()).fit_transform(data)
+            print("Output for pandas transform:", output_pandas)
+            print("Issue resolved")
+        except ValueError as ve:
+            print("Issue reproduced")
+            print("ValueError:", ve)
+            return
+        except Exception as e:
+            print("Other issues:", e)
+            return
+
+    except Exception as e:
+        print("Other issues:", e)
+        return
+
+test_feature_union_pandas_output()
+```
+
+This test script includes:
+1. Necessary imports for pandas and scikit-learn.
+2. Code to reproduce the issue described in the issue text.
+3. Print statements to indicate the outcome: "Issue reproduced", "Issue resolved", or "Other issues".
+
+The script first tests the default output configuration to confirm it works without issues. Then, it switches to the pandas output configuration to check if the issue is reproduced.
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works.
+        set_config(transform_output="default")
+        result_default = make_union(MyTransformer()).fit_transform(data)
+        
+        # This does not work.
+        set_config(transform_output="pandas")
+        result_pandas = make_union(MyTransformer()).fit_transform(data)
+        
+        # If we reach here, it means no error was thrown
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_with_pandas_output()
+```
+
+This test script does the following:
+1. Imports the necessary libraries.
+2. Sets up the data and the custom transformer as described in the issue text.
+3. Tries to run the pipeline with the default numpy output and then with the pandas output.
+4. Based on the outcome, it prints "Issue resolved", "Issue reproduced", or "Other issues" to reflect the status. 
+
+The script is designed to both reproduce the issue and verify if the issue has been fixed.
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # This works.
+        set_config(transform_output="default")
+        make_union(MyTransformer()).fit_transform(data)
+
+        # This does not work.
+        set_config(transform_output="pandas")
+        make_union(MyTransformer()).fit_transform(data)
+        
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+            return
+        else:
+            print("Other issues")
+            return
+    except Exception as e:
+        print("Other issues")
+        return
+
+    print("Issue resolved")
+
+test_feature_union_with_pandas_output()
+```
+
+This test code follows the structure of your example and includes the necessary imports, code to reproduce the issue described in the issue text, and the appropriate print statements to indicate the outcome.
+2025-05-03 14:25:58,435 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_issue():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    # This works.
+    try:
+        set_config(transform_output="default")
+        result_default = make_union(MyTransformer()).fit_transform(data)
+        print(result_default)
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return
+
+    # This does not work.
+    try:
+        set_config(transform_output="pandas")
+        result_pandas = make_union(MyTransformer()).fit_transform(data)
+        print(result_pandas)
+        print("Issue resolved")
+    except ValueError as ve:
+        print("Issue reproduced")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_feature_union_issue()
+```
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_transform_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    # This works.
+    set_config(transform_output="default")
+    try:
+        result_default = make_union(MyTransformer()).fit_transform(data)
+        print(result_default)
+    except Exception:
+        print("Other issues")
+        return
+
+    # This does not work.
+    set_config(transform_output="pandas")
+    try:
+        result_pandas = make_union(MyTransformer()).fit_transform(data)
+        print(result_pandas)
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception:
+        print("Other issues")
+
+test_feature_union_with_pandas_transform_output()
+```
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_pandas_transform_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works.
+        set_config(transform_output="default")
+        result_default = make_union(MyTransformer()).fit_transform(data)
+        assert result_default is not None
+
+        # This does not work.
+        set_config(transform_output="pandas")
+        result_pandas = make_union(MyTransformer()).fit_transform(data)
+        print("Issue resolved")
+    except ValueError as e:
+        if 'Length mismatch' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception:
+        print("Other issues")
+
+test_feature_union_pandas_transform_output()
+```
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_pandas_output():
+    # Sample data setup
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    # Custom transformer class
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # Scenario 1: Using default numpy output
+        set_config(transform_output="default")
+        make_union_output_default = make_union(MyTransformer()).fit_transform(data)
+
+        # Scenario 2: Using pandas output
+        set_config(transform_output="pandas")
+        make_union_output_pandas = make_union(MyTransformer()).fit_transform(data)
+
+        # If no exception is raised, this means the issue is resolved
+        print("Issue resolved")
+    except ValueError as e:
+        # Checking if ValueError is due to length mismatch
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # Any other exceptions indicate other issues
+        print("Other issues")
+
+# Run the test
+test_feature_union_pandas_output()
+```
+
+This code sets up the necessary imports and defines a test function `test_feature_union_pandas_output` that reproduces the issue described. It will print "Issue resolved" if the issue is fixed, "Issue reproduced" if the issue is still present, and "Other issues" if any other exceptions are encountered.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_issue():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+        
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works.
+        set_config(transform_output="default")
+        output_default = make_union(MyTransformer()).fit_transform(data)
+
+        # This does not work.
+        set_config(transform_output="pandas")
+        output_pandas = make_union(MyTransformer()).fit_transform(data)
+        
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_issue()
+```
+2025-05-03 14:25:58,436 - INFO - raw output:
+Sure, here's a complete test script that can be used to reproduce the issue described in the issue text. This test script follows the structure you requested:
+
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works with default numpy output
+        set_config(transform_output="default")
+        default_result = make_union(MyTransformer()).fit_transform(data)
+        print(default_result)
+
+        # This does not work with pandas output
+        set_config(transform_output="pandas")
+        pandas_result = make_union(MyTransformer()).fit_transform(data)
+        print(pandas_result)
+        
+        # If no error is raised, the issue is resolved
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            # If the specific error occurs, the issue is reproduced
+            print("Issue reproduced")
+        else:
+            # If a different error occurs, there are other issues
+            print("Other issues")
+    except Exception as e:
+        # Catch any other unexpected exceptions
+        print("Other issues")
+
+# Run the test
+test_feature_union_pandas_output()
+```
+
+Explanation:
+1. Necessary imports: The script imports necessary modules like `pandas`, `BaseEstimator`, `TransformerMixin`, `set_config`, and `make_union`.
+2. Code to reproduce the issue described in the issue text: The script defines a test function `test_feature_union_pandas_output` which contains the code to reproduce the issue.
+3. Print statements to indicate the outcome: The script contains print statements to indicate whether the issue is reproduced, resolved, or if there are other issues.
+
+You can run this script in your environment to verify if the issue is still present or if it has been resolved.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_issue():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works.
+        set_config(transform_output="default")
+        make_union(MyTransformer()).fit_transform(data)
+    except Exception:
+        print("Other issues")
+        return
+
+    try:
+        # This does not work.
+        set_config(transform_output="pandas")
+        make_union(MyTransformer()).fit_transform(data)
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception:
+        print("Other issues")
+
+test_feature_union_issue()
+```
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_aggregation_with_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    # Test with default numpy output
+    try:
+        set_config(transform_output="default")
+        result_default = make_union(MyTransformer()).fit_transform(data)
+    except Exception:
+        print("Other issues")
+        return
+
+    # Test with pandas output
+    try:
+        set_config(transform_output="pandas")
+        result_pandas = make_union(MyTransformer()).fit_transform(data)
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception:
+        print("Other issues")
+
+test_feature_union_aggregation_with_pandas_output()
+```
+
+This test script:
+
+1. Imports necessary libraries and sets up the data.
+2. Defines a custom transformer `MyTransformer`.
+3. Attempts to use `FeatureUnion` with the default `numpy` output to ensure there are no other issues.
+4. Attempts to use `FeatureUnion` with `pandas` output and checks for the specific error message.
+5. Prints "Issue resolved", "Issue reproduced", or "Other issues" based on the outcome.
+2025-05-03 14:25:58,436 - INFO - raw output:
+Certainly! Below is the complete test to reproduce the issue described in the provided issue text. This test will indicate whether the issue is reproduced, resolved, or if there are other issues.
+
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.pipeline import make_union
+from sklearn import set_config
+
+def test_feature_union_pandas_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # This works.
+        set_config(transform_output="default")
+        try:
+            result_default = make_union(MyTransformer()).fit_transform(data)
+        except Exception as e:
+            print("Other issues")
+            return
+
+        # This does not work.
+        set_config(transform_output="pandas")
+        try:
+            result_pandas = make_union(MyTransformer()).fit_transform(data)
+            print("Issue resolved")
+        except ValueError as e:
+            if "Length mismatch" in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+        except Exception as e:
+            print("Other issues")
+
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_pandas_output()
+```
+
+This test script will:
+1. Import necessary modules and classes.
+2. Define the transformer class `MyTransformer`.
+3. Attempt to reproduce the issue under the different configurations (`transform_output="default"` and `transform_output="pandas"`).
+4. Print "Issue reproduced" if the expected `ValueError` with the "Length mismatch" message is encountered.
+5. Print "Issue resolved" if no error occurs under the `pandas` configuration.
+6. Print "Other issues" if any other unexpected error is encountered.
+
+You can run this script to validate whether the current issue is still present or has been resolved.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # This works.
+        set_config(transform_output="default")
+        make_union(MyTransformer()).fit_transform(data)
+
+        # This does not work.
+        set_config(transform_output="pandas")
+        make_union(MyTransformer()).fit_transform(data)
+
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception:
+        print("Other issues")
+
+test_feature_union_with_pandas_output()
+```
+
+This script includes the necessary imports and reproduces the issue described in the provided issue text. It prints "Issue resolved" if the code runs without errors, "Issue reproduced" if the specific error related to the issue is encountered, and "Other issues" if any other exceptions occur.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_pandas_transform_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # This works.
+        set_config(transform_output="default")
+        try:
+            _ = make_union(MyTransformer()).fit_transform(data)
+        except Exception as e:
+            print("Other issues")
+            print(e)
+            return
+        
+        # This does not work.
+        set_config(transform_output="pandas")
+        try:
+            _ = make_union(MyTransformer()).fit_transform(data)
+            print("Issue resolved")
+        except ValueError as e:
+            if "Length mismatch" in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+                print(e)
+        except Exception as e:
+            print("Other issues")
+            print(e)
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+test_feature_union_pandas_transform_output()
+```
+
+This script performs the following steps:
+1. Sets up the necessary imports and data.
+2. Defines the `MyTransformer` class as described in the issue.
+3. Tests the code with the default `numpy` transform output configuration to ensure there are no other issues.
+4. Tests the code with the `pandas` transform output configuration to check if the issue is reproduced.
+5. Prints "Issue reproduced" if the `ValueError` related to length mismatch is caught.
+6. Prints "Issue resolved" if no errors are raised with the `pandas` transform output configuration.
+7. Prints "Other issues" if any other unexpected errors are encountered.
+
+You can run this script to confirm the presence of the issue and to verify when the issue gets resolved.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+
+        # This works.
+        set_config(transform_output="default")
+        try:
+            default_output = make_union(MyTransformer()).fit_transform(data)
+            print("Default output:\n", default_output)
+        except Exception as e:
+            print("Other issues")
+            return
+
+        # This does not work.
+        set_config(transform_output="pandas")
+        try:
+            pandas_output = make_union(MyTransformer()).fit_transform(data)
+            print("Pandas output:\n", pandas_output)
+            print("Issue resolved")
+        except ValueError as ve:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+        return
+
+test_feature_union_with_pandas_output()
+```
+
+This script is designed to reproduce the issue described in the provided text. It runs the code using both the default and pandas transform output configurations and checks for the expected ValueError. The script prints "Issue reproduced" if the error occurs as expected, "Issue resolved" if no error occurs, and "Other issues" if any other exception is raised, allowing for comprehensive testing and validation.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_pandas_transform_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # This works.
+        set_config(transform_output="default")
+        make_union(MyTransformer()).fit_transform(data)
+
+        # This does not work.
+        set_config(transform_output="pandas")
+        try:
+            make_union(MyTransformer()).fit_transform(data)
+            print("Issue resolved")
+        except ValueError as e:
+            if "Length mismatch" in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+    except Exception as e:
+        print("Other issues")
+        print(str(e))
+
+test_feature_union_pandas_transform_output()
+```
+
+This test script follows the outlined structure to reproduce and verify the issue:
+
+1. Imports necessary modules.
+2. Recreates the issue scenario using the code provided.
+3. Checks if the issue occurs when `transform_output` is set to `"pandas"`.
+4. Prints "Issue reproduced" if the expected error occurs, "Issue resolved" if no error occurs, and "Other issues" if there are any other unexpected errors.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_pandas_transform():
+    # Prepare test data
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+        
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works with default numpy output
+        set_config(transform_output="default")
+        make_union(MyTransformer()).fit_transform(data)
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return
+
+    try:
+        # This should work with pandas transform output
+        set_config(transform_output="pandas")
+        make_union(MyTransformer()).fit_transform(data)
+        print("Issue resolved")
+    except ValueError as ve:
+        if "Length mismatch" in str(ve):
+            print("Issue reproduced")
+        else:
+            print(f"Other issues: {ve}")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+# Run the test function
+test_feature_union_pandas_transform()
+```
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works.
+        set_config(transform_output="default")
+        np_output = make_union(MyTransformer()).fit_transform(data)
+        
+        # This does not work.
+        set_config(transform_output="pandas")
+        pd_output = make_union(MyTransformer()).fit_transform(data)
+        
+        # If both configurations work without errors, print "Issue resolved"
+        print("Issue resolved")
+        
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+# Run the test
+test_feature_union_with_pandas_output()
+```
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_pandas_transform():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    # This works.
+    set_config(transform_output="default")
+    try:
+        result_default = make_union(MyTransformer()).fit_transform(data)
+        assert result_default is not None
+    except Exception as e:
+        print("Other issues")
+        return
+
+    # This does not work.
+    set_config(transform_output="pandas")
+    try:
+        result_pandas = make_union(MyTransformer()).fit_transform(data)
+        assert result_pandas is not None
+        print("Issue resolved")
+    except ValueError as ve:
+        if "Length mismatch" in str(ve):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_pandas_transform()
+```
+
+This test script will:
+1. Create the necessary data and transformer as described in the issue.
+2. Attempt to transform the data using both default and pandas transform outputs.
+3. Check for the specific issue described (length mismatch error) and print the appropriate message based on the outcome.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works.
+        set_config(transform_output="default")
+        result_default = make_union(MyTransformer()).fit_transform(data)
+        
+        # This does not work.
+        set_config(transform_output="pandas")
+        try:
+            result_pandas = make_union(MyTransformer()).fit_transform(data)
+            print("Issue resolved")
+        except ValueError as e:
+            if "Length mismatch" in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_with_pandas_output()
+```
+
+In this test script, we follow these steps:
+
+1. Import necessary libraries.
+2. Define the data and custom transformer as described in the issue.
+3. Test the code path that uses the default numpy output to ensure that it works.
+4. Test the code path that uses the pandas output to see if it raises the expected `ValueError`.
+5. Print appropriate messages based on the outcomes of the tests.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    # Test with default config (numpy output)
+    set_config(transform_output="default")
+    try:
+        result_default = make_union(MyTransformer()).fit_transform(data)
+        print("Default output (numpy) test passed.")
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return
+
+    # Test with pandas config (pandas output)
+    set_config(transform_output="pandas")
+    try:
+        result_pandas = make_union(MyTransformer()).fit_transform(data)
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print(f"Other issues: {e}")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_feature_union_with_pandas_output()
+```
+
+This test:
+1. Sets up the environment with the necessary imports.
+2. Creates a DataFrame to simulate the data described in the issue.
+3. Defines the `MyTransformer` class.
+4. Tests the transformer first with the default configuration (numpy output).
+5. Tests the transformer with the pandas configuration.
+6. Prints "Issue reproduced" if the specific issue with the length mismatch is encountered.
+7. Prints "Issue resolved" if no errors are encountered with the pandas output.
+8. Prints "Other issues" if other exceptions are raised.
+
+You can run this test script to both reproduce the issue and verify if the issue is resolved after implementing any fixes.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_transform_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    # Test with default numpy output
+    set_config(transform_output="default")
+    try:
+        _ = make_union(MyTransformer()).fit_transform(data)
+    except Exception as e:
+        print("Other issues")
+        return
+
+    # Test with pandas transform output
+    set_config(transform_output="pandas")
+    try:
+        _ = make_union(MyTransformer()).fit_transform(data)
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_with_pandas_transform_output()
+```
+
+This test script does the following:
+1. Imports the necessary modules.
+2. Sets up the data and the custom transformer as described in the issue.
+3. Tests the functionality with the default numpy output configuration to ensure there are no other issues.
+4. Tests the functionality with the pandas transform output configuration.
+5. Prints "Issue resolved" if no error is thrown.
+6. Prints "Issue reproduced" if the specific ValueError related to length mismatch is thrown.
+7. Prints "Other issues" if any other exception is thrown.
+
+You can use this test script to reproduce the issue and verify if it has been fixed.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # This works.
+        set_config(transform_output="default")
+        try:
+            make_union(MyTransformer()).fit_transform(data)
+        except Exception:
+            print("Other issues")
+            return
+
+        # This does not work.
+        set_config(transform_output="pandas")
+        try:
+            make_union(MyTransformer()).fit_transform(data)
+            print("Issue resolved")
+        except ValueError as e:
+            if "Length mismatch" in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+    except Exception:
+        print("Other issues")
+
+test_feature_union_with_pandas_output()
+```
+
+This test script follows these steps:
+1. Imports the necessary modules.
+2. Defines the custom transformer `MyTransformer`.
+3. Sets up the input data.
+4. Tests the `make_union` pipeline using the default transform output.
+5. Tests the `make_union` pipeline using the pandas transform output.
+6. Checks the outcomes and prints the appropriate message based on the observed behavior.
+
+You can run this script to determine if the issue described in the provided issue text is reproduced, resolved, or if there are other issues.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # This works.
+        set_config(transform_output="default")
+        try:
+            default_output = make_union(MyTransformer()).fit_transform(data)
+        except Exception as e:
+            print("Other issues")
+            return
+
+        # This does not work.
+        set_config(transform_output="pandas")
+        try:
+            pandas_output = make_union(MyTransformer()).fit_transform(data)
+            print("Issue resolved")
+        except ValueError as e:
+            if "Length mismatch" in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_with_pandas_output()
+```
+
+This script will:
+1. Set up the data and transformer.
+2. Test with the default `numpy` output setting to ensure it works without issues.
+3. Switch to the `pandas` output setting and attempt to reproduce the issue.
+4. Print "Issue reproduced" if the `ValueError` with "Length mismatch" is raised.
+5. Print "Issue resolved" if the transformation completes without errors.
+6. Print "Other issues" if any other exceptions are raised.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works.
+        set_config(transform_output="default")
+        numpy_output = make_union(MyTransformer()).fit_transform(data)
+        print("Default numpy output:")
+        print(numpy_output)
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return
+
+    try:
+        # This does not work and should reproduce the issue.
+        set_config(transform_output="pandas")
+        pandas_output = make_union(MyTransformer()).fit_transform(data)
+        print("Pandas output:")
+        print(pandas_output)
+        print("Issue resolved")
+    except ValueError as ve:
+        if "Length mismatch" in str(ve):
+            print("Issue reproduced")
+        else:
+            print(f"Other issues: {ve}")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_feature_union_with_pandas_output()
+```
+
+In this test:
+1. We reproduce the setup described in the issue.
+2. We attempt to run the existing code with both `default` and `pandas` output configurations.
+3. The test checks if the specific error related to the length mismatch is raised, indicating that the issue has been reproduced.
+4. The test will print "Issue resolved" if the `pandas` output works without errors, "Issue reproduced" if the specific error occurs, and "Other issues" if any other unexpected issues arise.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works.
+        set_config(transform_output="default")
+        default_output = make_union(MyTransformer()).fit_transform(data)
+        
+        # This does not work.
+        set_config(transform_output="pandas")
+        pandas_output = make_union(MyTransformer()).fit_transform(data)
+        
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_with_pandas_output()
+```
+
+This script contains the necessary imports, the code to reproduce the issue, and conditions to print the appropriate messages based on the outcome. When executed, it will print "Issue reproduced" if the described issue occurs, "Issue resolved" if the issue no longer occurs, and "Other issues" if any other exception is thrown.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # This works.
+        set_config(transform_output="default")
+        default_output = make_union(MyTransformer()).fit_transform(data)
+        print("Default output:")
+        print(default_output)
+
+        # This does not work.
+        set_config(transform_output="pandas")
+
+        try:
+            pandas_output = make_union(MyTransformer()).fit_transform(data)
+            print("Pandas output:")
+            print(pandas_output)
+            print("Issue resolved")
+        except ValueError as e:
+            if "Length mismatch" in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_feature_union_with_pandas_output()
+```
+
+The provided test script follows the requested structure:
+
+1. Necessary imports are included.
+2. The code from the issue description is used to reproduce the issue.
+3. It prints "Issue reproduced" if the specific length mismatch error occurs when the `pandas` transform output is set.
+4. It prints "Issue resolved" if the code executes without errors for the `pandas` transform output.
+5. It prints "Other issues" for any other exceptions that might occur.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_issue():
+    try:
+        # Define the data and transformer
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # Test with default output (should work)
+        set_config(transform_output="default")
+        try:
+            make_union(MyTransformer()).fit_transform(data)
+        except Exception as e:
+            print("Other issues")
+            return
+
+        # Test with pandas output (should raise the issue)
+        set_config(transform_output="pandas")
+        try:
+            make_union(MyTransformer()).fit_transform(data)
+            print("Issue resolved")
+        except ValueError as e:
+            if "Length mismatch" in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_feature_union_issue()
+```
+
+This script does the following:
+1. Imports the necessary libraries.
+2. Defines the data and the custom transformer.
+3. Tests the scenario with the default output configuration to ensure it works without errors.
+4. Tests the scenario with the pandas output configuration to reproduce the issue.
+5. Prints "Issue resolved" if no error is raised, "Issue reproduced" if the specific error is raised, and "Other issues" if any other error is encountered.
+2025-05-03 14:25:58,436 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_pandas_transform_output():
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class MyTransformer(BaseEstimator, TransformerMixin):
+        def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+            return self
+
+        def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+            return X["value"].groupby(X["date"]).sum()
+
+    try:
+        # This works.
+        set_config(transform_output="default")
+        result_default = make_union(MyTransformer()).fit_transform(data)
+        
+        # This does not work.
+        set_config(transform_output="pandas")
+        result_pandas = make_union(MyTransformer()).fit_transform(data)
+
+        # If no exceptions, the issue is resolved
+        print("Issue resolved")
+    except ValueError as e:
+        if "Length mismatch" in str(e):
+            # Specific error indicating the issue
+            print("Issue reproduced")
+        else:
+            # Some other issue with the source code
+            print("Other issues")
+    except Exception as e:
+        # Some other issue with the source code
+        print("Other issues")
+
+test_feature_union_pandas_transform_output()
+```
+
+This script includes all necessary imports and simulates the issue described in the issue text. The test checks both configurations (`default` and `pandas`) and prints the relevant message based on the outcome.
+2025-05-03 14:25:58,437 - INFO - raw output:
+```python
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import set_config
+from sklearn.pipeline import make_union
+
+def test_feature_union_with_pandas_set_output():
+    try:
+        index = pd.date_range(start="2020-01-01", end="2020-01-05", inclusive="left", freq="H")
+        data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+        data["date"] = index.date
+
+        class MyTransformer(BaseEstimator, TransformerMixin):
+            def fit(self, X: pd.DataFrame, y: pd.Series | None = None, **kwargs):
+                return self
+
+            def transform(self, X: pd.DataFrame, y: pd.Series | None = None) -> pd.DataFrame:
+                return X["value"].groupby(X["date"]).sum()
+
+        # This works.
+        set_config(transform_output="default")
+        default_output = make_union(MyTransformer()).fit_transform(data)
+        print("Default output:", default_output)
+
+        # This does not work.
+        set_config(transform_output="pandas")
+        pandas_output = make_union(MyTransformer()).fit_transform(data)
+        print("Pandas output:", pandas_output)
+        
+        print("Issue resolved")
+
+    except ValueError as e:
+        if "Length mismatch: Expected axis has" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_feature_union_with_pandas_set_output()
+```
+
+This script sets up the test environment, reproduces the issue as described, and provides output based on whether the issue is reproduced, resolved, or if there are other issues. The expected behavior is:
+- If the "Length mismatch" error occurs, it will print "Issue reproduced".
+- If no errors occur, it will print "Issue resolved".
+- Any other exceptions will result in "Other issues" being printed.

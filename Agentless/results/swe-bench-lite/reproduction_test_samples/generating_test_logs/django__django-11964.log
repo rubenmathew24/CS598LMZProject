@@ -1,0 +1,2291 @@
+2025-05-02 17:20:54,169 - INFO - ================ generating test for django__django-11964 ================
+2025-05-02 17:20:54,298 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+The value of a TextChoices/IntegerChoices field has a differing type
+Description
+	
+If we create an instance of a model having a CharField or IntegerField with the keyword choices pointing to IntegerChoices or TextChoices, the value returned by the getter of the field will be of the same type as the one created by enum.Enum (enum value).
+For example, this model:
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+class MyChoice(models.TextChoices):
+	FIRST_CHOICE = "first", _("The first choice, it is")
+	SECOND_CHOICE = "second", _("The second choice, it is")
+class MyObject(models.Model):
+	my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+Then this test:
+from django.test import TestCase
+from testing.pkg.models import MyObject, MyChoice
+class EnumTest(TestCase):
+	def setUp(self) -> None:
+		self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+	def test_created_object_is_str(self):
+		my_object = self.my_object
+		self.assertIsInstance(my_object.my_str_value, str)
+		self.assertEqual(str(my_object.my_str_value), "first")
+	def test_retrieved_object_is_str(self):
+		my_object = MyObject.objects.last()
+		self.assertIsInstance(my_object.my_str_value, str)
+		self.assertEqual(str(my_object.my_str_value), "first")
+And then the results:
+(django30-venv) ➜ django30 ./manage.py test
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+F.
+======================================================================
+FAIL: test_created_object_is_str (testing.tests.EnumTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+ File "/Users/mikailkocak/Development/django30/testing/tests.py", line 14, in test_created_object_is_str
+	self.assertEqual(str(my_object.my_str_value), "first")
+AssertionError: 'MyChoice.FIRST_CHOICE' != 'first'
+- MyChoice.FIRST_CHOICE
++ first
+----------------------------------------------------------------------
+Ran 2 tests in 0.002s
+FAILED (failures=1)
+We notice when invoking __str__(...) we don't actually get the value property of the enum value which can lead to some unexpected issues, especially when communicating to an external API with a freshly created instance that will send MyEnum.MyValue, and the one that was retrieved would send my_value.
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:54,300 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 13:51:57,214 - INFO - ================ generating test for django__django-11964 ================
+2025-05-03 13:51:57,232 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+The value of a TextChoices/IntegerChoices field has a differing type
+Description
+	
+If we create an instance of a model having a CharField or IntegerField with the keyword choices pointing to IntegerChoices or TextChoices, the value returned by the getter of the field will be of the same type as the one created by enum.Enum (enum value).
+For example, this model:
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+class MyChoice(models.TextChoices):
+	FIRST_CHOICE = "first", _("The first choice, it is")
+	SECOND_CHOICE = "second", _("The second choice, it is")
+class MyObject(models.Model):
+	my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+Then this test:
+from django.test import TestCase
+from testing.pkg.models import MyObject, MyChoice
+class EnumTest(TestCase):
+	def setUp(self) -> None:
+		self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+	def test_created_object_is_str(self):
+		my_object = self.my_object
+		self.assertIsInstance(my_object.my_str_value, str)
+		self.assertEqual(str(my_object.my_str_value), "first")
+	def test_retrieved_object_is_str(self):
+		my_object = MyObject.objects.last()
+		self.assertIsInstance(my_object.my_str_value, str)
+		self.assertEqual(str(my_object.my_str_value), "first")
+And then the results:
+(django30-venv) ➜ django30 ./manage.py test
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+F.
+======================================================================
+FAIL: test_created_object_is_str (testing.tests.EnumTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+ File "/Users/mikailkocak/Development/django30/testing/tests.py", line 14, in test_created_object_is_str
+	self.assertEqual(str(my_object.my_str_value), "first")
+AssertionError: 'MyChoice.FIRST_CHOICE' != 'first'
+- MyChoice.FIRST_CHOICE
++ first
+----------------------------------------------------------------------
+Ran 2 tests in 0.002s
+FAILED (failures=1)
+We notice when invoking __str__(...) we don't actually get the value property of the enum value which can lead to some unexpected issues, especially when communicating to an external API with a freshly created instance that will send MyEnum.MyValue, and the one that was retrieved would send my_value.
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 13:51:57,232 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 13:51:57,239 - INFO - Creating API request
+2025-05-03 13:52:00,652 - INFO - API response ChatCompletion(id='chatcmpl-BTCFpt28NTT86dCXlHNiL9IpsSgxq', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the TextChoices and Model\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n\n        print("Issue resolved")\n\n# Run the tests\nif __name__ == "__main__":\n    import django\n    import sys\n    from django.conf import settings\n\n    settings.configure(\n        DATABASES={\n            \'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }\n        },\n        INSTALLED_APPS=[\n            __name__,\n        ],\n    )\n    django.setup()\n    try:\n        EnumTest(\'test_created_object_is_str\').run()\n        EnumTest(\'test_retrieved_object_is_str\').run()\n    except Exception as e:\n        print("Other issues")\n        sys.exit(1)\n```\n\nThis script sets up a Django test case to reproduce the issue described. It will print "Issue reproduced" if the issue is present, "Issue resolved" if the issue has been fixed, and "Other issues" if there are other problems with the code.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746298317, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=513, prompt_tokens=872, total_tokens=1385, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 13:52:00,652 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 13:52:00,659 - INFO - Creating API request
+2025-05-03 13:53:03,528 - INFO - API response ChatCompletion(id='chatcmpl-BTCFsPO2VgqHJX4dG0dSBPLlLkrPk', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\nif __name__ == "__main__":\n    import django\n    from django.conf import settings\n\n    settings.configure(\n        DATABASES={\n            "default": {\n                "ENGINE": "django.db.backends.sqlite3",\n                "NAME": ":memory:",\n            }\n        },\n        INSTALLED_APPS=[\n            __name__,\n        ],\n    )\n\n    django.setup()\n    TestCase.run(EnumTest("test_created_object_is_str"))\n    TestCase.run(EnumTest("test_retrieved_object_is_str"))\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\n\n# Define the TextChoices and Model as described in the issue\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        # Create an instance of MyObject with the choice value\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        if not isinstance(my_object.my_str_value, str):\n            print("Other issues")\n            return\n\n        if str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n            return\n        \n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        if not isinstance(my_object.my_str_value, str):\n            print("Other issues")\n            return\n\n        if str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n            return\n\n# Run the tests\nEnumTest().test_created_object_is_str()\nEnumTest().test_retrieved_object_is_str()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\nif __name__ == "__main__":\n    EnumTest().test_created_object_is_str()\n    EnumTest().test_retrieved_object_is_str()\n```\n\nThis script sets up a Django model, creates an instance of the model, and retrieves the instance to test if the value type is consistent. It also checks and prints whether the issue is reproduced, resolved, or if there are other issues based on the test results.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the TextChoices\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\n# Define the model\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        # Create the object\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        elif isinstance(my_object.my_str_value, MyChoice):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        elif isinstance(my_object.my_str_value, MyChoice):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\nif __name__ == "__main__":\n    # Run the tests\n    EnumTest().setUp()\n    EnumTest().test_created_object_is_str()\n    EnumTest().test_retrieved_object_is_str()\n```\n\nIn this script:\n1. We define the `MyChoice` and `MyObject` as described in the issue.\n2. We create a test case `EnumTest` where:\n   - `setUp` method creates an instance of `MyObject`.\n   - `test_created_object_is_str` checks the type and value of the `my_str_value` field for the created object and prints the appropriate message.\n   - `test_retrieved_object_is_str` checks the type and value of the `my_str_value` field for the retrieved object and prints the appropriate message.\n3. We run both tests in the main section to check if the issue is reproduced or resolved.\n\nThis test helps in verifying if the issue mentioned in the issue text is reproduced or resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the TextChoices and model as described\nclass MyChoice(models.TextChoices):\n\tFIRST_CHOICE = "first", _("The first choice, it is")\n\tSECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n\tmy_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case\nclass EnumTest(TestCase):\n\tdef setUp(self) -> None:\n\t\tself.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n\tdef test_enum_issue(self):\n\t\ttry:\n\t\t\t# Test with the created object\n\t\t\tmy_object = self.my_object\n\t\t\tif not isinstance(my_object.my_str_value, str) or str(my_object.my_str_value) != "first":\n\t\t\t\tprint("Issue reproduced")\n\t\t\t\treturn\n\n\t\t\t# Test with the retrieved object\n\t\t\tmy_object = MyObject.objects.last()\n\t\t\tif not isinstance(my_object.my_str_value, str) or str(my_object.my_str_value) != "first":\n\t\t\t\tprint("Issue reproduced")\n\t\t\t\treturn\n\n\t\t\t# If both tests pass\n\t\t\tprint("Issue resolved")\n\t\texcept Exception as e:\n\t\t\tprint("Other issues")\n\t\t\treturn\n\n# Run the test\nif __name__ == "__main__":\n\tEnumTest().test_enum_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\nfrom django.utils.translation import gettext_lazy as _\n\n# Define TextChoices\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\n# Define the model using TextChoices\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Test case to reproduce and verify the issue\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n# Running the test cases\nif __name__ == "__main__":\n    EnumTest().test_created_object_is_str()\n    EnumTest().test_retrieved_object_is_str()\n```\n\nThis test script will:\n1. Create an instance of `MyObject` with the `my_str_value` set to `MyChoice.FIRST_CHOICE`.\n2. Test whether the created object\'s `my_str_value` is a string and matches "first".\n3. Test whether the retrieved object\'s `my_str_value` is a string and matches "first".\n4. Print "Issue resolved" if the checks pass, "Issue reproduced" if the specific AssertionError is raised, and "Other issues" if any other AssertionError occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the enum class\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\n# Define the model class\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError as e:\n            if str(e) == \'MyChoice.FIRST_CHOICE\' != \'first\':\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError as e:\n            if str(e) == \'MyChoice.FIRST_CHOICE\' != \'first\':\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n\n        print("Issue resolved")\n\n# Run the test case\nif __name__ == "__main__":\n    EnumTest(\'test_created_object_is_str\').run()\n    EnumTest(\'test_retrieved_object_is_str\').run()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n\n# Run the tests\nif __name__ == "__main__":\n    try:\n        test_case = EnumTest()\n        test_case.setUp()\n        test_case.test_created_object_is_str()\n        test_case.test_retrieved_object_is_str()\n    except Exception as e:\n        print("Other issues")\n        print(str(e))\n```\n\nThis test script is designed to reproduce the issue described in the provided issue text. It includes the necessary imports, the code to set up the test conditions, and the logic to print "Issue reproduced" if the bug is present, "Issue resolved" if the bug is fixed, and "Other issues" if there are other problems with the code.\n\nBefore running the script, ensure Django is properly set up in your environment and that the models and tests are correctly integrated into your Django project.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Model definition as described in the issue\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Test case to reproduce and verify the issue\nclass EnumTest(TestCase):\n    \n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_enum_value_type(self):\n        try:\n            # Test case for created object\n            my_object = self.my_object\n            if str(my_object.my_str_value) != "first":\n                print("Issue reproduced")\n                return\n            \n            if not isinstance(my_object.my_str_value, str):\n                print("Other issues")\n                return\n\n            # Test case for retrieved object\n            my_object = MyObject.objects.last()\n            if str(my_object.my_str_value) != "first":\n                print("Issue reproduced")\n                return\n            \n            if not isinstance(my_object.my_str_value, str):\n                print("Other issues")\n                return\n\n            print("Issue resolved")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n# Run the test\nEnumTest().test_enum_value_type()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError:\n            print("Issue reproduced")\n            return\n        except Exception:\n            print("Other issues")\n            return\n\n        print("Issue resolved")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError:\n            print("Issue reproduced")\n            return\n        except Exception:\n            print("Other issues")\n            return\n\n        print("Issue resolved")\n\nif __name__ == "__main__":\n    try:\n        EnumTest().test_created_object_is_str()\n        EnumTest().test_retrieved_object_is_str()\n    except Exception as e:\n        print(f"Other issues: {e}")\n```\n\nThis test script includes:\n1. Necessary imports\n2. Code to reproduce the issue described in the issue text\n3. Conditional prints to indicate the outcome: "Issue reproduced", "Issue resolved", or "Other issues"\n\nTo use this script, you should have Django set up in your environment, and the models should be defined within your Django application. This test script can be run as a standalone script if placed within the Django application context.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError as e:\n            if str(e).strip() == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError as e:\n            if str(e).strip() == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n# Running the tests\nif __name__ == "__main__":\n    import sys\n    from django.conf import settings\n    import django\n\n    settings.configure(\n        DATABASES={\n            \'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }\n        },\n        INSTALLED_APPS=[\n            __name__\n        ]\n    )\n    django.setup()\n    from django.test.utils import get_runner\n    TestRunner = get_runner(settings)\n    test_runner = TestRunner(verbosity=2)\n    failures = test_runner.run_tests([__name__])\n    sys.exit(bool(failures))\n```\n\nThis script creates a Django test case similar to the provided issue text and aims to reproduce and identify the issue. It includes necessary imports, model definitions, and the test class. It handles the results by printing "Issue reproduced," "Issue resolved," or "Other issues" based on the assertion outcomes. It also includes a main section to set up a Django environment and run the tests.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the TextChoices Enum and the Model\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Test Case to Reproduce the Issue\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        elif isinstance(my_object.my_str_value, MyChoice):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        elif isinstance(my_object.my_str_value, MyChoice):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n# Running the tests\nif __name__ == "__main__":\n    EnumTest().setUp()\n    EnumTest().test_created_object_is_str()\n    EnumTest().test_retrieved_object_is_str()\n```\n\nIn this test script:\n\n1. Necessary imports are included.\n2. The code to reproduce the issue described in the issue text is provided, defining the model and enum, and creating and retrieving instances.\n3. The outcome is print statements indicating whether the issue is reproduced, resolved, or if there are other issues with the code.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the enum choices\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\n# Define the model\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n        except AssertionError as e:\n            if str(e).startswith(\'AssertionError: \'):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n        print("Issue resolved")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n        except AssertionError as e:\n            if str(e).startswith(\'AssertionError: \'):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n        print("Issue resolved")\n\n# Run the test case\nif __name__ == \'__main__\':\n    test_case = EnumTest()\n    test_case.setUp()\n    test_case.test_created_object_is_str()\n    test_case.test_retrieved_object_is_str()\n```\n\nThis script is a self-contained test case that will help in reproducing the issue described in the provided issue text. You can run this script to see if the issue is reproduced or resolved based on the output.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        if self._check_issue(my_object.my_str_value, "first"):\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    \n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        if self._check_issue(my_object.my_str_value, "first"):\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    \n    def _check_issue(self, value, expected):\n        try:\n            assert isinstance(value, str)\n            assert str(value) == expected\n            return False\n        except AssertionError:\n            return True\n    \n    def runTest(self):\n        try:\n            self.test_created_object_is_str()\n            self.test_retrieved_object_is_str()\n        except Exception as e:\n            print("Other issues:", e)\n\n# Running the test\nEnumTest().runTest()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\n\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        elif isinstance(my_object.my_str_value, MyChoice) and str(my_object.my_str_value) == "MyChoice.FIRST_CHOICE":\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        elif isinstance(my_object.my_str_value, MyChoice) and str(my_object.my_str_value) == "MyChoice.FIRST_CHOICE":\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n\n# Running the tests\nif __name__ == "__main__":\n    EnumTest().test_created_object_is_str()\n    EnumTest().test_retrieved_object_is_str()\n```\n\nThis code defines a unit test for the issue described. If the issue is reproduced, it prints "Issue reproduced". If the issue has been resolved, it prints "Issue resolved". If there are unexpected issues with the source code, it prints "Other issues". The tests check both the created and retrieved object cases as described in the issue.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nimport sys\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        else:\n            if str(my_object.my_str_value) == "MyChoice.FIRST_CHOICE":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        else:\n            if str(my_object.my_str_value) == "MyChoice.FIRST_CHOICE":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n\nif __name__ == "__main__":\n    try:\n        import django\n        django.setup()\n        test = EnumTest()\n        test.setUp()\n        test.test_created_object_is_str()\n        test.test_retrieved_object_is_str()\n    except Exception as e:\n        print("Other issues")\n        sys.exit(1)\n```\n\nThis test suite is designed to reproduce and verify the issue described in the provided issue text. It follows these steps:\n1. Import necessary modules and classes.\n2. Define the `MyChoice` and `MyObject` models.\n3. Create the `EnumTest` class inheriting from `TestCase`.\n4. Implement the `setUp` method to create an instance of `MyObject`.\n5. Define `test_created_object_is_str` and `test_retrieved_object_is_str` methods to test and print the outcomes based on whether the issue is reproduced, resolved, or there are other issues.\n6. Run the test methods within the `if __name__ == "__main__":` block to allow standalone execution of the test script.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\nfrom django.utils.translation import gettext_lazy as _\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        try:\n            my_object = self.my_object\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError as e:\n            if \'MyChoice.FIRST_CHOICE\' in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n\n    def test_retrieved_object_is_str(self):\n        try:\n            my_object = MyObject.objects.last()\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError as e:\n            if \'MyChoice.FIRST_CHOICE\' in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n\nif __name__ == "__main__":\n    EnumTest().test_created_object_is_str()\n    EnumTest().test_retrieved_object_is_str()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the choices using TextChoices\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\n# Define the model using CharField with choices\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case to reproduce the issue\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        # Create an instance of MyObject\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_enum_issue(self):\n        try:\n            # Test the created object\n            my_object = self.my_object\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n\n            # Test the retrieved object\n            my_object = MyObject.objects.last()\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n            \n            print("Issue resolved")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n# Execute the test case\nEnumTest().test_enum_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define models\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define tests\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError:\n            print("Issue reproduced")\n            return\n\n        print("Issue resolved")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError:\n            print("Issue reproduced")\n            return\n\n        print("Issue resolved")\n\n# Run tests\nif __name__ == "__main__":\n    try:\n        test_case = EnumTest()\n        test_case.setUp()\n        test_case.test_created_object_is_str()\n        test_case.test_retrieved_object_is_str()\n    except Exception as e:\n        print("Other issues")\n        print(str(e))\n```\n\nThis test script does the following:\n1. Defines the necessary imports and model definitions to set up the scenario described in the issue.\n2. Contains test cases to reproduce the described issue.\n3. Prints "Issue reproduced" if the tests indicate the issue is still present.\n4. Prints "Issue resolved" if the tests pass without any issues.\n5. Prints "Other issues" if there are exceptions or problems in the test execution beyond the described issue.\n\nTo use this script, ensure that the necessary Django environment and configurations are set up. Save the script and run it in the appropriate context where the Django models and test framework are available.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n        print("Issue resolved")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n        print("Issue resolved")\n\n# Running the tests\ntest_case = EnumTest()\ntest_case.setUp()\ntest_case.test_created_object_is_str()\ntest_case.test_retrieved_object_is_str()\n```\n\nThis test script adheres to the requirements. It sets up the necessary models and creates a test scenario to reproduce the issue. It will print "Issue reproduced" if the described problem is observed, "Issue resolved" if the problem does not occur, and "Other issues" if any other unexpected problems arise. You can run this script as a Django test case to check the status of the described issue.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='Here is a complete test that will help reproduce the issue described in your issue text:\n\n```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the TextChoices enum\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\n# Define the model using the TextChoices enum\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case to reproduce the issue\nclass EnumTest(TestCase):\n\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        if not isinstance(my_object.my_str_value, str):\n            print("Other issues")\n            return\n        \n        if str(my_object.my_str_value) != "first":\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        if not isinstance(my_object.my_str_value, str):\n            print("Other issues")\n            return\n        \n        if str(my_object.my_str_value) != "first":\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n\n# Running the tests\nif __name__ == "__main__":\n    test_case = EnumTest()\n    test_case.setUp()\n    test_case.test_created_object_is_str()\n    test_case.test_retrieved_object_is_str()\n```\n\nThis test suite will help you to reproduce the issue. If the issue is present, it will print "Issue reproduced". If the issue has been fixed, it will print "Issue resolved". If there are other issues with the source code, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the choices using TextChoices\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\n# Define the model\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case to reproduce the issue\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n            print("Issue resolved")\n        except AssertionError:\n            if isinstance(my_object.my_str_value, MyChoice):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n            print("Issue resolved")\n        except AssertionError:\n            if isinstance(my_object.my_str_value, MyChoice):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n# Running the test manually\nif __name__ == "__main__":\n    test = EnumTest()\n    test.setUp()\n    test.test_created_object_is_str()\n    test.test_retrieved_object_is_str()\n```\n\nThis test setup:\n1. Defines the necessary models and choices.\n2. Implements two test methods to check both the created and retrieved instances.\n3. Prints "Issue reproduced" if the issue described is encountered.\n4. Prints "Issue resolved" if the issue seems resolved.\n5. Prints "Other issues" if any unexpected issues are detected.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n\n    def test_other_issues(self):\n        try:\n            MyObject.objects.create(my_str_value="unexpected_value")\n        except Exception as e:\n            print("Other issues")\n            return\n\n        print("No other issues detected")\n\nif __name__ == "__main__":\n    import django\n    import os\n    os.environ.setdefault(\'DJANGO_SETTINGS_MODULE\', \'myproject.settings\')\n    django.setup()\n\n    test_case = EnumTest()\n    test_case.setUp()\n    test_case.test_created_object_is_str()\n    test_case.test_retrieved_object_is_str()\n    test_case.test_other_issues()\n```\n\nThis script includes:\n1. Necessary imports.\n2. Code to reproduce the issue described.\n3. Print statements to indicate the outcome as "Issue reproduced", "Issue resolved", or "Other issues".\n\nTo use this script:\n1. Ensure Django is properly set up and configured in your environment.\n2. Replace `\'myproject.settings\'` with your actual Django project settings module.\n3. Run the script to verify if the issue is reproduced or resolved, and check for any other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the models and choices according to the issue description\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        if not isinstance(my_object.my_str_value, str):\n            print("Other issues")\n            return\n        \n        if str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        if not isinstance(my_object.my_str_value, str):\n            print("Other issues")\n            return\n        \n        if str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n\n# Run the tests\ntest_case = EnumTest()\ntest_case.setUp()\n\ntry:\n    test_case.test_created_object_is_str()\n    test_case.test_retrieved_object_is_str()\nexcept Exception as e:\n    print("Other issues")\n    print(str(e))\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\n\n# Code to reproduce the issue\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n    \n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n        print("Issue resolved")\n    \n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n            return\n        print("Issue resolved")\n\n# Running tests\nif __name__ == "__main__":\n    from django.core.management import execute_from_command_line\n    import sys\n    execute_from_command_line([sys.argv[0], "test", "--verbosity=2"])\n```\n\nThis script does the following:\n1. Imports necessary modules.\n2. Sets up the `MyChoice` enum and `MyObject` model to reproduce the issue.\n3. Creates a Django test case with two tests:\n    - `test_created_object_is_str` to check the type of the field value when the object is first created.\n    - `test_retrieved_object_is_str` to check the type of the field value when the object is retrieved from the database.\n4. Prints "Issue reproduced" if the issue is detected, "Issue resolved" if the issue is resolved, and "Other issues" if there are other issues.\n\nYou can run this script to verify if the issue exists and to see if any changes you make resolve the issue.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n\n    def test_other_issues(self):\n        try:\n            # Invoke the tests to catch any other unexpected issues\n            self.test_created_object_is_str()\n            self.test_retrieved_object_is_str()\n        except Exception:\n            print("Other issues")\n\nif __name__ == \'__main__\':\n    EnumTest().test_other_issues()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n\n    def test_for_other_issues(self):\n        my_object = MyObject.objects.create(my_str_value="invalid_choice")\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "invalid_choice")\n            print("Other issues")\n        except Exception:\n            print("Issue resolved")\n\n# Execute the tests\nif __name__ == "__main__":\n    test_suite = EnumTest()\n    test_suite.setUp()\n    test_suite.test_created_object_is_str()\n    test_suite.test_retrieved_object_is_str()\n    test_suite.test_for_other_issues()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n        except Exception:\n            print("Other issues")\n        \n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n        except Exception:\n            print("Other issues")\n\nif __name__ == "__main__":\n    EnumTest().test_created_object_is_str()\n    EnumTest().test_retrieved_object_is_str()\n```\n\nThis test code will help you reproduce the issue described in the issue text by verifying if the value of the `my_str_value` field in the `MyObject` model is of type `str` and equals `"first"`. Based on the outcomes, it will print whether the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError:\n            print("Issue reproduced")\n            return\n        print("Issue resolved")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError:\n            print("Issue reproduced")\n            return\n        print("Issue resolved")\n\n    def test_other_potential_issues(self):\n        try:\n            # Testing for other potential issues\n            my_object = MyObject.objects.create(my_str_value=MyChoice.SECOND_CHOICE)\n            retrieved_obj = MyObject.objects.get(pk=my_object.pk)\n            self.assertEqual(retrieved_obj.my_str_value, "second")\n            print("Other issues")\n        except AssertionError:\n            print("Issue resolved")\n        except Exception as e:\n            print("Other issues:", str(e))\n\nif __name__ == "__main__":\n    import django\n    import sys\n    django.setup()\n    suite = unittest.TestLoader().loadTestsFromTestCase(EnumTest)\n    result = unittest.TextTestRunner().run(suite)\n    if not result.wasSuccessful():\n        sys.exit(len(result.failures) + len(result.errors))\n```\n\nThis test script includes necessary imports and defines a Django test case to reproduce the issue described. It will print "Issue reproduced" if the issue occurs, "Issue resolved" if the issue is fixed, and "Other issues" if there are other potential problems with the code. This script should be run in an environment where Django is properly set up and configured.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the TextChoices Enum\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\n# Define the Model using the TextChoices Enum\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the TestCase to reproduce the issue\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_enum_issue(self):\n        try:\n            # Test the created object\n            my_object_created = self.my_object\n            if not isinstance(my_object_created.my_str_value, str) or str(my_object_created.my_str_value) != "first":\n                print("Issue reproduced")\n                return\n\n            # Test the retrieved object\n            my_object_retrieved = MyObject.objects.last()\n            if not isinstance(my_object_retrieved.my_str_value, str) or str(my_object_retrieved.my_str_value) != "first":\n                print("Issue reproduced")\n                return\n\n            print("Issue resolved")\n        except Exception as e:\n            print(f"Other issues: {e}")\n            return\n\n# Run the test\nEnumTest().test_enum_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n    \n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n        except AssertionError:\n            print("Issue reproduced")\n            return\n        print("Issue resolved")\n    \n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n        except AssertionError:\n            print("Issue reproduced")\n            return\n        print("Issue resolved")\n    \n    def test_for_other_issues(self):\n        try:\n            MyObject.objects.create(my_str_value="invalid_choice")\n        except Exception as e:\n            if not isinstance(e, ValueError):\n                print("Other issues")\n                return\n    \n    def run_tests(self):\n        self.setUp()\n        self.test_created_object_is_str()\n        self.test_retrieved_object_is_str()\n        self.test_for_other_issues()\n        \nEnumTest().run_tests()\n```\n\nThis test script should accomplish the following:\n1. Attempt to reproduce the issue as described in the issue text.\n2. Print "Issue reproduced" if the test case fails, indicating that the issue is still present.\n3. Print "Issue resolved" if the test case passes, indicating that the issue has been fixed.\n4. Print "Other issues" if any other type of issue is encountered.\n\nJust run this script in your Django environment to observe the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the choices using TextChoices\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\n# Define the model using the choices\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_enum_issue(self):\n        try:\n            # Test the created object\n            my_object_created = self.my_object\n            assert isinstance(my_object_created.my_str_value, str)\n            assert str(my_object_created.my_str_value) == "first"\n            \n            # Test the retrieved object\n            my_object_retrieved = MyObject.objects.last()\n            assert isinstance(my_object_retrieved.my_str_value, str)\n            assert str(my_object_retrieved.my_str_value) == "first"\n            \n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n        except Exception:\n            print("Other issues")\n\n# Run the test\nEnumTest().test_enum_issue()\n```\n\nIn this test script:\n1. We define the necessary imports and the models as described in the issue.\n2. We create a test case `EnumTest` with a `setUp` method to initialize the test data.\n3. `test_enum_issue` method is used to test both the creation and retrieval of the model instance and check if the issue is reproduced.\n4. The script prints "Issue reproduced" if the assertion fails indicating the issue is still present, "Issue resolved" if the assertions pass indicating the issue is fixed, and "Other issues" if there are any other unexpected exceptions.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\nimport enum\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n        except Exception:\n            print("Other issues")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n        except Exception:\n            print("Other issues")\n\nif __name__ == "__main__":\n    test_case = EnumTest()\n    test_case.setUp()\n    test_case.test_created_object_is_str()\n    test_case.test_retrieved_object_is_str()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Models\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Test Case\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_enum_issue(self):\n        try:\n            # Test case for created object\n            my_object = self.my_object\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n\n            # Test case for retrieved object\n            my_object = MyObject.objects.last()\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n            \n            print("Issue resolved")\n        \n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n# Running the test\nif __name__ == "__main__":\n    EnumTest().setUp()\n    EnumTest().test_enum_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the TextChoices and model\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_enum_issue(self):\n        try:\n            my_object = self.my_object\n            if not isinstance(my_object.my_str_value, str):\n                print("Issue reproduced")\n                return\n            \n            if str(my_object.my_str_value) != "first":\n                print("Issue reproduced")\n                return\n                \n            my_object = MyObject.objects.last()\n            if not isinstance(my_object.my_str_value, str):\n                print("Issue reproduced")\n                return\n                \n            if str(my_object.my_str_value) != "first":\n                print("Issue reproduced")\n                return\n            \n            print("Issue resolved")\n        except Exception:\n            print("Other issues")\n            return\n\n# Run the test\nEnumTest().test_enum_issue()\n```\n\nThis test will:\n1. Set up a `MyObject` instance with a `TextChoices` value.\n2. Check if the instance\'s `my_str_value` attribute is a string and matches the expected value.\n3. Retrieve the object from the database and perform the same checks.\n4. Print "Issue reproduced" if the outcome indicates that the issue is reproduced, "Issue resolved" if the issue has been fixed, and "Other issues" if there are other unexpected issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the model and choices\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case to reproduce the issue\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n        except AssertionError:\n            print("Issue reproduced")\n            return\n    \n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n        except AssertionError:\n            print("Issue reproduced")\n            return\n\n    def runTest(self):\n        try:\n            self.test_created_object_is_str()\n            self.test_retrieved_object_is_str()\n            print("Issue resolved")\n        except Exception:\n            print("Other issues")\n\n# Run the test case\nEnumTest().runTest()\n```\n\nThis test case, when run, will reproduce the issue described in the issue text. If there is a type mismatch, it will print "Issue reproduced". If the issue is resolved, it will print "Issue resolved". If there are other issues, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define MyChoice TextChoices and MyObject model\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case for reproducing the issue\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n            print("Issue resolved")\n        except AssertionError as e:\n            if str(e) == "\'MyChoice.FIRST_CHOICE\' != \'first\'":\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n# Run the test case\nif __name__ == "__main__":\n    EnumTest().test_created_object_is_str()\n    EnumTest().test_retrieved_object_is_str()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\nfrom django.test import TestCase\n\n# Define the choices using TextChoices\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\n# Define the model\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\n# Define the test case\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        # Create an instance of the model\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        try:\n            my_object = self.my_object\n            # Check if the instance\'s field value is a string and equals to "first"\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n\n    def test_retrieved_object_is_str(self):\n        try:\n            my_object = MyObject.objects.last()\n            # Check if the retrieved instance\'s field value is a string and equals to "first"\n            assert isinstance(my_object.my_str_value, str)\n            assert str(my_object.my_str_value) == "first"\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n\n    def runTest(self):\n        try:\n            self.setUp()\n            self.test_created_object_is_str()\n            self.test_retrieved_object_is_str()\n        except Exception as e:\n            print("Other issues: ", e)\n\n# Run the test\nEnumTest().runTest()\n```\n\nThis test script sets up a model and a test case to reproduce the issue described in the issue text. It prints "Issue reproduced" if the issue is reproduced, "Issue resolved" if the issue has been fixed, and "Other issues" if there are other issues with the source code.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\nfrom django.utils.translation import gettext_lazy as _\n\nclass MyChoice(models.TextChoices):\n    FIRST_CHOICE = "first", _("The first choice, it is")\n    SECOND_CHOICE = "second", _("The second choice, it is")\n\nclass MyObject(models.Model):\n    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)\n\nclass EnumTest(TestCase):\n    def setUp(self) -> None:\n        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)\n\n    def test_created_object_is_str(self):\n        my_object = self.my_object\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError as e:\n            print("Issue reproduced")\n            return\n\n    def test_retrieved_object_is_str(self):\n        my_object = MyObject.objects.last()\n        try:\n            self.assertIsInstance(my_object.my_str_value, str)\n            self.assertEqual(str(my_object.my_str_value), "first")\n        except AssertionError as e:\n            print("Issue reproduced")\n            return\n\n    def test_no_other_issues(self):\n        try:\n            # This will simply pass if there are no other issues\n            self.test_created_object_is_str()\n            self.test_retrieved_object_is_str()\n            print("Issue resolved")\n        except AssertionError:\n            print("Other issues")\n            return\n\nEnumTest().test_no_other_issues()\n```\n\nThis test class incorporates the necessary imports, code to reproduce the issue, and conditional prints to indicate whether the issue has been reproduced, resolved, or if there are other issues. The `test_no_other_issues` method serves as the main entry point to run the other tests and print the appropriate messages based on their outcomes.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746298320, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=15649, prompt_tokens=872, total_tokens=16521, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 13:53:03,529 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the TextChoices and Model
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+
+        print("Issue resolved")
+
+# Run the tests
+if __name__ == "__main__":
+    import django
+    import sys
+    from django.conf import settings
+
+    settings.configure(
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        INSTALLED_APPS=[
+            __name__,
+        ],
+    )
+    django.setup()
+    try:
+        EnumTest('test_created_object_is_str').run()
+        EnumTest('test_retrieved_object_is_str').run()
+    except Exception as e:
+        print("Other issues")
+        sys.exit(1)
+```
+
+This script sets up a Django test case to reproduce the issue described. It will print "Issue reproduced" if the issue is present, "Issue resolved" if the issue has been fixed, and "Other issues" if there are other problems with the code.
+2025-05-03 13:53:03,530 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+if __name__ == "__main__":
+    import django
+    from django.conf import settings
+
+    settings.configure(
+        DATABASES={
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": ":memory:",
+            }
+        },
+        INSTALLED_APPS=[
+            __name__,
+        ],
+    )
+
+    django.setup()
+    TestCase.run(EnumTest("test_created_object_is_str"))
+    TestCase.run(EnumTest("test_retrieved_object_is_str"))
+```
+2025-05-03 13:53:03,530 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+# Define the TextChoices and Model as described in the issue
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        # Create an instance of MyObject with the choice value
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        if not isinstance(my_object.my_str_value, str):
+            print("Other issues")
+            return
+
+        if str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+            return
+        
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        if not isinstance(my_object.my_str_value, str):
+            print("Other issues")
+            return
+
+        if str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+            return
+
+# Run the tests
+EnumTest().test_created_object_is_str()
+EnumTest().test_retrieved_object_is_str()
+```
+2025-05-03 13:53:03,530 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+if __name__ == "__main__":
+    EnumTest().test_created_object_is_str()
+    EnumTest().test_retrieved_object_is_str()
+```
+
+This script sets up a Django model, creates an instance of the model, and retrieves the instance to test if the value type is consistent. It also checks and prints whether the issue is reproduced, resolved, or if there are other issues based on the test results.
+2025-05-03 13:53:03,530 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the TextChoices
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+# Define the model
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        # Create the object
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        elif isinstance(my_object.my_str_value, MyChoice):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        elif isinstance(my_object.my_str_value, MyChoice):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+if __name__ == "__main__":
+    # Run the tests
+    EnumTest().setUp()
+    EnumTest().test_created_object_is_str()
+    EnumTest().test_retrieved_object_is_str()
+```
+
+In this script:
+1. We define the `MyChoice` and `MyObject` as described in the issue.
+2. We create a test case `EnumTest` where:
+   - `setUp` method creates an instance of `MyObject`.
+   - `test_created_object_is_str` checks the type and value of the `my_str_value` field for the created object and prints the appropriate message.
+   - `test_retrieved_object_is_str` checks the type and value of the `my_str_value` field for the retrieved object and prints the appropriate message.
+3. We run both tests in the main section to check if the issue is reproduced or resolved.
+
+This test helps in verifying if the issue mentioned in the issue text is reproduced or resolved.
+2025-05-03 13:53:03,530 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the TextChoices and model as described
+class MyChoice(models.TextChoices):
+	FIRST_CHOICE = "first", _("The first choice, it is")
+	SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+	my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case
+class EnumTest(TestCase):
+	def setUp(self) -> None:
+		self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+	def test_enum_issue(self):
+		try:
+			# Test with the created object
+			my_object = self.my_object
+			if not isinstance(my_object.my_str_value, str) or str(my_object.my_str_value) != "first":
+				print("Issue reproduced")
+				return
+
+			# Test with the retrieved object
+			my_object = MyObject.objects.last()
+			if not isinstance(my_object.my_str_value, str) or str(my_object.my_str_value) != "first":
+				print("Issue reproduced")
+				return
+
+			# If both tests pass
+			print("Issue resolved")
+		except Exception as e:
+			print("Other issues")
+			return
+
+# Run the test
+if __name__ == "__main__":
+	EnumTest().test_enum_issue()
+```
+2025-05-03 13:53:03,530 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+from django.utils.translation import gettext_lazy as _
+
+# Define TextChoices
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+# Define the model using TextChoices
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Test case to reproduce and verify the issue
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+# Running the test cases
+if __name__ == "__main__":
+    EnumTest().test_created_object_is_str()
+    EnumTest().test_retrieved_object_is_str()
+```
+
+This test script will:
+1. Create an instance of `MyObject` with the `my_str_value` set to `MyChoice.FIRST_CHOICE`.
+2. Test whether the created object's `my_str_value` is a string and matches "first".
+3. Test whether the retrieved object's `my_str_value` is a string and matches "first".
+4. Print "Issue resolved" if the checks pass, "Issue reproduced" if the specific AssertionError is raised, and "Other issues" if any other AssertionError occurs.
+2025-05-03 13:53:03,530 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the enum class
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+# Define the model class
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError as e:
+            if str(e) == 'MyChoice.FIRST_CHOICE' != 'first':
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError as e:
+            if str(e) == 'MyChoice.FIRST_CHOICE' != 'first':
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+
+        print("Issue resolved")
+
+# Run the test case
+if __name__ == "__main__":
+    EnumTest('test_created_object_is_str').run()
+    EnumTest('test_retrieved_object_is_str').run()
+```
+2025-05-03 13:53:03,530 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+
+# Run the tests
+if __name__ == "__main__":
+    try:
+        test_case = EnumTest()
+        test_case.setUp()
+        test_case.test_created_object_is_str()
+        test_case.test_retrieved_object_is_str()
+    except Exception as e:
+        print("Other issues")
+        print(str(e))
+```
+
+This test script is designed to reproduce the issue described in the provided issue text. It includes the necessary imports, the code to set up the test conditions, and the logic to print "Issue reproduced" if the bug is present, "Issue resolved" if the bug is fixed, and "Other issues" if there are other problems with the code.
+
+Before running the script, ensure Django is properly set up in your environment and that the models and tests are correctly integrated into your Django project.
+2025-05-03 13:53:03,530 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Model definition as described in the issue
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Test case to reproduce and verify the issue
+class EnumTest(TestCase):
+    
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_enum_value_type(self):
+        try:
+            # Test case for created object
+            my_object = self.my_object
+            if str(my_object.my_str_value) != "first":
+                print("Issue reproduced")
+                return
+            
+            if not isinstance(my_object.my_str_value, str):
+                print("Other issues")
+                return
+
+            # Test case for retrieved object
+            my_object = MyObject.objects.last()
+            if str(my_object.my_str_value) != "first":
+                print("Issue reproduced")
+                return
+            
+            if not isinstance(my_object.my_str_value, str):
+                print("Other issues")
+                return
+
+            print("Issue resolved")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+# Run the test
+EnumTest().test_enum_value_type()
+```
+2025-05-03 13:53:03,530 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError:
+            print("Issue reproduced")
+            return
+        except Exception:
+            print("Other issues")
+            return
+
+        print("Issue resolved")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError:
+            print("Issue reproduced")
+            return
+        except Exception:
+            print("Other issues")
+            return
+
+        print("Issue resolved")
+
+if __name__ == "__main__":
+    try:
+        EnumTest().test_created_object_is_str()
+        EnumTest().test_retrieved_object_is_str()
+    except Exception as e:
+        print(f"Other issues: {e}")
+```
+
+This test script includes:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Conditional prints to indicate the outcome: "Issue reproduced", "Issue resolved", or "Other issues"
+
+To use this script, you should have Django set up in your environment, and the models should be defined within your Django application. This test script can be run as a standalone script if placed within the Django application context.
+2025-05-03 13:53:03,530 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError as e:
+            if str(e).strip() == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError as e:
+            if str(e).strip() == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+# Running the tests
+if __name__ == "__main__":
+    import sys
+    from django.conf import settings
+    import django
+
+    settings.configure(
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        INSTALLED_APPS=[
+            __name__
+        ]
+    )
+    django.setup()
+    from django.test.utils import get_runner
+    TestRunner = get_runner(settings)
+    test_runner = TestRunner(verbosity=2)
+    failures = test_runner.run_tests([__name__])
+    sys.exit(bool(failures))
+```
+
+This script creates a Django test case similar to the provided issue text and aims to reproduce and identify the issue. It includes necessary imports, model definitions, and the test class. It handles the results by printing "Issue reproduced," "Issue resolved," or "Other issues" based on the assertion outcomes. It also includes a main section to set up a Django environment and run the tests.
+2025-05-03 13:53:03,530 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the TextChoices Enum and the Model
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Test Case to Reproduce the Issue
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        elif isinstance(my_object.my_str_value, MyChoice):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        elif isinstance(my_object.my_str_value, MyChoice):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+# Running the tests
+if __name__ == "__main__":
+    EnumTest().setUp()
+    EnumTest().test_created_object_is_str()
+    EnumTest().test_retrieved_object_is_str()
+```
+
+In this test script:
+
+1. Necessary imports are included.
+2. The code to reproduce the issue described in the issue text is provided, defining the model and enum, and creating and retrieving instances.
+3. The outcome is print statements indicating whether the issue is reproduced, resolved, or if there are other issues with the code.
+2025-05-03 13:53:03,531 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the enum choices
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+# Define the model
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+        except AssertionError as e:
+            if str(e).startswith('AssertionError: '):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+        print("Issue resolved")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+        except AssertionError as e:
+            if str(e).startswith('AssertionError: '):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+        print("Issue resolved")
+
+# Run the test case
+if __name__ == '__main__':
+    test_case = EnumTest()
+    test_case.setUp()
+    test_case.test_created_object_is_str()
+    test_case.test_retrieved_object_is_str()
+```
+
+This script is a self-contained test case that will help in reproducing the issue described in the provided issue text. You can run this script to see if the issue is reproduced or resolved based on the output.
+2025-05-03 13:53:03,531 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        if self._check_issue(my_object.my_str_value, "first"):
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        if self._check_issue(my_object.my_str_value, "first"):
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    
+    def _check_issue(self, value, expected):
+        try:
+            assert isinstance(value, str)
+            assert str(value) == expected
+            return False
+        except AssertionError:
+            return True
+    
+    def runTest(self):
+        try:
+            self.test_created_object_is_str()
+            self.test_retrieved_object_is_str()
+        except Exception as e:
+            print("Other issues:", e)
+
+# Running the test
+EnumTest().runTest()
+```
+2025-05-03 13:53:03,531 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        elif isinstance(my_object.my_str_value, MyChoice) and str(my_object.my_str_value) == "MyChoice.FIRST_CHOICE":
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        elif isinstance(my_object.my_str_value, MyChoice) and str(my_object.my_str_value) == "MyChoice.FIRST_CHOICE":
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+
+# Running the tests
+if __name__ == "__main__":
+    EnumTest().test_created_object_is_str()
+    EnumTest().test_retrieved_object_is_str()
+```
+
+This code defines a unit test for the issue described. If the issue is reproduced, it prints "Issue reproduced". If the issue has been resolved, it prints "Issue resolved". If there are unexpected issues with the source code, it prints "Other issues". The tests check both the created and retrieved object cases as described in the issue.
+2025-05-03 13:53:03,531 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+import sys
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        else:
+            if str(my_object.my_str_value) == "MyChoice.FIRST_CHOICE":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        else:
+            if str(my_object.my_str_value) == "MyChoice.FIRST_CHOICE":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+
+if __name__ == "__main__":
+    try:
+        import django
+        django.setup()
+        test = EnumTest()
+        test.setUp()
+        test.test_created_object_is_str()
+        test.test_retrieved_object_is_str()
+    except Exception as e:
+        print("Other issues")
+        sys.exit(1)
+```
+
+This test suite is designed to reproduce and verify the issue described in the provided issue text. It follows these steps:
+1. Import necessary modules and classes.
+2. Define the `MyChoice` and `MyObject` models.
+3. Create the `EnumTest` class inheriting from `TestCase`.
+4. Implement the `setUp` method to create an instance of `MyObject`.
+5. Define `test_created_object_is_str` and `test_retrieved_object_is_str` methods to test and print the outcomes based on whether the issue is reproduced, resolved, or there are other issues.
+6. Run the test methods within the `if __name__ == "__main__":` block to allow standalone execution of the test script.
+2025-05-03 13:53:03,531 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+from django.utils.translation import gettext_lazy as _
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        try:
+            my_object = self.my_object
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError as e:
+            if 'MyChoice.FIRST_CHOICE' in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+
+    def test_retrieved_object_is_str(self):
+        try:
+            my_object = MyObject.objects.last()
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError as e:
+            if 'MyChoice.FIRST_CHOICE' in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+
+if __name__ == "__main__":
+    EnumTest().test_created_object_is_str()
+    EnumTest().test_retrieved_object_is_str()
+```
+2025-05-03 13:53:03,531 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the choices using TextChoices
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+# Define the model using CharField with choices
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case to reproduce the issue
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        # Create an instance of MyObject
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_enum_issue(self):
+        try:
+            # Test the created object
+            my_object = self.my_object
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+
+            # Test the retrieved object
+            my_object = MyObject.objects.last()
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+            
+            print("Issue resolved")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+# Execute the test case
+EnumTest().test_enum_issue()
+```
+2025-05-03 13:53:03,531 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define models
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define tests
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError:
+            print("Issue reproduced")
+            return
+
+        print("Issue resolved")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError:
+            print("Issue reproduced")
+            return
+
+        print("Issue resolved")
+
+# Run tests
+if __name__ == "__main__":
+    try:
+        test_case = EnumTest()
+        test_case.setUp()
+        test_case.test_created_object_is_str()
+        test_case.test_retrieved_object_is_str()
+    except Exception as e:
+        print("Other issues")
+        print(str(e))
+```
+
+This test script does the following:
+1. Defines the necessary imports and model definitions to set up the scenario described in the issue.
+2. Contains test cases to reproduce the described issue.
+3. Prints "Issue reproduced" if the tests indicate the issue is still present.
+4. Prints "Issue resolved" if the tests pass without any issues.
+5. Prints "Other issues" if there are exceptions or problems in the test execution beyond the described issue.
+
+To use this script, ensure that the necessary Django environment and configurations are set up. Save the script and run it in the appropriate context where the Django models and test framework are available.
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+        print("Issue resolved")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+        print("Issue resolved")
+
+# Running the tests
+test_case = EnumTest()
+test_case.setUp()
+test_case.test_created_object_is_str()
+test_case.test_retrieved_object_is_str()
+```
+
+This test script adheres to the requirements. It sets up the necessary models and creates a test scenario to reproduce the issue. It will print "Issue reproduced" if the described problem is observed, "Issue resolved" if the problem does not occur, and "Other issues" if any other unexpected problems arise. You can run this script as a Django test case to check the status of the described issue.
+2025-05-03 13:53:03,532 - INFO - raw output:
+Here is a complete test that will help reproduce the issue described in your issue text:
+
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the TextChoices enum
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+# Define the model using the TextChoices enum
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case to reproduce the issue
+class EnumTest(TestCase):
+
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        if not isinstance(my_object.my_str_value, str):
+            print("Other issues")
+            return
+        
+        if str(my_object.my_str_value) != "first":
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        if not isinstance(my_object.my_str_value, str):
+            print("Other issues")
+            return
+        
+        if str(my_object.my_str_value) != "first":
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+
+# Running the tests
+if __name__ == "__main__":
+    test_case = EnumTest()
+    test_case.setUp()
+    test_case.test_created_object_is_str()
+    test_case.test_retrieved_object_is_str()
+```
+
+This test suite will help you to reproduce the issue. If the issue is present, it will print "Issue reproduced". If the issue has been fixed, it will print "Issue resolved". If there are other issues with the source code, it will print "Other issues".
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the choices using TextChoices
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+# Define the model
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case to reproduce the issue
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+            print("Issue resolved")
+        except AssertionError:
+            if isinstance(my_object.my_str_value, MyChoice):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+            print("Issue resolved")
+        except AssertionError:
+            if isinstance(my_object.my_str_value, MyChoice):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+# Running the test manually
+if __name__ == "__main__":
+    test = EnumTest()
+    test.setUp()
+    test.test_created_object_is_str()
+    test.test_retrieved_object_is_str()
+```
+
+This test setup:
+1. Defines the necessary models and choices.
+2. Implements two test methods to check both the created and retrieved instances.
+3. Prints "Issue reproduced" if the issue described is encountered.
+4. Prints "Issue resolved" if the issue seems resolved.
+5. Prints "Other issues" if any unexpected issues are detected.
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+
+    def test_other_issues(self):
+        try:
+            MyObject.objects.create(my_str_value="unexpected_value")
+        except Exception as e:
+            print("Other issues")
+            return
+
+        print("No other issues detected")
+
+if __name__ == "__main__":
+    import django
+    import os
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
+    django.setup()
+
+    test_case = EnumTest()
+    test_case.setUp()
+    test_case.test_created_object_is_str()
+    test_case.test_retrieved_object_is_str()
+    test_case.test_other_issues()
+```
+
+This script includes:
+1. Necessary imports.
+2. Code to reproduce the issue described.
+3. Print statements to indicate the outcome as "Issue reproduced", "Issue resolved", or "Other issues".
+
+To use this script:
+1. Ensure Django is properly set up and configured in your environment.
+2. Replace `'myproject.settings'` with your actual Django project settings module.
+3. Run the script to verify if the issue is reproduced or resolved, and check for any other issues.
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the models and choices according to the issue description
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        if not isinstance(my_object.my_str_value, str):
+            print("Other issues")
+            return
+        
+        if str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        if not isinstance(my_object.my_str_value, str):
+            print("Other issues")
+            return
+        
+        if str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+
+# Run the tests
+test_case = EnumTest()
+test_case.setUp()
+
+try:
+    test_case.test_created_object_is_str()
+    test_case.test_retrieved_object_is_str()
+except Exception as e:
+    print("Other issues")
+    print(str(e))
+```
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+# Code to reproduce the issue
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+    
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+        print("Issue resolved")
+    
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+            return
+        print("Issue resolved")
+
+# Running tests
+if __name__ == "__main__":
+    from django.core.management import execute_from_command_line
+    import sys
+    execute_from_command_line([sys.argv[0], "test", "--verbosity=2"])
+```
+
+This script does the following:
+1. Imports necessary modules.
+2. Sets up the `MyChoice` enum and `MyObject` model to reproduce the issue.
+3. Creates a Django test case with two tests:
+    - `test_created_object_is_str` to check the type of the field value when the object is first created.
+    - `test_retrieved_object_is_str` to check the type of the field value when the object is retrieved from the database.
+4. Prints "Issue reproduced" if the issue is detected, "Issue resolved" if the issue is resolved, and "Other issues" if there are other issues.
+
+You can run this script to verify if the issue exists and to see if any changes you make resolve the issue.
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+
+    def test_other_issues(self):
+        try:
+            # Invoke the tests to catch any other unexpected issues
+            self.test_created_object_is_str()
+            self.test_retrieved_object_is_str()
+        except Exception:
+            print("Other issues")
+
+if __name__ == '__main__':
+    EnumTest().test_other_issues()
+```
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        if isinstance(my_object.my_str_value, str) and str(my_object.my_str_value) == "first":
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+
+    def test_for_other_issues(self):
+        my_object = MyObject.objects.create(my_str_value="invalid_choice")
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "invalid_choice")
+            print("Other issues")
+        except Exception:
+            print("Issue resolved")
+
+# Execute the tests
+if __name__ == "__main__":
+    test_suite = EnumTest()
+    test_suite.setUp()
+    test_suite.test_created_object_is_str()
+    test_suite.test_retrieved_object_is_str()
+    test_suite.test_for_other_issues()
+```
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+        except Exception:
+            print("Other issues")
+        
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+        except Exception:
+            print("Other issues")
+
+if __name__ == "__main__":
+    EnumTest().test_created_object_is_str()
+    EnumTest().test_retrieved_object_is_str()
+```
+
+This test code will help you reproduce the issue described in the issue text by verifying if the value of the `my_str_value` field in the `MyObject` model is of type `str` and equals `"first"`. Based on the outcomes, it will print whether the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError:
+            print("Issue reproduced")
+            return
+        print("Issue resolved")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError:
+            print("Issue reproduced")
+            return
+        print("Issue resolved")
+
+    def test_other_potential_issues(self):
+        try:
+            # Testing for other potential issues
+            my_object = MyObject.objects.create(my_str_value=MyChoice.SECOND_CHOICE)
+            retrieved_obj = MyObject.objects.get(pk=my_object.pk)
+            self.assertEqual(retrieved_obj.my_str_value, "second")
+            print("Other issues")
+        except AssertionError:
+            print("Issue resolved")
+        except Exception as e:
+            print("Other issues:", str(e))
+
+if __name__ == "__main__":
+    import django
+    import sys
+    django.setup()
+    suite = unittest.TestLoader().loadTestsFromTestCase(EnumTest)
+    result = unittest.TextTestRunner().run(suite)
+    if not result.wasSuccessful():
+        sys.exit(len(result.failures) + len(result.errors))
+```
+
+This test script includes necessary imports and defines a Django test case to reproduce the issue described. It will print "Issue reproduced" if the issue occurs, "Issue resolved" if the issue is fixed, and "Other issues" if there are other potential problems with the code. This script should be run in an environment where Django is properly set up and configured.
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the TextChoices Enum
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+# Define the Model using the TextChoices Enum
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the TestCase to reproduce the issue
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_enum_issue(self):
+        try:
+            # Test the created object
+            my_object_created = self.my_object
+            if not isinstance(my_object_created.my_str_value, str) or str(my_object_created.my_str_value) != "first":
+                print("Issue reproduced")
+                return
+
+            # Test the retrieved object
+            my_object_retrieved = MyObject.objects.last()
+            if not isinstance(my_object_retrieved.my_str_value, str) or str(my_object_retrieved.my_str_value) != "first":
+                print("Issue reproduced")
+                return
+
+            print("Issue resolved")
+        except Exception as e:
+            print(f"Other issues: {e}")
+            return
+
+# Run the test
+EnumTest().test_enum_issue()
+```
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+    
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+        except AssertionError:
+            print("Issue reproduced")
+            return
+        print("Issue resolved")
+    
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+        except AssertionError:
+            print("Issue reproduced")
+            return
+        print("Issue resolved")
+    
+    def test_for_other_issues(self):
+        try:
+            MyObject.objects.create(my_str_value="invalid_choice")
+        except Exception as e:
+            if not isinstance(e, ValueError):
+                print("Other issues")
+                return
+    
+    def run_tests(self):
+        self.setUp()
+        self.test_created_object_is_str()
+        self.test_retrieved_object_is_str()
+        self.test_for_other_issues()
+        
+EnumTest().run_tests()
+```
+
+This test script should accomplish the following:
+1. Attempt to reproduce the issue as described in the issue text.
+2. Print "Issue reproduced" if the test case fails, indicating that the issue is still present.
+3. Print "Issue resolved" if the test case passes, indicating that the issue has been fixed.
+4. Print "Other issues" if any other type of issue is encountered.
+
+Just run this script in your Django environment to observe the outcome.
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the choices using TextChoices
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+# Define the model using the choices
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_enum_issue(self):
+        try:
+            # Test the created object
+            my_object_created = self.my_object
+            assert isinstance(my_object_created.my_str_value, str)
+            assert str(my_object_created.my_str_value) == "first"
+            
+            # Test the retrieved object
+            my_object_retrieved = MyObject.objects.last()
+            assert isinstance(my_object_retrieved.my_str_value, str)
+            assert str(my_object_retrieved.my_str_value) == "first"
+            
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+        except Exception:
+            print("Other issues")
+
+# Run the test
+EnumTest().test_enum_issue()
+```
+
+In this test script:
+1. We define the necessary imports and the models as described in the issue.
+2. We create a test case `EnumTest` with a `setUp` method to initialize the test data.
+3. `test_enum_issue` method is used to test both the creation and retrieval of the model instance and check if the issue is reproduced.
+4. The script prints "Issue reproduced" if the assertion fails indicating the issue is still present, "Issue resolved" if the assertions pass indicating the issue is fixed, and "Other issues" if there are any other unexpected exceptions.
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+import enum
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+        except Exception:
+            print("Other issues")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+        except Exception:
+            print("Other issues")
+
+if __name__ == "__main__":
+    test_case = EnumTest()
+    test_case.setUp()
+    test_case.test_created_object_is_str()
+    test_case.test_retrieved_object_is_str()
+```
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Models
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Test Case
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_enum_issue(self):
+        try:
+            # Test case for created object
+            my_object = self.my_object
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+
+            # Test case for retrieved object
+            my_object = MyObject.objects.last()
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+            
+            print("Issue resolved")
+        
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+# Running the test
+if __name__ == "__main__":
+    EnumTest().setUp()
+    EnumTest().test_enum_issue()
+```
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the TextChoices and model
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_enum_issue(self):
+        try:
+            my_object = self.my_object
+            if not isinstance(my_object.my_str_value, str):
+                print("Issue reproduced")
+                return
+            
+            if str(my_object.my_str_value) != "first":
+                print("Issue reproduced")
+                return
+                
+            my_object = MyObject.objects.last()
+            if not isinstance(my_object.my_str_value, str):
+                print("Issue reproduced")
+                return
+                
+            if str(my_object.my_str_value) != "first":
+                print("Issue reproduced")
+                return
+            
+            print("Issue resolved")
+        except Exception:
+            print("Other issues")
+            return
+
+# Run the test
+EnumTest().test_enum_issue()
+```
+
+This test will:
+1. Set up a `MyObject` instance with a `TextChoices` value.
+2. Check if the instance's `my_str_value` attribute is a string and matches the expected value.
+3. Retrieve the object from the database and perform the same checks.
+4. Print "Issue reproduced" if the outcome indicates that the issue is reproduced, "Issue resolved" if the issue has been fixed, and "Other issues" if there are other unexpected issues.
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the model and choices
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case to reproduce the issue
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+        except AssertionError:
+            print("Issue reproduced")
+            return
+    
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+        except AssertionError:
+            print("Issue reproduced")
+            return
+
+    def runTest(self):
+        try:
+            self.test_created_object_is_str()
+            self.test_retrieved_object_is_str()
+            print("Issue resolved")
+        except Exception:
+            print("Other issues")
+
+# Run the test case
+EnumTest().runTest()
+```
+
+This test case, when run, will reproduce the issue described in the issue text. If there is a type mismatch, it will print "Issue reproduced". If the issue is resolved, it will print "Issue resolved". If there are other issues, it will print "Other issues".
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define MyChoice TextChoices and MyObject model
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case for reproducing the issue
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+            print("Issue resolved")
+        except AssertionError as e:
+            if str(e) == "'MyChoice.FIRST_CHOICE' != 'first'":
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+# Run the test case
+if __name__ == "__main__":
+    EnumTest().test_created_object_is_str()
+    EnumTest().test_retrieved_object_is_str()
+```
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
+
+# Define the choices using TextChoices
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+# Define the model
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+# Define the test case
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        # Create an instance of the model
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        try:
+            my_object = self.my_object
+            # Check if the instance's field value is a string and equals to "first"
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+
+    def test_retrieved_object_is_str(self):
+        try:
+            my_object = MyObject.objects.last()
+            # Check if the retrieved instance's field value is a string and equals to "first"
+            assert isinstance(my_object.my_str_value, str)
+            assert str(my_object.my_str_value) == "first"
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+
+    def runTest(self):
+        try:
+            self.setUp()
+            self.test_created_object_is_str()
+            self.test_retrieved_object_is_str()
+        except Exception as e:
+            print("Other issues: ", e)
+
+# Run the test
+EnumTest().runTest()
+```
+
+This test script sets up a model and a test case to reproduce the issue described in the issue text. It prints "Issue reproduced" if the issue is reproduced, "Issue resolved" if the issue has been fixed, and "Other issues" if there are other issues with the source code.
+2025-05-03 13:53:03,532 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+class MyChoice(models.TextChoices):
+    FIRST_CHOICE = "first", _("The first choice, it is")
+    SECOND_CHOICE = "second", _("The second choice, it is")
+
+class MyObject(models.Model):
+    my_str_value = models.CharField(max_length=10, choices=MyChoice.choices)
+
+class EnumTest(TestCase):
+    def setUp(self) -> None:
+        self.my_object = MyObject.objects.create(my_str_value=MyChoice.FIRST_CHOICE)
+
+    def test_created_object_is_str(self):
+        my_object = self.my_object
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError as e:
+            print("Issue reproduced")
+            return
+
+    def test_retrieved_object_is_str(self):
+        my_object = MyObject.objects.last()
+        try:
+            self.assertIsInstance(my_object.my_str_value, str)
+            self.assertEqual(str(my_object.my_str_value), "first")
+        except AssertionError as e:
+            print("Issue reproduced")
+            return
+
+    def test_no_other_issues(self):
+        try:
+            # This will simply pass if there are no other issues
+            self.test_created_object_is_str()
+            self.test_retrieved_object_is_str()
+            print("Issue resolved")
+        except AssertionError:
+            print("Other issues")
+            return
+
+EnumTest().test_no_other_issues()
+```
+
+This test class incorporates the necessary imports, code to reproduce the issue, and conditional prints to indicate whether the issue has been reproduced, resolved, or if there are other issues. The `test_no_other_issues` method serves as the main entry point to run the other tests and print the appropriate messages based on their outcomes.

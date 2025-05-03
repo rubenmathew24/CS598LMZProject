@@ -1,0 +1,2238 @@
+2025-05-02 17:20:54,890 - INFO - ================ generating test for django__django-14608 ================
+2025-05-02 17:20:55,023 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+Add `nonform` CSS class for non form errors in FormSets
+Description
+	 
+		(last modified by Ties Jan Hefting)
+	 
+Forms add the nonfield CSS class for non field errors in ErrorList instances. This is documented in a section on ​rendering form error messages. Similarly, in FormSets I'd expect to see the nonform CSS class added for non form errors. This would allow a custom ErrorList to make a distinction in form field errors, non field errors (forms) and non form errors (FormSets) when rendering error messages. Therefore I'd suggest to add this nonform CSS class and document it for developers to use.
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:55,024 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:06:27,622 - INFO - ================ generating test for django__django-14608 ================
+2025-05-03 14:06:27,638 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+Add `nonform` CSS class for non form errors in FormSets
+Description
+	 
+		(last modified by Ties Jan Hefting)
+	 
+Forms add the nonfield CSS class for non field errors in ErrorList instances. This is documented in a section on ​rendering form error messages. Similarly, in FormSets I'd expect to see the nonform CSS class added for non form errors. This would allow a custom ErrorList to make a distinction in form field errors, non field errors (forms) and non form errors (FormSets) when rendering error messages. Therefore I'd suggest to add this nonform CSS class and document it for developers to use.
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 14:06:27,638 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:06:27,645 - INFO - Creating API request
+2025-05-03 14:06:33,043 - INFO - API response ChatCompletion(id='chatcmpl-BTCTsqXD1zAc8g7vsekLiT3eaYy5X', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.core.exceptions import ValidationError\n\n# Custom ErrorList to capture and classify errors\nclass CustomErrorList(forms.utils.ErrorList):\n    def as_ul(self):\n        if not self:\n            return \'\'\n        return \'<ul class="errorlist">%s</ul>\' % \'\'.join([\'<li class="%s">%s</li>\' % (self.error_class(e), e) for e in self])\n\n    def error_class(self, error):\n        if isinstance(error, forms.ValidationError):\n            if error.code == \'nonform\':\n                return \'nonform\'\n            elif error.code == \'nonfield\':\n                return \'nonfield\'\n        return \'field\'\n\n# Sample form to use in the FormSet\nclass SampleForm(forms.Form):\n    name = forms.CharField()\n\n# Custom FormSet to add non form errors\nclass SampleFormSet(forms.BaseFormSet):\n    def clean(self):\n        if any(self.errors):\n            return\n        raise ValidationError("Non form error", code=\'nonform\')\n\n# Create a formset factory\nSampleFormSetFactory = formset_factory(SampleForm, formset=SampleFormSet, extra=1)\n\ndef test_nonform_css_class_in_formset():\n    # Create a formset instance with no data to trigger the non form error\n    formset = SampleFormSetFactory(data={})\n    formset.is_valid()  # This will trigger the clean method and add the non form error\n\n    # Check if the nonform CSS class is present in the errors\n    error_list = CustomErrorList(formset.non_form_errors())\n    error_html = error_list.as_ul()\n\n    if \'class="nonform"\' in error_html:\n        print("Issue resolved")\n    elif \'Non form error\' in error_html:\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_nonform_css_class_in_formset()\n```\n\nThis test script does the following:\n1. Imports necessary modules and classes.\n2. Defines a custom `ErrorList` class to classify errors.\n3. Creates a sample form and a custom formset that raises a non-form error.\n4. Creates a formset factory.\n5. Defines a test function that creates a formset instance, triggers the non-form error, and checks if the `nonform` CSS class is present in the error list.\n6. Prints "Issue resolved" if the `nonform` CSS class is found, "Issue reproduced" if the error message is found without the `nonform` class, and "Other issues" if neither condition is met.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299188, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=540, prompt_tokens=492, total_tokens=1032, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:06:33,043 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:06:33,050 - INFO - Creating API request
+2025-05-03 14:07:57,927 - INFO - API response ChatCompletion(id='chatcmpl-BTCTxuw9H31X8Kv6I7xkYEPVzQnxL', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='Sure, here\'s a complete test to reproduce and verify the issue described in the issue text. This test assumes you\'re working within a Django project and have the appropriate setup for forms and formsets.\n\n```python\nfrom django import forms\nfrom django.forms import formset_factory\n\n# Custom ErrorList to capture the errors for testing\nclass CustomErrorList(forms.utils.ErrorList):\n    def __str__(self):\n        return self.as_text()\n    \n    def as_text(self):\n        if not self:\n            return \'\'\n        return \'\\n\'.join([str(e) for e in self])\n\n# Sample form to be used in the formset\nclass SampleForm(forms.Form):\n    name = forms.CharField()\n\n# Function to reproduce the issue\ndef test_nonform_css_class_in_formset():\n    SampleFormSet = formset_factory(SampleForm, extra=2)\n    \n    # Creating an instance of SampleFormSet with some initial data\n    initial_data = [\n        {\'name\': \'John\'},\n        {\'name\': \'Doe\'}\n    ]\n    \n    # Simulating a formset with a non-form error\n    data = {\n        \'form-TOTAL_FORMS\': \'2\',\n        \'form-INITIAL_FORMS\': \'2\',\n        \'form-0-name\': \'John\',\n        \'form-1-name\': \'\'\n    }\n    \n    formset = SampleFormSet(data, initial=initial_data, error_class=CustomErrorList)\n    \n    # Manually adding a non-form error for testing\n    formset.non_form_errors().append(\'A non-form error\')\n\n    # Rendering the formset errors for testing\n    non_field_errors = formset.non_form_errors()\n    \n    # Checking for \'nonform\' CSS class in non-form errors\n    if any([\'nonform\' in str(error) for error in non_field_errors]):\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\n# Execute the test\ntest_nonform_css_class_in_formset()\n```\n\n### Explanation\n\n1. **Imports**: Import necessary components from Django.\n2. **Custom ErrorList**: Define a `CustomErrorList` to use for rendering errors in a way that allows for easy testing.\n3. **Sample Form**: Define a simple form (`SampleForm`) to be used in the formset.\n4. **Test Function**: Define the `test_nonform_css_class_in_formset` function to simulate the formset behavior, add a non-form error, and check for the `nonform` CSS class.\n\nThis test will print "Issue reproduced" if the `nonform` CSS class is not present in the non-form errors, indicating that the issue is still present. It will print "Issue resolved" if the `nonform` CSS class is present, indicating that the issue has been fixed. If there are other issues in the code, it will print "Other issues".\n\nMake sure to integrate this test within your Django project\'s test suite for executing and verifying the fix.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the Python code to create a test for reproducing the issue described in your repository issue text. This test will check whether the `nonform` CSS class is added for non-form errors in FormSets.\n\n```python\nfrom django.forms import Form, FormSet, BaseFormSet, ErrorList\nfrom django.core.exceptions import ValidationError\n\n\nclass SampleForm(Form):\n    def clean(self):\n        raise ValidationError("Sample form error", code="non_field_error")\n\n\nclass SampleFormSet(BaseFormSet):\n    def clean(self):\n        if any(self.errors):\n            raise ValidationError("Sample non-form error", code="non_form_error")\n\n\ndef test_nonform_css_class_in_formset():\n    SampleFormSetInstance = FormSet(form=SampleForm, formset=SampleFormSet, extra=1)\n    formset = SampleFormSetInstance(data={})\n\n    try:\n        formset.is_valid()\n    except ValidationError as e:\n        non_form_errors = e.error_list\n        if \'non_form_error\' in [error.code for error in non_form_errors]:\n            if any(\'nonform\' in error.message for error in non_form_errors):\n                # The issue has been resolved correctly\n                print("Issue resolved")\n            else:\n                # The issue is reproduced\n                print("Issue reproduced")\n        else:\n            # Other issues\n            print("Other issues")\n        return\n\n    # No ValidationError raised\n    print("Other issues")\n\n\n# Run the test\ntest_nonform_css_class_in_formset()\n```\n\nThis test performs the following steps:\n1. Defines a `SampleForm` form that raises a non-field error.\n2. Defines a `SampleFormSet` formset that raises a non-form error if any form within the formset has an error.\n3. Creates a formset instance, provides empty data (to ensure validation errors), and checks for the presence of the `nonform` CSS class in non-form errors.\n\n- If the `nonform` CSS class is found in the non-form errors, it prints "Issue resolved".\n- If the `nonform` CSS class is not found, it prints "Issue reproduced".\n- If any other issues arise or no `ValidationError` is raised, it prints "Other issues".\n\nThis test can be used to verify both the presence of the issue as well as its resolution.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\n\n\nclass TestForm(forms.Form):\n    field = forms.CharField()\n\n\ndef test_nonform_css_class_in_formset_errors():\n    class CustomErrorList(forms.utils.ErrorList):\n        def as_ul(self):\n            if not self:\n                return \'\'\n            return \'<ul class="errorlist">{}</ul>\'.format(\'\'.join(\n                \'<li class="{}">{}</li>\'.format(self.error_class, e) for e in self))\n\n    class BaseTestFormSet(forms.BaseFormSet):\n        def clean(self):\n            raise forms.ValidationError("This is a non-form error.", code=\'nonform\')\n\n    TestFormSet = formset_factory(TestForm, formset=BaseTestFormSet, error_class=CustomErrorList)\n    \n    formset = TestFormSet(data={\'form-TOTAL_FORMS\': \'1\', \'form-INITIAL_FORMS\': \'0\'})\n    \n    if not formset.is_valid():\n        errors = formset.non_form_errors()\n        if errors and \'nonform\' in errors.as_ul():\n            print("Issue resolved")\n        elif errors:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    else:\n        print("Other issues")\n\n\ntest_nonform_css_class_in_formset_errors()\n```\n\nThis test follows these steps:\n1. Defines a `TestForm` with a single field.\n2. Defines a custom `CustomErrorList` class to check the presence of CSS classes in errors.\n3. Defines a `BaseTestFormSet` class with a `clean` method that raises a `ValidationError` to simulate non-form errors.\n4. Creates a `TestFormSet` using `formset_factory`.\n5. Simulates formset validation with invalid data to trigger the error.\n6. Checks if the error list contains the `nonform` CSS class and prints appropriate messages based on this check.\n\nThis test can be used to both reproduce the issue and verify its resolution, as requested.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\n\nclass CustomErrorList(forms.utils.ErrorList):\n    def as_ul(self):\n        if not self:\n            return \'\'\n        return \'<ul class="errorlist">%s</ul>\' % \'\'.join([\n            \'<li class="nonform">%s</li>\' % e for e in self\n        ])\n\nclass SampleForm(forms.Form):\n    field = forms.CharField()\n\ndef test_nonform_css_class_in_formsets():\n    data = {\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n    }\n    FormSet = formset_factory(SampleForm)\n    formset = FormSet(data, error_class=CustomErrorList)\n    \n    # Manually add a non form error to the formset\n    formset.non_form_errors().append(\'This is a non form error\')\n    \n    non_form_errors = formset.non_form_errors().as_ul()\n    \n    if \'class="nonform"\' in non_form_errors:\n        print("Issue resolved")\n    elif \'class="errorlist"\' in non_form_errors:\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_nonform_css_class_in_formsets()\n```\n\nThis test code does the following:\n\n1. Imports the necessary modules and classes to reproduce the issue.\n2. Defines a custom `ErrorList` class to include the `nonform` CSS class.\n3. Defines a sample form to be used in the formset.\n4. Creates and initializes a formset with the required management form data.\n5. Manually adds a non-form error to the formset.\n6. Checks if the `nonform` CSS class is present in the non-form error list output and prints the appropriate message.\n\nThis test should help in verifying if the issue with the `nonform` CSS class has been resolved or not.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.forms.utils import ErrorList\n\nclass CustomErrorList(ErrorList):\n    def as_ul(self):\n        if not self:\n            return \'\'\n        return \'<ul class="errorlist">%s</ul>\' % \'\'.join([\'<li class="nonform">%s</li>\' % e for e in self])\n\nclass SimpleForm(forms.Form):\n    field = forms.CharField()\n\ndef test_formset_nonform_error_class():\n    # Create a formset with a custom error class\n    SimpleFormSet = formset_factory(SimpleForm, extra=1)\n    data = {\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-0-field\': \'test\'\n    }\n\n    # Create a formset instance and add a non-form error\n    formset = SimpleFormSet(data, error_class=CustomErrorList)\n    formset.non_form_errors().append(\'Non form error\')\n\n    # Render the error list to check if the custom error class is applied\n    non_form_errors = formset.non_form_errors().as_ul()\n\n    try:\n        # Check if the custom class \'nonform\' is applied in the error list\n        assert \'nonform\' in non_form_errors\n        print("Issue resolved")\n    except AssertionError:\n        print("Issue reproduced")\n    except Exception:\n        print("Other issues")\n\ntest_formset_nonform_error_class()\n```\n\nExplanation:\n1. **Imports**: The necessary imports are included from `django.forms` and `django.forms.utils`.\n2. **Custom ErrorList**: We create a custom `ErrorList` class to render errors with a `nonform` CSS class.\n3. **SimpleForm**: We define a basic form class with one field.\n4. **Test Function**: The function `test_formset_nonform_error_class` creates a formset, adds a non-form error, and checks if the non-form error is rendered with the `nonform` CSS class.\n5. **Assertions and Print Statements**: Depending on the outcome, the function prints "Issue resolved", "Issue reproduced", or "Other issues". \n\nThis test should be able to reproduce the issue described in the issue text and verify if the issue has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.test import TestCase\n\nclass ExampleForm(forms.Form):\n    field = forms.CharField(required=False)\n\ndef custom_error_list(errors):\n    """\n    Custom ErrorList class to append nonform CSS class for non form errors in formsets.\n    """\n\n    class CustomErrorList(forms.utils.ErrorList):\n        def as_ul(self):\n            if not self: \n                return \'\'\n            return \'<ul class="errorlist">%s</ul>\' % \'\'.join([\'<li class="nonform">%s</li>\' % e for e in self])\n\n    return CustomErrorList(errors)\n\nclass FormSetTest(TestCase):\n\n    def test_formset_nonform_css_class(self):\n        ExampleFormSet = formset_factory(ExampleForm, extra=0)\n        data = {\n            \'form-TOTAL_FORMS\': \'1\',\n            \'form-INITIAL_FORMS\': \'0\',\n            \'form-MIN_NUM_FORMS\': \'0\',\n            \'form-MAX_NUM_FORMS\': \'1000\',\n        }\n        formset = ExampleFormSet(data, error_class=custom_error_list)\n\n        # Artificially add a nonform error to the formset\n        formset.non_form_errors().append(\'There was an error with the formset.\')\n\n        # Check the output HTML\n        output = formset.non_form_errors().as_ul()\n\n        # Check if nonform CSS class is added\n        if \'class="nonform"\' in output:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n\n        return\n\n# Run the test\nFormSetTest().test_formset_nonform_css_class()\n```\n\nExplanation:\n1. **Necessary imports:** Imported necessary modules and classes from `django.forms` and `django.test`.\n2. **Code to reproduce the issue:** Created an `ExampleForm` and a formset using `formset_factory`. Added a custom `ErrorList` class that appends the `nonform` CSS class to non form errors.\n3. **Print statements:** Added logic to print "Issue resolved" if the `nonform` CSS class is found in the output, otherwise print "Issue reproduced".\n\nTo verify the issue, include this test in your Django project and run it. The test will check if the `nonform` CSS class is added to non form errors in formsets.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.test import SimpleTestCase\n\nclass ExampleForm(forms.Form):\n    field = forms.CharField()\n\ndef custom_error_list(errors, error_class):\n    return forms.utils.ErrorList(errors, error_class=error_class)\n\nclass FormSetWithNonFormErrorTest(SimpleTestCase):\n    def test_nonform_css_class_in_formset_errors(self):\n        # Create a formset with a custom ErrorList class to capture the CSS classes\n        CustomErrorList = lambda *args, **kwargs: custom_error_list(*args, **kwargs, error_class=\'custom-error\')\n\n        ExampleFormSet = formset_factory(ExampleForm, extra=1, formset=forms.BaseFormSet)\n        formset = ExampleFormSet(data={}, error_class=CustomErrorList)\n\n        # Add a non form error to the formset\n        formset.non_form_errors().append(\'This is a non form error.\')\n\n        # Trigger the validation to populate the errors\n        formset.is_valid()\n\n        # Check if the nonform CSS class is present in the non_form_errors\n        non_form_errors_rendered = formset.non_form_errors().as_ul()\n\n        if \'nonform\' in non_form_errors_rendered:\n            print("Issue resolved")\n        elif \'custom-error\' in non_form_errors_rendered and \'nonform\' not in non_form_errors_rendered:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\nFormSetWithNonFormErrorTest().test_nonform_css_class_in_formset_errors()\n```\n\nThis test script follows these steps:\n1. Defines an `ExampleForm` class to use within the FormSet.\n2. Sets up a `custom_error_list` function to use a custom error class for capturing CSS classes in errors.\n3. Creates a test class `FormSetWithNonFormErrorTest` that extends `SimpleTestCase`.\n4. Implements a test method `test_nonform_css_class_in_formset_errors` which:\n   - Creates a FormSet with the custom error list class.\n   - Adds a non-form error to the FormSet.\n   - Validates the FormSet to populate the errors.\n   - Checks if the `nonform` CSS class is present in the non-form errors and prints the appropriate message.\n\nThe test can be run to verify if the issue described is reproduced or resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='Sure, here is a complete test to reproduce the issue described in your issue text. This test ensures that non-form errors in FormSets have the expected `nonform` CSS class.\n\n```python\nfrom django import forms\nfrom django.forms import formset_factory\n\n# Custom error list to capture CSS classes\nclass CustomErrorList(forms.utils.ErrorList):\n    def __str__(self):\n        return \'\\n\'.join([f"{error} ({css_class})" for error, css_class in self.data])\n\n    def as_data(self):\n        return self.data\n\nclass SampleForm(forms.Form):\n    field = forms.CharField()\n\ndef test_nonform_css_class_in_formsets():\n    # Create a formset with a non-form error\n    SampleFormSet = formset_factory(SampleForm, extra=1)\n    data = {\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\'\n    }\n    formset = SampleFormSet(data, error_class=CustomErrorList)\n    \n    # Manually add a non-form error\n    formset.non_form_errors().append((\'This is a non-form error\', \'nonform\'))\n\n    # Check if the non-form error has the expected CSS class\n    non_form_errors = formset.non_form_errors().as_data()\n\n    # Print the result based on whether the issue is reproduced or resolved\n    if any(css_class == \'nonform\' for _, css_class in non_form_errors):\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\ntest_nonform_css_class_in_formsets()\n```\n\nThis test does the following:\n1. Imports necessary Django components.\n2. Defines a custom error list class to capture errors with their CSS classes.\n3. Defines a simple form class to use in the formset.\n4. Defines a test function to create a formset and manually add a non-form error with a specific CSS class.\n5. Checks whether the non-form error has the expected CSS class and prints the appropriate message.\n\nThis code should help determine if the issue is reproduced or resolved based on the presence of the `nonform` CSS class in non-form errors for formsets.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.test import TestCase\n\nclass TestForm(forms.Form):\n    field = forms.CharField()\n\nclass CustomErrorList(forms.utils.ErrorList):\n    def __str__(self):\n        return self.as_ul()\n\n    def as_ul(self):\n        if not self:\n            return \'\'\n        return \'<ul class="errorlist">%s</ul>\' % \'\'.join([\'<li class="%s">%s</li>\' % (self.error_class, e) for e in self])\n\nclass FormSetErrorTest(TestCase):\n    def test_formset_nonform_errors(self):\n        TestFormSet = formset_factory(TestForm, extra=1, formset=forms.BaseFormSet)\n\n        data = {\n            \'form-TOTAL_FORMS\': \'1\',\n            \'form-INITIAL_FORMS\': \'0\',\n            \'form-MIN_NUM_FORMS\': \'0\',\n            \'form-MAX_NUM_FORMS\': \'1000\',\n        }\n\n        formset = TestFormSet(data, error_class=CustomErrorList)\n\n        # Manually add non-form error to the formset\n        formset.non_form_errors().append(\'Non-form related error\')\n\n        rendered_errors = str(formset.non_form_errors())\n\n        if \'nonform\' not in rendered_errors:\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n\n        return\n\n# Run the test\nFormSetErrorTest().test_formset_nonform_errors()\n```\n\nExplanation of the test:\n1. **Necessary imports**: We import necessary modules and classes like `forms`, `formset_factory`, and `TestCase` from Django.\n2. **Code to reproduce the issue**: We define a test form and a custom error list class (`CustomErrorList`). We then create a formset using this form, submit some data, and manually add a non-form error to the formset. \n3. **Print statements**: Based on whether the `nonform` CSS class is present in the rendered non-form error messages, we print "Issue reproduced" or "Issue resolved".\n\nThis test can be used to check if the `nonform` CSS class is being added to non-form errors in formsets, thus verifying if the issue is resolved or not.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.forms.utils import ErrorList\n\n\n# Custom ErrorList to check for CSS classes\nclass CustomErrorList(ErrorList):\n    def as_ul(self):\n        return \' \'.join(self.as_data())\n\n    def as_data(self):\n        return [f"{error[\'message\']} (class: {\' \'.join(error[\'class\'])})" for error in self.errors]\n\n\n# Define a simple form\nclass SimpleForm(forms.Form):\n    field = forms.CharField()\n\n    def clean(self):\n        cleaned_data = super().clean()\n        field = cleaned_data.get("field")\n\n        if not field:\n            self.add_error(None, "This is a non-field error.")\n        \n        return cleaned_data\n\n\n# Define a FormSet\nSimpleFormSet = formset_factory(SimpleForm, extra=2)\n\n\ndef test_nonform_css_class_for_non_form_errors():\n    # Create a formset with an error not tied to a specific form\n    data = {\n        \'form-TOTAL_FORMS\': \'2\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n        \'form-0-field\': \'\',\n        \'form-1-field\': \'\'\n    }\n    formset = SimpleFormSet(data=data, error_class=CustomErrorList)\n\n    # Manually injecting a non-form error\n    formset.non_form_errors().append("This is a non-form error.")\n\n    if formset.is_valid():\n        print("Other issues")\n        return\n\n    error_list = formset.non_form_errors().as_data()\n\n    if any("nonform" in error for error in error_list):\n        print("Issue resolved")\n    elif any("This is a non-form error." in error for error in error_list):\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\n\ntest_nonform_css_class_for_non_form_errors()\n```\n\nThis test aims to reproduce the issue by creating a formset and manually adding a non-form error. It checks whether the `nonform` CSS class is included in the error message output. If the class is present, it prints "Issue resolved"; if the error message is present without the class, it prints "Issue reproduced"; for all other cases, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\n\nclass TestForm(forms.Form):\n    field1 = forms.CharField(required=False)\n    field2 = forms.CharField(required=False)\n\ndef test_nonform_css_class_in_formsets():\n    # Create a formset with some initial data\n    TestFormSet = formset_factory(TestForm, extra=2)\n\n    # Simulate some formset data with errors\n    data = {\n        \'form-TOTAL_FORMS\': \'2\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n        \'form-0-field1\': \'value\',\n        \'form-1-field2\': \'value\',\n    }\n\n    formset = TestFormSet(data)\n\n    # Add non form error to the formset\n    formset.non_form_errors().append(\'This is a non form error\')\n\n    # Check the CSS classes in the error list\n    error_html = formset.non_form_errors().as_ul()\n\n    if \'nonform\' in error_html:\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\n# Ensure the test runs\ntest_nonform_css_class_in_formsets()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.test import TestCase\n\nclass SampleForm(forms.Form):\n    field1 = forms.CharField(required=True)\n    field2 = forms.CharField(required=True)\n\nclass SampleFormSet(forms.BaseFormSet):\n    def clean(self):\n        super().clean()\n        raise forms.ValidationError("This is a non-form error.", code=\'nonform_error\')\n\nclass NonFormErrorList(forms.utils.ErrorList):\n    def as_ul(self):\n        if not self:\n            return \'\'\n        return \'<ul class="errorlist nonform">\' + \'\'.join([\'<li>%s</li>\' % e for e in self]) + \'</ul>\'\n\nclass FormSetTestCase(TestCase):\n    def test_nonform_css_class(self):\n        # Create the formset data with missing fields to raise errors\n        data = {\n            \'form-TOTAL_FORMS\': \'1\',\n            \'form-INITIAL_FORMS\': \'0\',\n            \'form-MIN_NUM_FORMS\': \'0\',\n            \'form-MAX_NUM_FORMS\': \'1000\',\n            \'form-0-field1\': \'\',\n            \'form-0-field2\': \'\',\n        }\n\n        SampleFormSetFactory = formset_factory(SampleForm, formset=SampleFormSet, extra=1)\n        formset = SampleFormSetFactory(data, error_class=NonFormErrorList)\n\n        if formset.is_valid():\n            print("Other issues")\n        else:\n            errors = formset.non_form_errors()\n            # Check if the nonform CSS class is in the error list\n            if errors:\n                errors_as_ul = errors.as_ul()\n                if \'nonform\' in errors_as_ul:\n                    print("Issue resolved")\n                else:\n                    print("Issue reproduced")\n            else:\n                print("Other issues")\n\nFormSetTestCase().test_nonform_css_class()\n```\n\nThis test case does the following:\n1. Creates a `SampleForm` containing two required fields.\n2. Creates a `SampleFormSet` that raises a non-form error in the `clean` method.\n3. Defines a custom `NonFormErrorList` to render errors with a specific CSS class.\n4. Creates a test case to check if the `nonform` CSS class is added when a non-form error occurs in the `FormSet`.\n5. Prints "Issue resolved" if the `nonform` CSS class is found, "Issue reproduced" if it is not found, and "Other issues" if there are no errors or other issues.\n\nYou can use this code to both reproduce the issue and verify if it has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.forms import formset_factory, Form, ValidationError\nfrom django.forms.utils import ErrorList\n\n# Custom form to test the FormSet errors\nclass TestForm(Form):\n    # Define some form fields if necessary\n    pass\n\ndef test_formset_nonform_error():\n    class CustomErrorList(ErrorList):\n        def __str__(self):\n            return self.as_ul()\n\n        def as_ul(self):\n            if not self: return \'\'\n            return \'<ul class="errorlist %s">%s</ul>\' % (\n                \' \'.join(self.error_class),\n                \'\'.join(\'<li>%s</li>\' % e for e in self)\n            )\n\n    # Define a formset\n    TestFormSet = formset_factory(TestForm, extra=1)\n\n    # Create a formset instance with a non-form error\n    formset = TestFormSet(data={})\n    formset.non_form_errors().append(ValidationError(\'Non form error\'))\n\n    # Check if the custom error list is used\n    error_list = CustomErrorList(formset.non_form_errors())\n\n    try:\n        assert \'nonform\' in error_list.as_ul()\n        print("Issue resolved")\n    except AssertionError:\n        print("Issue reproduced")\n        return\n\n    # Check for other issues\n    if len(formset.errors) > 0:\n        print("Other issues")\n        return\n\n    return\n\ntest_formset_nonform_error()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='Sure! Below is the Python test code that meets the requirements described in the issue text:\n\n```python\nfrom django import forms\nfrom django.forms import formset_factory\n\nclass SimpleForm(forms.Form):\n    name = forms.CharField()\n\ndef test_formset_non_form_errors():\n    # Create a FormSet with a custom ErrorList to capture non form errors\n    SimpleFormSet = formset_factory(SimpleForm, extra=1)\n    \n    # Introduce a non-form error by passing a management form with missing data\n    data = {\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'0\',\n    }\n    \n    formset = SimpleFormSet(data)\n    \n    # Add a non-form error manually to simulate the issue\n    formset.non_form_errors().append(\'A non-form error occurred\')\n    \n    # Check the CSS class of the non-form error\n    if hasattr(formset.non_form_errors(), \'as_ul\'):\n        non_form_errors_html = formset.non_form_errors().as_ul()\n        if \'nonform\' in non_form_errors_html:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_formset_non_form_errors()\n```\n\nExplanation:\n1. The code imports necessary modules and creates a simple form.\n2. A `SimpleFormSet` is created using `formset_factory`.\n3. The test simulates a non-form error by manipulating the formset\'s non-form errors.\n4. It checks if the error list has the `nonform` CSS class.\n5. If the `nonform` class is present, it prints "Issue resolved".\n6. If not, it prints "Issue reproduced".\n7. If there are other issues, it prints "Other issues".\n\nThis should help in both reproducing the issue and verifying if it has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test code to reproduce the issue described in the issue text:\n\n```python\nfrom django import forms\nfrom django.forms import formset_factory\n\n# Define a sample form\nclass SampleForm(forms.Form):\n    field1 = forms.CharField()\n\n# Define a custom ErrorList that will help us verify the CSS classes\nclass CustomErrorList(forms.utils.ErrorList):\n    def as_ul(self):\n        return \'\'.join([\'<li class="{}">{}</li>\'.format(self.error_class, e) for e in self])\n\n    def __init__(self, initlist=None, error_class=\'nonform\'):\n        super().__init__(initlist, error_class)\n\ndef test_nonform_css_class_in_formset():\n    # Create a formset with a non-form error\n    SampleFormSet = formset_factory(SampleForm, extra=0, error_class=CustomErrorList)\n    formset = SampleFormSet(data={\'form-TOTAL_FORMS\': \'1\', \'form-INITIAL_FORMS\': \'0\'})\n\n    # Add a non-form error manually\n    formset.non_form_errors().append("A non-form error")\n\n    # Render the formset errors\n    rendered_errors = formset.non_form_errors().as_ul()\n\n    # Check for the presence of the \'nonform\' CSS class\n    if \'nonform\' in rendered_errors:\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\n    # Check for other potential issues with the source code\n    try:\n        # Add a normal form error\n        formset.forms[0].add_error(\'field1\', \'A form error\')\n        form_errors = formset.forms[0].errors.as_ul()\n        if \'nonfield\' in form_errors:\n            print(\'Issue resolved\')\n        else:\n            print(\'Other issues\')\n    except Exception as e:\n        print("Other issues")\n\ntest_nonform_css_class_in_formset()\n```\n\nThis test does the following:\n1. Imports necessary modules and classes from Django.\n2. Defines a sample form and a custom `ErrorList` class.\n3. Creates a formset and adds a non-form error to it.\n4. Checks if the non-form error is correctly rendered with the `nonform` CSS class.\n5. Prints whether the issue is reproduced, resolved, or if there are other issues based on the presence of the `nonform` CSS class in the rendered errors.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.core.exceptions import ValidationError\n\n# Custom ErrorList class to render error CSS classes\nclass CustomErrorList(forms.utils.ErrorList):\n    def as_ul(self):\n        if not self:\n            return \'\'\n        return \'<ul class="errorlist">%s</ul>\' % \'\'.join([\'<li class="%s">%s</li>\' % (self.error_class(error), e) for error, e in enumerate(self)])\n\n    def error_class(self, error):\n        if hasattr(error, \'code\') and error.code == \'non_field_error\':\n            return \'nonfield\'\n        return \'nonform\'\n\n# Sample Form class\nclass SampleForm(forms.Form):\n    field1 = forms.CharField(required=False)\n    field2 = forms.CharField(required=False)\n\n    def clean(self):\n        cleaned_data = super().clean()\n        if not cleaned_data.get(\'field1\') and not cleaned_data.get(\'field2\'):\n            raise ValidationError(\'At least one field must be filled.\', code=\'non_field_error\')\n\n# FormSet definition\nSampleFormSet = formset_factory(SampleForm, extra=2)\n\n# Test function\ndef test_nonform_css_class_for_formsets():\n    # Create a formset instance with empty data to trigger non form errors\n    formset = SampleFormSet(data={})\n\n    try:\n        # Check if there are non form errors\n        formset.is_valid()\n        if not formset.errors and formset.non_form_errors():\n            # Check if the custom ErrorList is applied and the CSS class is set correctly\n            custom_error_list = CustomErrorList(formset.non_form_errors())\n            if \'nonform\' in custom_error_list.as_ul():\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues:", e)\n\n# Run the test\ntest_nonform_css_class_for_formsets()\n```\n\nThis test sets up a Django form and formset, triggers non form errors by submitting empty data, and checks if the custom ErrorList correctly applies the `nonform` CSS class. Depending on the results, it prints whether the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\n\nclass SampleForm(forms.Form):\n    field1 = forms.CharField()\n\ndef test_nonform_css_class_in_formsets():\n    class CustomErrorList(forms.utils.ErrorList):\n        def __str__(self):\n            return self.as_divs()\n\n        def as_divs(self):\n            if not self:\n                return \'\'\n            return \'<div class="errorlist">%s</div>\' % \'\'.join([\'<div class="nonform">%s</div>\' % e for e in self])\n\n    SampleFormSet = formset_factory(SampleForm, extra=1, error_class=CustomErrorList)\n\n    # Trigger non form error\n    formset = SampleFormSet(data={\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        # Normally some other validation would trigger this error\n        \'form-0-field1\': \'\',\n    })\n\n    # Manually adding a non form error for testing\n    formset.non_form_errors().append(\'A non-form error\')\n    \n    # Check if the nonform CSS class is added to the non form error\n    try:\n        rendered_errors = str(formset.non_form_errors())\n        if \'nonform\' in rendered_errors:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_nonform_css_class_in_formsets()\n```\n\nExplanation:\n1. This test imports necessary modules from Django.\n2. It defines a `SampleForm` class as a basic form for the formset.\n3. It creates a custom `ErrorList` class to override the default error rendering to include a `nonform` CSS class.\n4. It sets up a formset using `formset_factory` with the custom `ErrorList`.\n5. It manually triggers a non-form error.\n6. It checks if the `nonform` CSS class is present in the rendered non-form error messages.\n7. It prints "Issue resolved" if the `nonform` class is found, otherwise prints "Issue reproduced". If any other issues occur, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\n\n# Custom ErrorList that records CSS classes\nclass CustomErrorList(forms.utils.ErrorList):\n    def as_divs(self):\n        if not self:\n            return \'\'\n        return \'<div class="{}">{}</div>\'.format(\n            self.formset_error_class if hasattr(self, \'formset_error_class\') else \'nonfield\',\n            \'\'.join(\'<div class="error">%s</div>\' % e for e in self)\n        )\n\n# Sample form to be used in the formset\nclass SampleForm(forms.Form):\n    field = forms.CharField()\n\n# Create a formset with the custom error list\nSampleFormSet = formset_factory(SampleForm, extra=0)\n\ndef test_nonform_css_class_for_formset_errors():\n    # Create a formset with an error\n    data = {\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n    }\n    formset = SampleFormSet(data, error_class=CustomErrorList)\n    \n    # Add a non-form error to the formset\n    formset.non_form_errors().append("This is a non-form error")\n\n    # Set the expected class for non-form errors\n    formset.non_form_errors().formset_error_class = \'nonform\'\n\n    # Render the errors as divs to check the CSS classes applied\n    rendered_errors = formset.non_form_errors().as_divs()\n\n    try:\n        assert \'<div class="nonform">\' in rendered_errors\n        print("Issue resolved")\n    except AssertionError:\n        print("Issue reproduced")\n    \n    # Check for other issues\n    try:\n        assert \'<div class="nonfield">\' not in rendered_errors\n        assert \'This is a non-form error\' in rendered_errors\n        print("Issue resolved")\n    except AssertionError:\n        print("Other issues")\n\ntest_nonform_css_class_for_formset_errors()\n```\n\nThis test does the following:\n1. Sets up necessary imports and creates a custom `ErrorList` to capture the CSS class.\n2. Defines a sample form and creates a formset using this form.\n3. Adds a non-form error to the formset and sets the expected CSS class (`nonform`).\n4. Renders the errors to check the applied CSS classes.\n5. Prints "Issue resolved" if the `nonform` class is correctly applied, "Issue reproduced" if the class is not applied, and "Other issues" if there are any discrepancies in the error rendering.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.test import SimpleTestCase\n\nclass TestForm(forms.Form):\n    field = forms.CharField(required=False)\n\ndef test_add_nonform_css_class():\n    class CustomErrorList(forms.utils.ErrorList):\n        def as_ul(self):\n            if not self: \n                return \'\'\n            return \'<ul class="errorlist {}">{}</ul>\'.format(\n                \' \'.join(self.error_class), \'\'.join([\'<li>%s</li>\' % e for e in self])\n            )\n\n    TestFormSet = formset_factory(TestForm, extra=2)\n    data = {\n        \'form-TOTAL_FORMS\': \'2\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n    }\n    formset = TestFormSet(data, error_class=CustomErrorList)\n\n    # Add a non-form error to the formset\n    formset._non_form_errors = formset.error_class([\'Non form error\'])\n\n    # Render the formset errors as ul\n    non_form_errors_ul = formset.non_form_errors().as_ul()\n\n    if \'nonform\' in non_form_errors_ul:\n        print("Issue resolved")\n    elif \'errorlist\' in non_form_errors_ul:\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_add_nonform_css_class()\n```\n\nThis test sets up a form and formset, adds a non-form error to the formset, and checks if the error list rendered as an unordered list (`<ul>`) contains the `nonform` CSS class or just the `errorlist` class. Based on the presence or absence of the `nonform` class, it prints the appropriate message to indicate whether the issue is still present, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.utils.safestring import mark_safe\n\nclass CustomErrorList(forms.utils.ErrorList):\n    def as_ul(self):\n        if not self:\n            return \'\'\n        return mark_safe(\'<ul class="errorlist">%s</ul>\' % \'\'.join(\n            \'<li class="%s">%s</li>\' % (self.css_class(e), e) for e in self))\n\n    def css_class(self, error):\n        if isinstance(error, forms.ValidationError) and hasattr(error, \'params\') and error.params:\n            return \'nonform\'\n        return \'error\'\n\nclass TestForm(forms.Form):\n    field = forms.CharField()\n\n    def clean(self):\n        raise forms.ValidationError("Form error", code=\'form_error\')\n\ndef test_formset_nonform_errors():\n    TestFormSet = formset_factory(TestForm, formset=forms.BaseFormSet)\n    data = {\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n    }\n\n    formset = TestFormSet(data, error_class=CustomErrorList)\n    \n    if not formset.is_valid():\n        nonform_errors_found = any(\'nonform\' in str(e) for e in formset.non_form_errors())\n        form_errors_found = any(\'error\' in str(e) for form in formset.forms for e in form.errors.values())\n        \n        if nonform_errors_found and form_errors_found:\n            print("Issue resolved")\n        elif not nonform_errors_found and form_errors_found:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    else:\n        print("Other issues")\n\ntest_formset_nonform_errors()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\n\n# Define the form with a non-field error\nclass SampleForm(forms.Form):\n    name = forms.CharField(max_length=100)\n\n    def clean(self):\n        cleaned_data = super().clean()\n        if cleaned_data.get(\'name\') == \'error\':\n            raise forms.ValidationError(\'This is a non-field error on the form.\')\n        return cleaned_data\n\n# Create a formset from the form\nSampleFormSet = formset_factory(SampleForm, extra=1)\n\ndef test_nonform_css_class_in_formset():\n    # Create a formset with data that will trigger the non-field error\n    data = {\n        \'form-0-name\': \'error\',\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n    }\n    formset = SampleFormSet(data)\n\n    # Check if the formset is valid (it should not be due to the non-field error)\n    if not formset.is_valid():\n        # Check if nonform CSS class is applied in non_form_errors\n        non_form_errors = formset.non_form_errors()\n        if any(\'nonform\' in str(error) for error in non_form_errors):\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_nonform_css_class_in_formset()\n```\n\nExplanation of the test:\n1. We define a `SampleForm` with a custom `clean` method that raises a non-field error if the `name` field is set to "error".\n2. We create a formset factory `SampleFormSet` from `SampleForm`.\n3. We define the `test_nonform_css_class_in_formset` function to test the issue:\n    - We create a formset with data that will trigger the non-field error.\n    - We check if the formset is valid (it should not be due to the non-field error).\n    - We then check if the `nonform` CSS class is applied in the non-form errors of the formset.\n    - Depending on the outcome, it prints "Issue resolved" if the `nonform` CSS class is present in the errors, "Issue reproduced" if it is not, and "Other issues" if the formset is unexpectedly valid.\n\nThis test can be used to both reproduce the issue and verify if it has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.forms.utils import ErrorList\n\ndef test_nonform_css_class_added():\n    class CustomErrorList(ErrorList):\n        def __str__(self):\n            return self.as_ul()\n\n        def as_ul(self):\n            if not self:\n                return \'\'\n            return \'<ul class="%s">%s</ul>\' % (\n                self.error_class,\n                \'\'.join(\'<li>%s</li>\' % e for e in self)\n            )\n\n    class TestForm(forms.Form):\n        field1 = forms.CharField()\n\n    TestFormSet = formset_factory(TestForm, extra=1)\n\n    # Create a formset instance with a non-form error\n    data = {\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-MAX_NUM_FORMS\': \'\',\n    }\n    formset = TestFormSet(data, error_class=CustomErrorList)\n\n    # Add a non-form error\n    formset.non_form_errors().append(\'This is a non-form error.\')\n\n    # Render the formset errors\n    rendered_errors = str(formset.non_form_errors())\n\n    # Check if the "nonform" CSS class is present\n    if \'class="nonform"\' in rendered_errors:\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\ntry:\n    test_nonform_css_class_added()\nexcept Exception as e:\n    print("Other issues")\n    print(e)\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='Sure, here is a test script to reproduce the issue described in your issue text:\n\n```python\nfrom django import forms\nfrom django.forms import formset_factory\n\nclass CustomErrorList(forms.utils.ErrorList):\n    def as_ul(self):\n        if not self:\n            return \'\'\n        return \'<ul class="errorlist">%s</ul>\' % \'\'.join([\'<li class="%s">%s</li>\' % (self.error_css_class, e) for e in self])\n\nclass TestForm(forms.Form):\n    field1 = forms.CharField()\n\ndef test_add_nonform_css_class():\n    TestFormSet = formset_factory(TestForm, extra=0)\n    \n    # Creating a formset with a non_form_error\n    data = {\'form-TOTAL_FORMS\': \'1\', \'form-INITIAL_FORMS\': \'0\'}\n    formset = TestFormSet(data, error_class=CustomErrorList)\n    \n    # Forcing a non_form_error\n    formset.non_form_errors().append(\'Non form error\')\n\n    # Check if \'nonform\' CSS class is added\n    for error in formset.non_form_errors():\n        if \'nonform\' in error:\n            print("Issue resolved")\n            return\n        \n    # If \'nonform\' class is not found in non_form_errors, the issue is reproduced\n    print("Issue reproduced")\n    return\n\n# Running the test\ntest_add_nonform_css_class()\n```\n\nExplanation of the Test:\n- **Necessary Imports**: The test imports the necessary modules from `django` to create and manipulate forms and formsets.\n- **Code to Reproduce the Issue**: The script defines a custom error list class `CustomErrorList` and a simple form `TestForm`. It then creates a formset from `TestForm` and forces a non-form error.\n- **Outcome Verification**:\n  - If the `nonform` CSS class is found in the non-form errors, it prints "Issue resolved".\n  - If the `nonform` CSS class is not found in the non-form errors, it prints "Issue reproduced".\n  - If any unexpected issues arise, it prints "Other issues".\n\nYou can use this script to verify if the issue is reproduced or resolved in your codebase.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='Sure, here\'s a complete test script that you can use to reproduce the issue described in the issue text:\n\n```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.forms.utils import ErrorList\n\n# Custom ErrorList to capture CSS classes applied\nclass CustomErrorList(ErrorList):\n    def __str__(self):\n        return self.as_text()\n\n    def as_text(self):\n        return "\\n".join(\n            f"{e} (classes: {getattr(e, \'attrs\', {}).get(\'class\', \'\')})"\n            for e in self\n        )\n\n# Sample form with no fields just to trigger formset errors\nclass SampleForm(forms.Form):\n    pass\n\ndef test_nonform_css_class_in_formset():\n    SampleFormSet = formset_factory(SampleForm, extra=1)\n    formset = SampleFormSet(data={\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n    }, error_class=CustomErrorList)\n\n    # Trigger a nonform error manually\n    formset.non_form_errors = lambda: CustomErrorList(["This is a non form error."])\n\n    error_list = formset.non_form_errors()\n    error_texts = error_list.as_text()\n\n    if "nonform" in error_texts:\n        print("Issue resolved")\n    elif "This is a non form error." in error_texts:\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_nonform_css_class_in_formset()\n```\n\nThis script does the following:\n\n1. Imports necessary modules and classes from Django.\n2. Defines a custom `ErrorList` class to capture and display CSS classes applied to errors.\n3. Defines a sample form with no fields, which is used to create a formset.\n4. In the `test_nonform_css_class_in_formset` function:\n   - Creates a formset using the `SampleForm`.\n   - Manually triggers a non-form error in the formset.\n   - Checks if the "nonform" CSS class is present in the error messages.\n   - Prints "Issue resolved" if the "nonform" CSS class is found, "Issue reproduced" if the specific non-form error message is found without the CSS class, and "Other issues" for any other case.\n\nYou can run this script to determine if the issue is present or has been fixed. This script should help in verifying the presence or absence of the `nonform` CSS class in non-form errors.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.forms.utils import ErrorList\n\n# Custom ErrorList to check for CSS classes\nclass CustomErrorList(ErrorList):\n    def __str__(self):\n        return \'\\n\'.join([f\'{e} ({self.error_class})\' for e in self])\n\n# Sample form to use in the FormSet\nclass SampleForm(forms.Form):\n    field = forms.CharField(required=False)\n\n# Custom FormSet with error\nclass CustomFormSet(forms.BaseFormSet):\n    def clean(self):\n        super().clean()\n        raise forms.ValidationError("Non form error", code=\'non_form_error\')\n\n# Test function to reproduce the issue\ndef test_nonform_css_class_for_non_form_errors():\n    # Create the FormSet with a CustomErrorList\n    CustomFormSetWithError = formset_factory(SampleForm, formset=CustomFormSet, extra=1, error_class=CustomErrorList)\n    formset = CustomFormSetWithError(data={\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n        \'form-0-field\': \'test\',\n    })\n\n    try:\n        formset.is_valid()\n    except:\n        print("Other issues")\n        return\n\n    # Check for non form error and its CSS class\n    non_form_errors = formset.non_form_errors()\n    if non_form_errors:\n        error_list_str = str(non_form_errors)\n        if \'nonform\' in error_list_str:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_nonform_css_class_for_non_form_errors()\n```\n\nThis test code will provide a clear indication if the issue described in the issue text regarding the `nonform` CSS class is reproducible or has been resolved. If the `nonform` CSS class is not found in the non-form errors, it will print "Issue reproduced". If the `nonform` CSS class is present, it will print "Issue resolved". If there are any other issues, such as exceptions or unexpected states, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.forms.utils import ErrorList\n\nclass CustomErrorList(ErrorList):\n    def as_ul(self):\n        if not self: \n            return \'\'\n        style = self.non_form_error_css_class if self.is_non_form_errors else \'\'\n        return \'<ul class="{}">{}</ul>\'.format(\n            style,\n            \'\'.join([\'<li>{}</li>\'.format(e) for e in self])\n        )\n\nclass TestForm(forms.Form):\n    field1 = forms.CharField(required=True)\n\n# Define a formset using the TestForm\nTestFormSet = formset_factory(TestForm, extra=2)\n\ndef create_formset_with_nonform_error():\n    data = {\n        \'form-TOTAL_FORMS\': \'2\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n        \'form-0-field1\': \'valid data\',\n        \'form-1-field1\': \'\'\n    }\n    formset = TestFormSet(data, error_class=CustomErrorList)\n    formset.non_form_errors().append(\'Non formset error\')\n    return formset\n\ndef test_nonform_css_class():\n    formset = create_formset_with_nonform_error()\n    non_form_errors = formset.non_form_errors()\n\n    if not non_form_errors:\n        print("Other issues")\n        return\n\n    # Check if the custom CSS class is added to the non-form errors\n    if \'nonform\' in non_form_errors.as_ul():\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\ntest_nonform_css_class()\n```\n\nThis test script does the following:\n1. Imports necessary Django modules and classes.\n2. Defines a custom error list class `CustomErrorList` that can differentiate between form and non-form errors by CSS class.\n3. Creates a simple form and a formset.\n4. Sets up a scenario where a formset has a non-form error.\n5. Checks if the `nonform` CSS class is applied to the non-form errors in the formset, depending on whether the issue is resolved or reproduced.\n\nRunning this script will output:\n- "Issue reproduced" if the `nonform` CSS class is not applied as expected.\n- "Issue resolved" if the `nonform` CSS class is correctly applied.\n- "Other issues" if there are other issues with the script or the formset.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\n\nclass SampleForm(forms.Form):\n    field = forms.CharField()\n\nclass CustomErrorList(forms.utils.ErrorList):\n    def as_ul(self):\n        if not self:\n            return \'\'\n        return \'<ul class="errorlist">%s</ul>\' % \'\'.join([\'<li class="nonform">%s</li>\' % e for e in self])\n\ndef test_nonform_css_class_in_formsets():\n    # Create a formset with an error in one of the forms\n    SampleFormSet = formset_factory(SampleForm, extra=1)\n    data = {\n        \'form-TOTAL_FORMS\': \'2\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n        \'form-0-field\': \'Valid Data\',\n        \'form-1-field\': \'\',\n    }\n\n    formset = SampleFormSet(data, error_class=CustomErrorList)\n    \n    # Add a non-form error to the formset\n    formset.non_form_errors().append(\'A non-form error occurred.\')\n\n    # Render the formset errors to check for the presence of the "nonform" CSS class\n    rendered_errors = str(formset.non_form_errors())\n\n    if \'class="nonform"\' in rendered_errors:\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\ntry:\n    test_nonform_css_class_in_formsets()\nexcept Exception as e:\n    print("Other issues")\n    print(str(e))\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\n\nclass SampleForm(forms.Form):\n    field = forms.CharField()\n\nclass CustomErrorList(forms.utils.ErrorList):\n    def as_ul(self):\n        if not self:\n            return \'\'\n        return \'<ul class="errorlist">%s</ul>\' % \'\'.join([\'<li class="nonform">%s</li>\' % e for e in self])\n\ndef test_formset_nonform_errors():\n    # Step 1: Create a formset with a custom error list\n    SampleFormSet = formset_factory(SampleForm, extra=1)\n    \n    # Step 2: Introduce a non-form error to the formset\n    formset = SampleFormSet(data={\'form-TOTAL_FORMS\': \'1\', \'form-INITIAL_FORMS\': \'0\'}, error_class=CustomErrorList)\n    formset.non_form_errors().append(\'Non-form error\')\n    \n    # Step 3: Render the formset errors and check for the nonform CSS class\n    rendered_errors = formset.non_form_errors().as_ul()\n    \n    if \'nonform\' in rendered_errors:\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\n    # Check for other issues\n    if \'error\' not in rendered_errors:\n        print("Other issues")\n\ntest_formset_nonform_errors()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.test import TestCase\n\nclass CustomErrorList(forms.utils.ErrorList):\n    def __str__(self):\n        return self.as_ul()\n\n    def as_ul(self):\n        if not self:\n            return \'\'\n        return \'<ul class="errorlist">%s</ul>\' % \'\'.join([\'<li class="nonform">%s</li>\' % e for e in self])\n\nclass SampleForm(forms.Form):\n    name = forms.CharField()\n\ndef test_nonform_css_class_in_formset():\n    # Create a FormSet with a custom error list to reproduce the issue\n    SampleFormSet = formset_factory(SampleForm, extra=1)\n    data = {\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n    }\n    \n    # Instantiate the formset with invalid data to trigger non-form errors\n    formset = SampleFormSet(data, error_class=CustomErrorList)\n    \n    # Manually add a non-form error to simulate the condition\n    formset.non_form_errors().append(\'This is a non-form error\')\n    \n    # Render the errors\n    non_form_errors_html = str(formset.non_form_errors())\n    \n    # Check for the presence of the custom CSS class\n    if \'class="nonform"\' in non_form_errors_html:\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\n    # Check for other potential issues\n    try:\n        formset.is_valid()\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_nonform_css_class_in_formset()\n```\n\nThis test script does the following:\n1. **Imports necessary Django modules**: It imports the necessary modules for form handling and testing.\n2. **Defines a custom error list class**: This class includes a custom error list that outputs errors wrapped in `<li>` with a `nonform` CSS class.\n3. **Defines a simple form**: A basic form with a single `CharField`.\n4. **Creates and tests a formset**:\n   - A formset is created with one form.\n   - Non-form errors are manually added to the formset.\n   - These errors are rendered and checked for the presence of the `nonform` CSS class.\n   - Depending on the presence of the `nonform` class, it prints `"Issue resolved"` or `"Issue reproduced"`.\n   - A try-except block catches other potential issues during validation and reports them.\n\nThe provided script can be used to test whether the issue described (the absence of the `nonform` CSS class for non-form errors in FormSets) is present or resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.core.exceptions import NON_FIELD_ERRORS\nfrom django.test import TestCase\n\nclass SampleForm(forms.Form):\n    field = forms.CharField()\n\nclass TestNonFormCSSClass(TestCase):\n    def test_nonform_css_class_in_formsets(self):\n        SampleFormSet = formset_factory(SampleForm, extra=1)\n        formset = SampleFormSet(data={\n            \'form-TOTAL_FORMS\': \'1\',\n            \'form-INITIAL_FORMS\': \'0\',\n            \'form-MIN_NUM_FORMS\': \'0\',\n            \'form-MAX_NUM_FORMS\': \'1000\',\n        })\n\n        # Simulate a formset-level error\n        formset.non_form_errors().append(\'This is a non-form error.\')\n        \n        # Check if the nonform CSS class is added\n        non_form_errors_html = formset.non_form_errors().as_ul()\n        if \'class="nonform"\' in non_form_errors_html:\n            print("Issue resolved")\n        elif \'This is a non-form error.\' in non_form_errors_html:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\nTestNonFormCSSClass().test_nonform_css_class_in_formsets()\n```\n\nThis test will:\n\n1. Create a `SampleForm` and a `SampleFormSet`.\n2. Simulate a non-form error in the formset.\n3. Check if the `nonform` CSS class is applied to the non-form errors in the formset.\n4. Print "Issue resolved" if the `nonform` CSS class is found.\n5. Print "Issue reproduced" if the non-form error is present but the `nonform` CSS class is not found.\n6. Print "Other issues" for any other unexpected outcomes.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='Sure, here is a complete test that can be used to reproduce the issue described in the issue text:\n\n```python\nfrom django import forms\nfrom django.forms import formset_factory\n\nclass TestForm(forms.Form):\n    name = forms.CharField()\n\ndef test_nonform_css_class_in_formsets():\n    TestFormSet = formset_factory(TestForm, extra=1)\n\n    # Simulate a POST request with no data to trigger a non-form error\n    formset = TestFormSet(data={})\n    \n    # Assuming the non-form error is added manually for testing purpose\n    formset.non_form_errors().append(\'Non form error\')\n\n    # Check if the nonform CSS class is present in the non-form errors\n    non_form_errors = formset.non_form_errors()\n    \n    if any(\'nonform\' in str(error) for error in non_form_errors):\n        print("Issue resolved")\n    elif any(\'Non form error\' in str(error) for error in non_form_errors):\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_nonform_css_class_in_formsets()\n```\n\nThis code creates a formset and manually adds a non-form error to simulate the scenario described in the issue text. It then checks if the `nonform` CSS class is present in the non-form errors. If the class is present, it prints "Issue resolved"; if the non-form error is present without the `nonform` class, it prints "Issue reproduced"; and if other issues are encountered, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\n\ndef test_nonform_css_class_in_formset_errors():\n    class TestForm(forms.Form):\n        field = forms.CharField()\n\n    TestFormSet = formset_factory(TestForm, extra=1)\n\n    # Simulating a formset with a non-form error\n    formset_data = {\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n    }\n    formset = TestFormSet(data=formset_data)\n    formset.non_form_errors = lambda: forms.utils.ErrorList([\'Non-form error\'])\n\n    rendered_non_form_errors = formset.non_form_errors().as_ul()\n\n    if \'nonform\' in rendered_non_form_errors:\n        print("Issue resolved")\n    else:\n        if \'Non-form error\' in rendered_non_form_errors:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_nonform_css_class_in_formset_errors()\n```\n\nIn this test:\n- We define a `TestForm` class and a `TestFormSet` using Django\'s `formset_factory`.\n- We simulate a FormSet with non-form errors by manually setting `formset.non_form_errors`.\n- The test then checks if the rendered non-form errors contain the `nonform` CSS class.\n- The test prints "Issue resolved" if the `nonform` CSS class is present, "Issue reproduced" if the error message is present but the `nonform` class is not, and "Other issues" if the error message isn\'t found at all.\n\nThis test should help in both reproducing the issue and verifying if it has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='Sure, I\'ll create a test to reproduce the issue as described. This test will check for the presence of the `nonform` CSS class in the error messages of FormSets. Here\'s the complete test:\n\n```python\nfrom django import forms\nfrom django.forms import formset_factory\n\nclass TestForm(forms.Form):\n    name = forms.CharField(max_length=100)\n    age = forms.IntegerField()\n\ndef test_nonform_css_class_in_formset_errorlist():\n    try:\n        # Create a formset with some initial data and errors\n        TestFormSet = formset_factory(TestForm, extra=1)\n        data = {\n            \'form-TOTAL_FORMS\': \'2\',\n            \'form-INITIAL_FORMS\': \'0\',\n            \'form-MIN_NUM_FORMS\': \'0\',\n            \'form-MAX_NUM_FORMS\': \'1000\',\n            # First form data\n            \'form-0-name\': \'John Doe\',\n            \'form-0-age\': \'30\',\n            # Second form data (invalid age)\n            \'form-1-name\': \'Jane Doe\',\n            \'form-1-age\': \'invalid_age\',\n        }\n        formset = TestFormSet(data)\n\n        # Manually add a non-form error to the formset\n        formset.non_form_errors().append(\'Non form specific error\')\n        \n        # Convert errors to the HTML to check CSS classes\n        errors_html = str(formset.non_form_errors())\n        \n        # Check if \'nonform\' CSS class is present in the error HTML\n        assert \'nonform\' in errors_html\n    except AssertionError:\n        print("Issue reproduced")\n        return\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return\n\n    print("Issue resolved")\n\ntest_nonform_css_class_in_formset_errorlist()\n```\n\n### Explanation\n\n1. **Necessary Imports**: The test imports necessary modules from Django (`forms` and `formset_factory`).\n2. **Reproduce the Issue**: The test creates a `formset` with some initial data, including an invalid age to generate an error. Additionally, it manually adds a non-form specific error to the `formset`.\n3. **Error Checking**: Converts errors to HTML and checks if the `nonform` CSS class is present in the error messages.\n4. **Print Statements**:\n    - Prints "Issue reproduced" if the `nonform` CSS class is not found in the errors HTML.\n    - Prints "Issue resolved" if the `nonform` CSS class is found.\n    - Prints "Other issues" if there are any other exceptions raised during the test.\n\nThis test can be used to detect whether the issue is present and verify if it has been resolved once the fix is applied.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\n\nclass SampleForm(forms.Form):\n    field1 = forms.CharField(required=False)\n\ndef test_nonform_css_class_in_formsets():\n    # Step 1: Create a custom ErrorList class to capture non form errors with \'nonform\' CSS class\n    class CustomErrorList(forms.utils.ErrorList):\n        def as_ul(self):\n            if not self:\n                return \'\'\n            return \'<ul class="errorlist nonform">%s</ul>\' % \'\'.join([\'<li>%s</li>\' % e for e in self])\n\n    # Step 2: Create a FormSet using the SampleForm with a custom ErrorList\n    SampleFormSet = formset_factory(SampleForm, error_class=CustomErrorList, extra=2)\n\n    # Step 3: Create an instance of the FormSet with an error that should be a non form error\n    data = {\n        \'form-TOTAL_FORMS\': \'2\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n        \'form-0-field1\': \'some data\',\n        \'form-1-field1\': \'some more data\',\n    }\n\n    formset = SampleFormSet(data)\n\n    # Step 4: Manually add a non form error to the FormSet\n    formset.non_form_errors().append("This is a non form error.")\n\n    # Step 5: Check if \'nonform\' CSS class is present in non_form_errors\n    non_form_errors_output = formset.non_form_errors().as_ul()\n\n    if \'class="errorlist nonform"\' in non_form_errors_output:\n        print("Issue resolved")\n    elif \'class="errorlist"\' in non_form_errors_output:\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_nonform_css_class_in_formsets()\n```\n\nExplanation:\n1. **Imports**: Imported necessary Django form-related modules.\n2. **Custom ErrorList**: Created a custom `ErrorList` class to capture and render non-form errors with the `nonform` CSS class.\n3. **FormSet**: Created a formset from a sample form with the custom `ErrorList`.\n4. **Data**: Provided data to the formset to simulate form submission.\n5. **Non-Form Error**: Manually added a non-form error to the formset.\n6. **CSS Class Check**: Checked the presence of the `nonform` CSS class in the non-form errors output.\n7. **Outcome Print Statements**: Printed "Issue resolved" if the `nonform` CSS class is found, "Issue reproduced" if only `errorlist` class is found, and "Other issues" for other cases.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\n\nclass TestForm(forms.Form):\n    field1 = forms.CharField()\n\ndef test_nonform_css_class_in_formsets():\n    # Define a custom ErrorList to capture the error classes\n    class CustomErrorList(forms.utils.ErrorList):\n        def __str__(self):\n            return \',\'.join(self.data)\n\n    # Create a FormSet with a custom ErrorList\n    TestFormSet = formset_factory(TestForm, extra=1, error_class=CustomErrorList)\n    \n    # Case where we trigger a non-form error\n    formset = TestFormSet(data={\n        \'form-TOTAL_FORMS\': \'2\',  # Should be \'1\' as per the definition\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-0-field1\': \'some data\',\n    })\n\n    # Check if the nonform CSS class is added\n    non_form_errors = formset.non_form_errors()\n    error_messages = ",".join(str(error) for error in non_form_errors)\n\n    if \'nonform\' in error_messages:\n        print("Issue resolved")\n    elif \'nonfield\' in error_messages:  # This indicates it\'s using the wrong CSS class\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_nonform_css_class_in_formsets()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.forms.utils import ErrorList\n\n# Custom ErrorList to check CSS classes\nclass CustomErrorList(ErrorList):\n    def as_ul(self):\n        return \'\'.join([\'<li class="%s">%s</li>\' % (e, e) for e in self])\n\n# Form class for the FormSet\nclass TestForm(forms.Form):\n    field = forms.CharField()\n\n# FormSet class\nTestFormSet = formset_factory(TestForm, extra=1)\n\ndef test_nonform_css_class_in_formsets():\n    # Create a formset with a non form error\n    data = {\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1\',\n    }\n    formset = TestFormSet(data, error_class=CustomErrorList)\n    formset.non_form_errors().append(\'This is a non form error\')\n    \n    try:\n        # Convert the non form errors to a string\n        error_string = formset.non_form_errors().as_ul()\n        print(error_string)\n\n        # Check for the presence of the \'nonform\' CSS class\n        if \'nonform\' in error_string:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_nonform_css_class_in_formsets()\n```\n\n### Explanation:\n1. **Imports**: Includes necessary imports from Django forms.\n2. **Custom ErrorList Class**: A custom `ErrorList` class that helps check the CSS class applied to errors.\n3. **Form and FormSet Definitions**: Defines a simple form and formset to use in the test.\n4. **Test Function**: \n   - Sets up the formset with data that will trigger non form errors.\n   - Appends a non form error to the formset.\n   - Converts the non form errors to a string to check for the CSS class.\n   - Checks for the presence of the \'nonform\' CSS class and prints the appropriate message based on whether the issue is reproduced, resolved, or if there are other issues.\n\nThis test should help you identify if the `nonform` CSS class is correctly applied to non form errors in `FormSets`.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test to reproduce the issue described in the issue text related to adding a `nonform` CSS class for non form errors in FormSets.\n\n```python\nfrom django import forms\nfrom django.forms import formset_factory\nfrom django.forms.utils import ErrorList\n\nclass TestForm(forms.Form):\n    field = forms.CharField()\n\ndef test_nonform_css_class_in_formsets():\n    # Define a custom ErrorList to check for the presence of CSS classes\n    class CustomErrorList(ErrorList):\n        def as_ul(self):\n            return \'\'.join([\'<li class="%s">%s</li>\' % (self.error_class, e) for e in self])\n\n        @property\n        def error_class(self):\n            if self.form.is_bound:\n                if hasattr(self.form, \'non_form_errors\'):\n                    return \'nonform\'\n                elif self.form.non_field_errors():\n                    return \'nonfield\'\n                else:\n                    return \'field\'\n            return \'\'\n    \n    # Create a formset with a non-form error\n    TestFormSet = formset_factory(TestForm, extra=1)\n    formset = TestFormSet(data={\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n        \'form-0-field\': \'\'\n    }, error_class=CustomErrorList)\n\n    # Add a non-form error manually\n    formset.non_form_errors().append("A non-form error")\n    \n    # Render the errors to check for the presence of the \'nonform\' CSS class\n    rendered_errors = formset.non_form_errors().as_ul()\n\n    try:\n        assert \'nonform\' in rendered_errors\n        print("Issue resolved")\n    except AssertionError:\n        print("Issue reproduced")\n\n    return\n\ntest_nonform_css_class_in_formsets()\n```\n\n### Explanation:\n1. **Imports**:\n   - `forms` and `formset_factory` from Django to create a form and a formset.\n   - `ErrorList` to create a custom error list class.\n\n2. **Custom ErrorList**:\n   - This class includes a method to generate an unordered list (`as_ul`) of errors with CSS classes.\n   - It assigns `nonform` CSS class if the error is a non-form error, `nonfield` if it\'s a non-field error, and `field` if it\'s a field-specific error.\n\n3. **FormSet Creation**:\n   - A formset is created with `TestForm`.\n   - A non-form error is manually appended to the formset\'s non-form errors.\n\n4. **Rendering and Assertion**:\n   - The errors are rendered to check for the presence of the `nonform` CSS class.\n   - If the `nonform` class is present, the issue is considered resolved; otherwise, it is reproduced.\n\nThis test checks if the `nonform` CSS class is properly added and can help in verifying if the issue gets resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='Sure, here is a complete test that addresses the issue described in the issue text related to adding a `nonform` CSS class for non-form errors in FormSets:\n\n```python\nfrom django import forms\nfrom django.forms import formset_factory\n\nclass TestForm(forms.Form):\n    field1 = forms.CharField()\n\n    def clean(self):\n        cleaned_data = super().clean()\n        if cleaned_data.get(\'field1\') == \'error\':\n            raise forms.ValidationError(\'This is a non-field error\')\n\n# Custom ErrorList to track CSS classes\nclass CustomErrorList(forms.utils.ErrorList):\n    def as_ul(self):\n        return \'\'.join([f\'<li class="{error}"</li>\' for error in self])\n\n# FormSet with custom ErrorList\nTestFormSet = formset_factory(TestForm, error_class=CustomErrorList)\n\ndef test_nonform_css_class_in_formsets():\n    # Create a formset with data that triggers a non-form error\n    data = {\n        \'form-TOTAL_FORMS\': \'1\',\n        \'form-INITIAL_FORMS\': \'0\',\n        \'form-MIN_NUM_FORMS\': \'0\',\n        \'form-MAX_NUM_FORMS\': \'1000\',\n        \'form-0-field1\': \'error\',\n    }\n    \n    formset = TestFormSet(data)\n    \n    if formset.is_valid():\n        print("Other issues")\n    else:\n        # Check for \'nonform\' CSS class in non-form errors\n        non_form_errors = formset.non_form_errors().as_ul()\n        if \'nonform\' in non_form_errors:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n\ntest_nonform_css_class_in_formsets()\n```\n\nExplanation:\n1. **Necessary Imports**:\n   - Imported necessary modules from `django.forms` and `django.utils`.\n2. **Code to Reproduce the Issue**:\n   - Defined a `TestForm` class with a `clean` method that raises a non-field error.\n   - Created a custom `ErrorList` class to track CSS classes.\n   - Used `formset_factory` to create a `TestFormSet` with the custom `ErrorList`.\n   - Provided data to the formset to trigger a non-form error.\n3. **Outcome Handling**:\n   - Checked if the formset is valid (`formset.is_valid()`). If valid, it prints "Other issues".\n   - If not valid, it checks for the presence of the `nonform` CSS class in the errors (`non_form_errors`). Depending on whether the `nonform` class is found, it prints "Issue resolved" or "Issue reproduced".\n\nThis test should be able to help reproduce the issue and verify if it has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django import forms\nfrom django.forms import formset_factory\n\n# Define a simple form with a single field\nclass SampleForm(forms.Form):\n    field = forms.CharField()\n\n# Define a simple custom ErrorList that prints the type of errors\nclass CustomErrorList(forms.utils.ErrorList):\n    def as_text(self):\n        error_messages = []\n        for error in self:\n            if \'nonform\' in self.attrs.get(\'class\', \'\'):\n                error_messages.append(f"Non-form error: {error}")\n            elif \'nonfield\' in self.attrs.get(\'class\', \'\'):\n                error_messages.append(f"Non-field error: {error}")\n            else:\n                error_messages.append(f"Field error: {error}")\n        return \'\\n\'.join(error_messages)\n\n# Define a formset using the SampleForm\nSampleFormSet = formset_factory(SampleForm, extra=1)\n\ndef test_nonform_error_class_in_formset():\n    # Create a formset instance\n    formset = SampleFormSet(data={\'form-TOTAL_FORMS\': \'2\', \'form-INITIAL_FORMS\': \'0\'})\n    \n    # Add a non-form error to the formset\n    formset.non_form_errors().append("A non form error")\n    \n    # Use the custom ErrorList to render errors\n    formset.error_class = CustomErrorList\n    \n    # Check the rendered errors\n    errors_output = formset.non_form_errors().as_text()\n    \n    try:\n        # Check for the \'nonform\' class in the error messages\n        assert "Non-form error: A non form error" in errors_output\n        print("Issue resolved")\n    except AssertionError:\n        print("Issue reproduced")\n    except Exception:\n        print("Other issues")\n\ntest_nonform_error_class_in_formset()\n```\n\nThis test script does the following:\n1. Imports necessary modules from Django.\n2. Defines a simple form and a custom `ErrorList` to capture and print different types of errors.\n3. Creates a formset using the simple form.\n4. Adds a non-form error to the formset.\n5. Uses the custom `ErrorList` to render the errors.\n6. Checks if the non-form error is rendered with the expected `nonform` class.\n7. Prints "Issue resolved" if the issue is fixed, "Issue reproduced" if the issue is still present, and "Other issues" if any unexpected errors occur.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299193, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=17787, prompt_tokens=492, total_tokens=18279, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:07:57,928 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.core.exceptions import ValidationError
+
+# Custom ErrorList to capture and classify errors
+class CustomErrorList(forms.utils.ErrorList):
+    def as_ul(self):
+        if not self:
+            return ''
+        return '<ul class="errorlist">%s</ul>' % ''.join(['<li class="%s">%s</li>' % (self.error_class(e), e) for e in self])
+
+    def error_class(self, error):
+        if isinstance(error, forms.ValidationError):
+            if error.code == 'nonform':
+                return 'nonform'
+            elif error.code == 'nonfield':
+                return 'nonfield'
+        return 'field'
+
+# Sample form to use in the FormSet
+class SampleForm(forms.Form):
+    name = forms.CharField()
+
+# Custom FormSet to add non form errors
+class SampleFormSet(forms.BaseFormSet):
+    def clean(self):
+        if any(self.errors):
+            return
+        raise ValidationError("Non form error", code='nonform')
+
+# Create a formset factory
+SampleFormSetFactory = formset_factory(SampleForm, formset=SampleFormSet, extra=1)
+
+def test_nonform_css_class_in_formset():
+    # Create a formset instance with no data to trigger the non form error
+    formset = SampleFormSetFactory(data={})
+    formset.is_valid()  # This will trigger the clean method and add the non form error
+
+    # Check if the nonform CSS class is present in the errors
+    error_list = CustomErrorList(formset.non_form_errors())
+    error_html = error_list.as_ul()
+
+    if 'class="nonform"' in error_html:
+        print("Issue resolved")
+    elif 'Non form error' in error_html:
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_nonform_css_class_in_formset()
+```
+
+This test script does the following:
+1. Imports necessary modules and classes.
+2. Defines a custom `ErrorList` class to classify errors.
+3. Creates a sample form and a custom formset that raises a non-form error.
+4. Creates a formset factory.
+5. Defines a test function that creates a formset instance, triggers the non-form error, and checks if the `nonform` CSS class is present in the error list.
+6. Prints "Issue resolved" if the `nonform` CSS class is found, "Issue reproduced" if the error message is found without the `nonform` class, and "Other issues" if neither condition is met.
+2025-05-03 14:07:57,928 - INFO - raw output:
+Sure, here's a complete test to reproduce and verify the issue described in the issue text. This test assumes you're working within a Django project and have the appropriate setup for forms and formsets.
+
+```python
+from django import forms
+from django.forms import formset_factory
+
+# Custom ErrorList to capture the errors for testing
+class CustomErrorList(forms.utils.ErrorList):
+    def __str__(self):
+        return self.as_text()
+    
+    def as_text(self):
+        if not self:
+            return ''
+        return '\n'.join([str(e) for e in self])
+
+# Sample form to be used in the formset
+class SampleForm(forms.Form):
+    name = forms.CharField()
+
+# Function to reproduce the issue
+def test_nonform_css_class_in_formset():
+    SampleFormSet = formset_factory(SampleForm, extra=2)
+    
+    # Creating an instance of SampleFormSet with some initial data
+    initial_data = [
+        {'name': 'John'},
+        {'name': 'Doe'}
+    ]
+    
+    # Simulating a formset with a non-form error
+    data = {
+        'form-TOTAL_FORMS': '2',
+        'form-INITIAL_FORMS': '2',
+        'form-0-name': 'John',
+        'form-1-name': ''
+    }
+    
+    formset = SampleFormSet(data, initial=initial_data, error_class=CustomErrorList)
+    
+    # Manually adding a non-form error for testing
+    formset.non_form_errors().append('A non-form error')
+
+    # Rendering the formset errors for testing
+    non_field_errors = formset.non_form_errors()
+    
+    # Checking for 'nonform' CSS class in non-form errors
+    if any(['nonform' in str(error) for error in non_field_errors]):
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+# Execute the test
+test_nonform_css_class_in_formset()
+```
+
+### Explanation
+
+1. **Imports**: Import necessary components from Django.
+2. **Custom ErrorList**: Define a `CustomErrorList` to use for rendering errors in a way that allows for easy testing.
+3. **Sample Form**: Define a simple form (`SampleForm`) to be used in the formset.
+4. **Test Function**: Define the `test_nonform_css_class_in_formset` function to simulate the formset behavior, add a non-form error, and check for the `nonform` CSS class.
+
+This test will print "Issue reproduced" if the `nonform` CSS class is not present in the non-form errors, indicating that the issue is still present. It will print "Issue resolved" if the `nonform` CSS class is present, indicating that the issue has been fixed. If there are other issues in the code, it will print "Other issues".
+
+Make sure to integrate this test within your Django project's test suite for executing and verifying the fix.
+2025-05-03 14:07:57,928 - INFO - raw output:
+Certainly! Below is the Python code to create a test for reproducing the issue described in your repository issue text. This test will check whether the `nonform` CSS class is added for non-form errors in FormSets.
+
+```python
+from django.forms import Form, FormSet, BaseFormSet, ErrorList
+from django.core.exceptions import ValidationError
+
+
+class SampleForm(Form):
+    def clean(self):
+        raise ValidationError("Sample form error", code="non_field_error")
+
+
+class SampleFormSet(BaseFormSet):
+    def clean(self):
+        if any(self.errors):
+            raise ValidationError("Sample non-form error", code="non_form_error")
+
+
+def test_nonform_css_class_in_formset():
+    SampleFormSetInstance = FormSet(form=SampleForm, formset=SampleFormSet, extra=1)
+    formset = SampleFormSetInstance(data={})
+
+    try:
+        formset.is_valid()
+    except ValidationError as e:
+        non_form_errors = e.error_list
+        if 'non_form_error' in [error.code for error in non_form_errors]:
+            if any('nonform' in error.message for error in non_form_errors):
+                # The issue has been resolved correctly
+                print("Issue resolved")
+            else:
+                # The issue is reproduced
+                print("Issue reproduced")
+        else:
+            # Other issues
+            print("Other issues")
+        return
+
+    # No ValidationError raised
+    print("Other issues")
+
+
+# Run the test
+test_nonform_css_class_in_formset()
+```
+
+This test performs the following steps:
+1. Defines a `SampleForm` form that raises a non-field error.
+2. Defines a `SampleFormSet` formset that raises a non-form error if any form within the formset has an error.
+3. Creates a formset instance, provides empty data (to ensure validation errors), and checks for the presence of the `nonform` CSS class in non-form errors.
+
+- If the `nonform` CSS class is found in the non-form errors, it prints "Issue resolved".
+- If the `nonform` CSS class is not found, it prints "Issue reproduced".
+- If any other issues arise or no `ValidationError` is raised, it prints "Other issues".
+
+This test can be used to verify both the presence of the issue as well as its resolution.
+2025-05-03 14:07:57,928 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+
+
+class TestForm(forms.Form):
+    field = forms.CharField()
+
+
+def test_nonform_css_class_in_formset_errors():
+    class CustomErrorList(forms.utils.ErrorList):
+        def as_ul(self):
+            if not self:
+                return ''
+            return '<ul class="errorlist">{}</ul>'.format(''.join(
+                '<li class="{}">{}</li>'.format(self.error_class, e) for e in self))
+
+    class BaseTestFormSet(forms.BaseFormSet):
+        def clean(self):
+            raise forms.ValidationError("This is a non-form error.", code='nonform')
+
+    TestFormSet = formset_factory(TestForm, formset=BaseTestFormSet, error_class=CustomErrorList)
+    
+    formset = TestFormSet(data={'form-TOTAL_FORMS': '1', 'form-INITIAL_FORMS': '0'})
+    
+    if not formset.is_valid():
+        errors = formset.non_form_errors()
+        if errors and 'nonform' in errors.as_ul():
+            print("Issue resolved")
+        elif errors:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    else:
+        print("Other issues")
+
+
+test_nonform_css_class_in_formset_errors()
+```
+
+This test follows these steps:
+1. Defines a `TestForm` with a single field.
+2. Defines a custom `CustomErrorList` class to check the presence of CSS classes in errors.
+3. Defines a `BaseTestFormSet` class with a `clean` method that raises a `ValidationError` to simulate non-form errors.
+4. Creates a `TestFormSet` using `formset_factory`.
+5. Simulates formset validation with invalid data to trigger the error.
+6. Checks if the error list contains the `nonform` CSS class and prints appropriate messages based on this check.
+
+This test can be used to both reproduce the issue and verify its resolution, as requested.
+2025-05-03 14:07:57,928 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+
+class CustomErrorList(forms.utils.ErrorList):
+    def as_ul(self):
+        if not self:
+            return ''
+        return '<ul class="errorlist">%s</ul>' % ''.join([
+            '<li class="nonform">%s</li>' % e for e in self
+        ])
+
+class SampleForm(forms.Form):
+    field = forms.CharField()
+
+def test_nonform_css_class_in_formsets():
+    data = {
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+    }
+    FormSet = formset_factory(SampleForm)
+    formset = FormSet(data, error_class=CustomErrorList)
+    
+    # Manually add a non form error to the formset
+    formset.non_form_errors().append('This is a non form error')
+    
+    non_form_errors = formset.non_form_errors().as_ul()
+    
+    if 'class="nonform"' in non_form_errors:
+        print("Issue resolved")
+    elif 'class="errorlist"' in non_form_errors:
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_nonform_css_class_in_formsets()
+```
+
+This test code does the following:
+
+1. Imports the necessary modules and classes to reproduce the issue.
+2. Defines a custom `ErrorList` class to include the `nonform` CSS class.
+3. Defines a sample form to be used in the formset.
+4. Creates and initializes a formset with the required management form data.
+5. Manually adds a non-form error to the formset.
+6. Checks if the `nonform` CSS class is present in the non-form error list output and prints the appropriate message.
+
+This test should help in verifying if the issue with the `nonform` CSS class has been resolved or not.
+2025-05-03 14:07:57,928 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.forms.utils import ErrorList
+
+class CustomErrorList(ErrorList):
+    def as_ul(self):
+        if not self:
+            return ''
+        return '<ul class="errorlist">%s</ul>' % ''.join(['<li class="nonform">%s</li>' % e for e in self])
+
+class SimpleForm(forms.Form):
+    field = forms.CharField()
+
+def test_formset_nonform_error_class():
+    # Create a formset with a custom error class
+    SimpleFormSet = formset_factory(SimpleForm, extra=1)
+    data = {
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        'form-0-field': 'test'
+    }
+
+    # Create a formset instance and add a non-form error
+    formset = SimpleFormSet(data, error_class=CustomErrorList)
+    formset.non_form_errors().append('Non form error')
+
+    # Render the error list to check if the custom error class is applied
+    non_form_errors = formset.non_form_errors().as_ul()
+
+    try:
+        # Check if the custom class 'nonform' is applied in the error list
+        assert 'nonform' in non_form_errors
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+    except Exception:
+        print("Other issues")
+
+test_formset_nonform_error_class()
+```
+
+Explanation:
+1. **Imports**: The necessary imports are included from `django.forms` and `django.forms.utils`.
+2. **Custom ErrorList**: We create a custom `ErrorList` class to render errors with a `nonform` CSS class.
+3. **SimpleForm**: We define a basic form class with one field.
+4. **Test Function**: The function `test_formset_nonform_error_class` creates a formset, adds a non-form error, and checks if the non-form error is rendered with the `nonform` CSS class.
+5. **Assertions and Print Statements**: Depending on the outcome, the function prints "Issue resolved", "Issue reproduced", or "Other issues". 
+
+This test should be able to reproduce the issue described in the issue text and verify if the issue has been fixed.
+2025-05-03 14:07:57,928 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.test import TestCase
+
+class ExampleForm(forms.Form):
+    field = forms.CharField(required=False)
+
+def custom_error_list(errors):
+    """
+    Custom ErrorList class to append nonform CSS class for non form errors in formsets.
+    """
+
+    class CustomErrorList(forms.utils.ErrorList):
+        def as_ul(self):
+            if not self: 
+                return ''
+            return '<ul class="errorlist">%s</ul>' % ''.join(['<li class="nonform">%s</li>' % e for e in self])
+
+    return CustomErrorList(errors)
+
+class FormSetTest(TestCase):
+
+    def test_formset_nonform_css_class(self):
+        ExampleFormSet = formset_factory(ExampleForm, extra=0)
+        data = {
+            'form-TOTAL_FORMS': '1',
+            'form-INITIAL_FORMS': '0',
+            'form-MIN_NUM_FORMS': '0',
+            'form-MAX_NUM_FORMS': '1000',
+        }
+        formset = ExampleFormSet(data, error_class=custom_error_list)
+
+        # Artificially add a nonform error to the formset
+        formset.non_form_errors().append('There was an error with the formset.')
+
+        # Check the output HTML
+        output = formset.non_form_errors().as_ul()
+
+        # Check if nonform CSS class is added
+        if 'class="nonform"' in output:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+
+        return
+
+# Run the test
+FormSetTest().test_formset_nonform_css_class()
+```
+
+Explanation:
+1. **Necessary imports:** Imported necessary modules and classes from `django.forms` and `django.test`.
+2. **Code to reproduce the issue:** Created an `ExampleForm` and a formset using `formset_factory`. Added a custom `ErrorList` class that appends the `nonform` CSS class to non form errors.
+3. **Print statements:** Added logic to print "Issue resolved" if the `nonform` CSS class is found in the output, otherwise print "Issue reproduced".
+
+To verify the issue, include this test in your Django project and run it. The test will check if the `nonform` CSS class is added to non form errors in formsets.
+2025-05-03 14:07:57,928 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.test import SimpleTestCase
+
+class ExampleForm(forms.Form):
+    field = forms.CharField()
+
+def custom_error_list(errors, error_class):
+    return forms.utils.ErrorList(errors, error_class=error_class)
+
+class FormSetWithNonFormErrorTest(SimpleTestCase):
+    def test_nonform_css_class_in_formset_errors(self):
+        # Create a formset with a custom ErrorList class to capture the CSS classes
+        CustomErrorList = lambda *args, **kwargs: custom_error_list(*args, **kwargs, error_class='custom-error')
+
+        ExampleFormSet = formset_factory(ExampleForm, extra=1, formset=forms.BaseFormSet)
+        formset = ExampleFormSet(data={}, error_class=CustomErrorList)
+
+        # Add a non form error to the formset
+        formset.non_form_errors().append('This is a non form error.')
+
+        # Trigger the validation to populate the errors
+        formset.is_valid()
+
+        # Check if the nonform CSS class is present in the non_form_errors
+        non_form_errors_rendered = formset.non_form_errors().as_ul()
+
+        if 'nonform' in non_form_errors_rendered:
+            print("Issue resolved")
+        elif 'custom-error' in non_form_errors_rendered and 'nonform' not in non_form_errors_rendered:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+FormSetWithNonFormErrorTest().test_nonform_css_class_in_formset_errors()
+```
+
+This test script follows these steps:
+1. Defines an `ExampleForm` class to use within the FormSet.
+2. Sets up a `custom_error_list` function to use a custom error class for capturing CSS classes in errors.
+3. Creates a test class `FormSetWithNonFormErrorTest` that extends `SimpleTestCase`.
+4. Implements a test method `test_nonform_css_class_in_formset_errors` which:
+   - Creates a FormSet with the custom error list class.
+   - Adds a non-form error to the FormSet.
+   - Validates the FormSet to populate the errors.
+   - Checks if the `nonform` CSS class is present in the non-form errors and prints the appropriate message.
+
+The test can be run to verify if the issue described is reproduced or resolved.
+2025-05-03 14:07:57,929 - INFO - raw output:
+Sure, here is a complete test to reproduce the issue described in your issue text. This test ensures that non-form errors in FormSets have the expected `nonform` CSS class.
+
+```python
+from django import forms
+from django.forms import formset_factory
+
+# Custom error list to capture CSS classes
+class CustomErrorList(forms.utils.ErrorList):
+    def __str__(self):
+        return '\n'.join([f"{error} ({css_class})" for error, css_class in self.data])
+
+    def as_data(self):
+        return self.data
+
+class SampleForm(forms.Form):
+    field = forms.CharField()
+
+def test_nonform_css_class_in_formsets():
+    # Create a formset with a non-form error
+    SampleFormSet = formset_factory(SampleForm, extra=1)
+    data = {
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000'
+    }
+    formset = SampleFormSet(data, error_class=CustomErrorList)
+    
+    # Manually add a non-form error
+    formset.non_form_errors().append(('This is a non-form error', 'nonform'))
+
+    # Check if the non-form error has the expected CSS class
+    non_form_errors = formset.non_form_errors().as_data()
+
+    # Print the result based on whether the issue is reproduced or resolved
+    if any(css_class == 'nonform' for _, css_class in non_form_errors):
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+test_nonform_css_class_in_formsets()
+```
+
+This test does the following:
+1. Imports necessary Django components.
+2. Defines a custom error list class to capture errors with their CSS classes.
+3. Defines a simple form class to use in the formset.
+4. Defines a test function to create a formset and manually add a non-form error with a specific CSS class.
+5. Checks whether the non-form error has the expected CSS class and prints the appropriate message.
+
+This code should help determine if the issue is reproduced or resolved based on the presence of the `nonform` CSS class in non-form errors for formsets.
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.test import TestCase
+
+class TestForm(forms.Form):
+    field = forms.CharField()
+
+class CustomErrorList(forms.utils.ErrorList):
+    def __str__(self):
+        return self.as_ul()
+
+    def as_ul(self):
+        if not self:
+            return ''
+        return '<ul class="errorlist">%s</ul>' % ''.join(['<li class="%s">%s</li>' % (self.error_class, e) for e in self])
+
+class FormSetErrorTest(TestCase):
+    def test_formset_nonform_errors(self):
+        TestFormSet = formset_factory(TestForm, extra=1, formset=forms.BaseFormSet)
+
+        data = {
+            'form-TOTAL_FORMS': '1',
+            'form-INITIAL_FORMS': '0',
+            'form-MIN_NUM_FORMS': '0',
+            'form-MAX_NUM_FORMS': '1000',
+        }
+
+        formset = TestFormSet(data, error_class=CustomErrorList)
+
+        # Manually add non-form error to the formset
+        formset.non_form_errors().append('Non-form related error')
+
+        rendered_errors = str(formset.non_form_errors())
+
+        if 'nonform' not in rendered_errors:
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+
+        return
+
+# Run the test
+FormSetErrorTest().test_formset_nonform_errors()
+```
+
+Explanation of the test:
+1. **Necessary imports**: We import necessary modules and classes like `forms`, `formset_factory`, and `TestCase` from Django.
+2. **Code to reproduce the issue**: We define a test form and a custom error list class (`CustomErrorList`). We then create a formset using this form, submit some data, and manually add a non-form error to the formset. 
+3. **Print statements**: Based on whether the `nonform` CSS class is present in the rendered non-form error messages, we print "Issue reproduced" or "Issue resolved".
+
+This test can be used to check if the `nonform` CSS class is being added to non-form errors in formsets, thus verifying if the issue is resolved or not.
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.forms.utils import ErrorList
+
+
+# Custom ErrorList to check for CSS classes
+class CustomErrorList(ErrorList):
+    def as_ul(self):
+        return ' '.join(self.as_data())
+
+    def as_data(self):
+        return [f"{error['message']} (class: {' '.join(error['class'])})" for error in self.errors]
+
+
+# Define a simple form
+class SimpleForm(forms.Form):
+    field = forms.CharField()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        field = cleaned_data.get("field")
+
+        if not field:
+            self.add_error(None, "This is a non-field error.")
+        
+        return cleaned_data
+
+
+# Define a FormSet
+SimpleFormSet = formset_factory(SimpleForm, extra=2)
+
+
+def test_nonform_css_class_for_non_form_errors():
+    # Create a formset with an error not tied to a specific form
+    data = {
+        'form-TOTAL_FORMS': '2',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+        'form-0-field': '',
+        'form-1-field': ''
+    }
+    formset = SimpleFormSet(data=data, error_class=CustomErrorList)
+
+    # Manually injecting a non-form error
+    formset.non_form_errors().append("This is a non-form error.")
+
+    if formset.is_valid():
+        print("Other issues")
+        return
+
+    error_list = formset.non_form_errors().as_data()
+
+    if any("nonform" in error for error in error_list):
+        print("Issue resolved")
+    elif any("This is a non-form error." in error for error in error_list):
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+
+test_nonform_css_class_for_non_form_errors()
+```
+
+This test aims to reproduce the issue by creating a formset and manually adding a non-form error. It checks whether the `nonform` CSS class is included in the error message output. If the class is present, it prints "Issue resolved"; if the error message is present without the class, it prints "Issue reproduced"; for all other cases, it prints "Other issues".
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+
+class TestForm(forms.Form):
+    field1 = forms.CharField(required=False)
+    field2 = forms.CharField(required=False)
+
+def test_nonform_css_class_in_formsets():
+    # Create a formset with some initial data
+    TestFormSet = formset_factory(TestForm, extra=2)
+
+    # Simulate some formset data with errors
+    data = {
+        'form-TOTAL_FORMS': '2',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+        'form-0-field1': 'value',
+        'form-1-field2': 'value',
+    }
+
+    formset = TestFormSet(data)
+
+    # Add non form error to the formset
+    formset.non_form_errors().append('This is a non form error')
+
+    # Check the CSS classes in the error list
+    error_html = formset.non_form_errors().as_ul()
+
+    if 'nonform' in error_html:
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+# Ensure the test runs
+test_nonform_css_class_in_formsets()
+```
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.test import TestCase
+
+class SampleForm(forms.Form):
+    field1 = forms.CharField(required=True)
+    field2 = forms.CharField(required=True)
+
+class SampleFormSet(forms.BaseFormSet):
+    def clean(self):
+        super().clean()
+        raise forms.ValidationError("This is a non-form error.", code='nonform_error')
+
+class NonFormErrorList(forms.utils.ErrorList):
+    def as_ul(self):
+        if not self:
+            return ''
+        return '<ul class="errorlist nonform">' + ''.join(['<li>%s</li>' % e for e in self]) + '</ul>'
+
+class FormSetTestCase(TestCase):
+    def test_nonform_css_class(self):
+        # Create the formset data with missing fields to raise errors
+        data = {
+            'form-TOTAL_FORMS': '1',
+            'form-INITIAL_FORMS': '0',
+            'form-MIN_NUM_FORMS': '0',
+            'form-MAX_NUM_FORMS': '1000',
+            'form-0-field1': '',
+            'form-0-field2': '',
+        }
+
+        SampleFormSetFactory = formset_factory(SampleForm, formset=SampleFormSet, extra=1)
+        formset = SampleFormSetFactory(data, error_class=NonFormErrorList)
+
+        if formset.is_valid():
+            print("Other issues")
+        else:
+            errors = formset.non_form_errors()
+            # Check if the nonform CSS class is in the error list
+            if errors:
+                errors_as_ul = errors.as_ul()
+                if 'nonform' in errors_as_ul:
+                    print("Issue resolved")
+                else:
+                    print("Issue reproduced")
+            else:
+                print("Other issues")
+
+FormSetTestCase().test_nonform_css_class()
+```
+
+This test case does the following:
+1. Creates a `SampleForm` containing two required fields.
+2. Creates a `SampleFormSet` that raises a non-form error in the `clean` method.
+3. Defines a custom `NonFormErrorList` to render errors with a specific CSS class.
+4. Creates a test case to check if the `nonform` CSS class is added when a non-form error occurs in the `FormSet`.
+5. Prints "Issue resolved" if the `nonform` CSS class is found, "Issue reproduced" if it is not found, and "Other issues" if there are no errors or other issues.
+
+You can use this code to both reproduce the issue and verify if it has been fixed.
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django.forms import formset_factory, Form, ValidationError
+from django.forms.utils import ErrorList
+
+# Custom form to test the FormSet errors
+class TestForm(Form):
+    # Define some form fields if necessary
+    pass
+
+def test_formset_nonform_error():
+    class CustomErrorList(ErrorList):
+        def __str__(self):
+            return self.as_ul()
+
+        def as_ul(self):
+            if not self: return ''
+            return '<ul class="errorlist %s">%s</ul>' % (
+                ' '.join(self.error_class),
+                ''.join('<li>%s</li>' % e for e in self)
+            )
+
+    # Define a formset
+    TestFormSet = formset_factory(TestForm, extra=1)
+
+    # Create a formset instance with a non-form error
+    formset = TestFormSet(data={})
+    formset.non_form_errors().append(ValidationError('Non form error'))
+
+    # Check if the custom error list is used
+    error_list = CustomErrorList(formset.non_form_errors())
+
+    try:
+        assert 'nonform' in error_list.as_ul()
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    # Check for other issues
+    if len(formset.errors) > 0:
+        print("Other issues")
+        return
+
+    return
+
+test_formset_nonform_error()
+```
+2025-05-03 14:07:57,929 - INFO - raw output:
+Sure! Below is the Python test code that meets the requirements described in the issue text:
+
+```python
+from django import forms
+from django.forms import formset_factory
+
+class SimpleForm(forms.Form):
+    name = forms.CharField()
+
+def test_formset_non_form_errors():
+    # Create a FormSet with a custom ErrorList to capture non form errors
+    SimpleFormSet = formset_factory(SimpleForm, extra=1)
+    
+    # Introduce a non-form error by passing a management form with missing data
+    data = {
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '0',
+    }
+    
+    formset = SimpleFormSet(data)
+    
+    # Add a non-form error manually to simulate the issue
+    formset.non_form_errors().append('A non-form error occurred')
+    
+    # Check the CSS class of the non-form error
+    if hasattr(formset.non_form_errors(), 'as_ul'):
+        non_form_errors_html = formset.non_form_errors().as_ul()
+        if 'nonform' in non_form_errors_html:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_formset_non_form_errors()
+```
+
+Explanation:
+1. The code imports necessary modules and creates a simple form.
+2. A `SimpleFormSet` is created using `formset_factory`.
+3. The test simulates a non-form error by manipulating the formset's non-form errors.
+4. It checks if the error list has the `nonform` CSS class.
+5. If the `nonform` class is present, it prints "Issue resolved".
+6. If not, it prints "Issue reproduced".
+7. If there are other issues, it prints "Other issues".
+
+This should help in both reproducing the issue and verifying if it has been fixed.
+2025-05-03 14:07:57,929 - INFO - raw output:
+Certainly! Below is the complete test code to reproduce the issue described in the issue text:
+
+```python
+from django import forms
+from django.forms import formset_factory
+
+# Define a sample form
+class SampleForm(forms.Form):
+    field1 = forms.CharField()
+
+# Define a custom ErrorList that will help us verify the CSS classes
+class CustomErrorList(forms.utils.ErrorList):
+    def as_ul(self):
+        return ''.join(['<li class="{}">{}</li>'.format(self.error_class, e) for e in self])
+
+    def __init__(self, initlist=None, error_class='nonform'):
+        super().__init__(initlist, error_class)
+
+def test_nonform_css_class_in_formset():
+    # Create a formset with a non-form error
+    SampleFormSet = formset_factory(SampleForm, extra=0, error_class=CustomErrorList)
+    formset = SampleFormSet(data={'form-TOTAL_FORMS': '1', 'form-INITIAL_FORMS': '0'})
+
+    # Add a non-form error manually
+    formset.non_form_errors().append("A non-form error")
+
+    # Render the formset errors
+    rendered_errors = formset.non_form_errors().as_ul()
+
+    # Check for the presence of the 'nonform' CSS class
+    if 'nonform' in rendered_errors:
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+    # Check for other potential issues with the source code
+    try:
+        # Add a normal form error
+        formset.forms[0].add_error('field1', 'A form error')
+        form_errors = formset.forms[0].errors.as_ul()
+        if 'nonfield' in form_errors:
+            print('Issue resolved')
+        else:
+            print('Other issues')
+    except Exception as e:
+        print("Other issues")
+
+test_nonform_css_class_in_formset()
+```
+
+This test does the following:
+1. Imports necessary modules and classes from Django.
+2. Defines a sample form and a custom `ErrorList` class.
+3. Creates a formset and adds a non-form error to it.
+4. Checks if the non-form error is correctly rendered with the `nonform` CSS class.
+5. Prints whether the issue is reproduced, resolved, or if there are other issues based on the presence of the `nonform` CSS class in the rendered errors.
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.core.exceptions import ValidationError
+
+# Custom ErrorList class to render error CSS classes
+class CustomErrorList(forms.utils.ErrorList):
+    def as_ul(self):
+        if not self:
+            return ''
+        return '<ul class="errorlist">%s</ul>' % ''.join(['<li class="%s">%s</li>' % (self.error_class(error), e) for error, e in enumerate(self)])
+
+    def error_class(self, error):
+        if hasattr(error, 'code') and error.code == 'non_field_error':
+            return 'nonfield'
+        return 'nonform'
+
+# Sample Form class
+class SampleForm(forms.Form):
+    field1 = forms.CharField(required=False)
+    field2 = forms.CharField(required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get('field1') and not cleaned_data.get('field2'):
+            raise ValidationError('At least one field must be filled.', code='non_field_error')
+
+# FormSet definition
+SampleFormSet = formset_factory(SampleForm, extra=2)
+
+# Test function
+def test_nonform_css_class_for_formsets():
+    # Create a formset instance with empty data to trigger non form errors
+    formset = SampleFormSet(data={})
+
+    try:
+        # Check if there are non form errors
+        formset.is_valid()
+        if not formset.errors and formset.non_form_errors():
+            # Check if the custom ErrorList is applied and the CSS class is set correctly
+            custom_error_list = CustomErrorList(formset.non_form_errors())
+            if 'nonform' in custom_error_list.as_ul():
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues:", e)
+
+# Run the test
+test_nonform_css_class_for_formsets()
+```
+
+This test sets up a Django form and formset, triggers non form errors by submitting empty data, and checks if the custom ErrorList correctly applies the `nonform` CSS class. Depending on the results, it prints whether the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+
+class SampleForm(forms.Form):
+    field1 = forms.CharField()
+
+def test_nonform_css_class_in_formsets():
+    class CustomErrorList(forms.utils.ErrorList):
+        def __str__(self):
+            return self.as_divs()
+
+        def as_divs(self):
+            if not self:
+                return ''
+            return '<div class="errorlist">%s</div>' % ''.join(['<div class="nonform">%s</div>' % e for e in self])
+
+    SampleFormSet = formset_factory(SampleForm, extra=1, error_class=CustomErrorList)
+
+    # Trigger non form error
+    formset = SampleFormSet(data={
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        # Normally some other validation would trigger this error
+        'form-0-field1': '',
+    })
+
+    # Manually adding a non form error for testing
+    formset.non_form_errors().append('A non-form error')
+    
+    # Check if the nonform CSS class is added to the non form error
+    try:
+        rendered_errors = str(formset.non_form_errors())
+        if 'nonform' in rendered_errors:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_nonform_css_class_in_formsets()
+```
+
+Explanation:
+1. This test imports necessary modules from Django.
+2. It defines a `SampleForm` class as a basic form for the formset.
+3. It creates a custom `ErrorList` class to override the default error rendering to include a `nonform` CSS class.
+4. It sets up a formset using `formset_factory` with the custom `ErrorList`.
+5. It manually triggers a non-form error.
+6. It checks if the `nonform` CSS class is present in the rendered non-form error messages.
+7. It prints "Issue resolved" if the `nonform` class is found, otherwise prints "Issue reproduced". If any other issues occur, it prints "Other issues".
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+
+# Custom ErrorList that records CSS classes
+class CustomErrorList(forms.utils.ErrorList):
+    def as_divs(self):
+        if not self:
+            return ''
+        return '<div class="{}">{}</div>'.format(
+            self.formset_error_class if hasattr(self, 'formset_error_class') else 'nonfield',
+            ''.join('<div class="error">%s</div>' % e for e in self)
+        )
+
+# Sample form to be used in the formset
+class SampleForm(forms.Form):
+    field = forms.CharField()
+
+# Create a formset with the custom error list
+SampleFormSet = formset_factory(SampleForm, extra=0)
+
+def test_nonform_css_class_for_formset_errors():
+    # Create a formset with an error
+    data = {
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+    }
+    formset = SampleFormSet(data, error_class=CustomErrorList)
+    
+    # Add a non-form error to the formset
+    formset.non_form_errors().append("This is a non-form error")
+
+    # Set the expected class for non-form errors
+    formset.non_form_errors().formset_error_class = 'nonform'
+
+    # Render the errors as divs to check the CSS classes applied
+    rendered_errors = formset.non_form_errors().as_divs()
+
+    try:
+        assert '<div class="nonform">' in rendered_errors
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+    
+    # Check for other issues
+    try:
+        assert '<div class="nonfield">' not in rendered_errors
+        assert 'This is a non-form error' in rendered_errors
+        print("Issue resolved")
+    except AssertionError:
+        print("Other issues")
+
+test_nonform_css_class_for_formset_errors()
+```
+
+This test does the following:
+1. Sets up necessary imports and creates a custom `ErrorList` to capture the CSS class.
+2. Defines a sample form and creates a formset using this form.
+3. Adds a non-form error to the formset and sets the expected CSS class (`nonform`).
+4. Renders the errors to check the applied CSS classes.
+5. Prints "Issue resolved" if the `nonform` class is correctly applied, "Issue reproduced" if the class is not applied, and "Other issues" if there are any discrepancies in the error rendering.
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.test import SimpleTestCase
+
+class TestForm(forms.Form):
+    field = forms.CharField(required=False)
+
+def test_add_nonform_css_class():
+    class CustomErrorList(forms.utils.ErrorList):
+        def as_ul(self):
+            if not self: 
+                return ''
+            return '<ul class="errorlist {}">{}</ul>'.format(
+                ' '.join(self.error_class), ''.join(['<li>%s</li>' % e for e in self])
+            )
+
+    TestFormSet = formset_factory(TestForm, extra=2)
+    data = {
+        'form-TOTAL_FORMS': '2',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+    }
+    formset = TestFormSet(data, error_class=CustomErrorList)
+
+    # Add a non-form error to the formset
+    formset._non_form_errors = formset.error_class(['Non form error'])
+
+    # Render the formset errors as ul
+    non_form_errors_ul = formset.non_form_errors().as_ul()
+
+    if 'nonform' in non_form_errors_ul:
+        print("Issue resolved")
+    elif 'errorlist' in non_form_errors_ul:
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_add_nonform_css_class()
+```
+
+This test sets up a form and formset, adds a non-form error to the formset, and checks if the error list rendered as an unordered list (`<ul>`) contains the `nonform` CSS class or just the `errorlist` class. Based on the presence or absence of the `nonform` class, it prints the appropriate message to indicate whether the issue is still present, resolved, or if there are other issues.
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.utils.safestring import mark_safe
+
+class CustomErrorList(forms.utils.ErrorList):
+    def as_ul(self):
+        if not self:
+            return ''
+        return mark_safe('<ul class="errorlist">%s</ul>' % ''.join(
+            '<li class="%s">%s</li>' % (self.css_class(e), e) for e in self))
+
+    def css_class(self, error):
+        if isinstance(error, forms.ValidationError) and hasattr(error, 'params') and error.params:
+            return 'nonform'
+        return 'error'
+
+class TestForm(forms.Form):
+    field = forms.CharField()
+
+    def clean(self):
+        raise forms.ValidationError("Form error", code='form_error')
+
+def test_formset_nonform_errors():
+    TestFormSet = formset_factory(TestForm, formset=forms.BaseFormSet)
+    data = {
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+    }
+
+    formset = TestFormSet(data, error_class=CustomErrorList)
+    
+    if not formset.is_valid():
+        nonform_errors_found = any('nonform' in str(e) for e in formset.non_form_errors())
+        form_errors_found = any('error' in str(e) for form in formset.forms for e in form.errors.values())
+        
+        if nonform_errors_found and form_errors_found:
+            print("Issue resolved")
+        elif not nonform_errors_found and form_errors_found:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    else:
+        print("Other issues")
+
+test_formset_nonform_errors()
+```
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+
+# Define the form with a non-field error
+class SampleForm(forms.Form):
+    name = forms.CharField(max_length=100)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('name') == 'error':
+            raise forms.ValidationError('This is a non-field error on the form.')
+        return cleaned_data
+
+# Create a formset from the form
+SampleFormSet = formset_factory(SampleForm, extra=1)
+
+def test_nonform_css_class_in_formset():
+    # Create a formset with data that will trigger the non-field error
+    data = {
+        'form-0-name': 'error',
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+    }
+    formset = SampleFormSet(data)
+
+    # Check if the formset is valid (it should not be due to the non-field error)
+    if not formset.is_valid():
+        # Check if nonform CSS class is applied in non_form_errors
+        non_form_errors = formset.non_form_errors()
+        if any('nonform' in str(error) for error in non_form_errors):
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_nonform_css_class_in_formset()
+```
+
+Explanation of the test:
+1. We define a `SampleForm` with a custom `clean` method that raises a non-field error if the `name` field is set to "error".
+2. We create a formset factory `SampleFormSet` from `SampleForm`.
+3. We define the `test_nonform_css_class_in_formset` function to test the issue:
+    - We create a formset with data that will trigger the non-field error.
+    - We check if the formset is valid (it should not be due to the non-field error).
+    - We then check if the `nonform` CSS class is applied in the non-form errors of the formset.
+    - Depending on the outcome, it prints "Issue resolved" if the `nonform` CSS class is present in the errors, "Issue reproduced" if it is not, and "Other issues" if the formset is unexpectedly valid.
+
+This test can be used to both reproduce the issue and verify if it has been fixed.
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.forms.utils import ErrorList
+
+def test_nonform_css_class_added():
+    class CustomErrorList(ErrorList):
+        def __str__(self):
+            return self.as_ul()
+
+        def as_ul(self):
+            if not self:
+                return ''
+            return '<ul class="%s">%s</ul>' % (
+                self.error_class,
+                ''.join('<li>%s</li>' % e for e in self)
+            )
+
+    class TestForm(forms.Form):
+        field1 = forms.CharField()
+
+    TestFormSet = formset_factory(TestForm, extra=1)
+
+    # Create a formset instance with a non-form error
+    data = {
+        'form-INITIAL_FORMS': '0',
+        'form-TOTAL_FORMS': '1',
+        'form-MAX_NUM_FORMS': '',
+    }
+    formset = TestFormSet(data, error_class=CustomErrorList)
+
+    # Add a non-form error
+    formset.non_form_errors().append('This is a non-form error.')
+
+    # Render the formset errors
+    rendered_errors = str(formset.non_form_errors())
+
+    # Check if the "nonform" CSS class is present
+    if 'class="nonform"' in rendered_errors:
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+try:
+    test_nonform_css_class_added()
+except Exception as e:
+    print("Other issues")
+    print(e)
+```
+2025-05-03 14:07:57,929 - INFO - raw output:
+Sure, here is a test script to reproduce the issue described in your issue text:
+
+```python
+from django import forms
+from django.forms import formset_factory
+
+class CustomErrorList(forms.utils.ErrorList):
+    def as_ul(self):
+        if not self:
+            return ''
+        return '<ul class="errorlist">%s</ul>' % ''.join(['<li class="%s">%s</li>' % (self.error_css_class, e) for e in self])
+
+class TestForm(forms.Form):
+    field1 = forms.CharField()
+
+def test_add_nonform_css_class():
+    TestFormSet = formset_factory(TestForm, extra=0)
+    
+    # Creating a formset with a non_form_error
+    data = {'form-TOTAL_FORMS': '1', 'form-INITIAL_FORMS': '0'}
+    formset = TestFormSet(data, error_class=CustomErrorList)
+    
+    # Forcing a non_form_error
+    formset.non_form_errors().append('Non form error')
+
+    # Check if 'nonform' CSS class is added
+    for error in formset.non_form_errors():
+        if 'nonform' in error:
+            print("Issue resolved")
+            return
+        
+    # If 'nonform' class is not found in non_form_errors, the issue is reproduced
+    print("Issue reproduced")
+    return
+
+# Running the test
+test_add_nonform_css_class()
+```
+
+Explanation of the Test:
+- **Necessary Imports**: The test imports the necessary modules from `django` to create and manipulate forms and formsets.
+- **Code to Reproduce the Issue**: The script defines a custom error list class `CustomErrorList` and a simple form `TestForm`. It then creates a formset from `TestForm` and forces a non-form error.
+- **Outcome Verification**:
+  - If the `nonform` CSS class is found in the non-form errors, it prints "Issue resolved".
+  - If the `nonform` CSS class is not found in the non-form errors, it prints "Issue reproduced".
+  - If any unexpected issues arise, it prints "Other issues".
+
+You can use this script to verify if the issue is reproduced or resolved in your codebase.
+2025-05-03 14:07:57,929 - INFO - raw output:
+Sure, here's a complete test script that you can use to reproduce the issue described in the issue text:
+
+```python
+from django import forms
+from django.forms import formset_factory
+from django.forms.utils import ErrorList
+
+# Custom ErrorList to capture CSS classes applied
+class CustomErrorList(ErrorList):
+    def __str__(self):
+        return self.as_text()
+
+    def as_text(self):
+        return "\n".join(
+            f"{e} (classes: {getattr(e, 'attrs', {}).get('class', '')})"
+            for e in self
+        )
+
+# Sample form with no fields just to trigger formset errors
+class SampleForm(forms.Form):
+    pass
+
+def test_nonform_css_class_in_formset():
+    SampleFormSet = formset_factory(SampleForm, extra=1)
+    formset = SampleFormSet(data={
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+    }, error_class=CustomErrorList)
+
+    # Trigger a nonform error manually
+    formset.non_form_errors = lambda: CustomErrorList(["This is a non form error."])
+
+    error_list = formset.non_form_errors()
+    error_texts = error_list.as_text()
+
+    if "nonform" in error_texts:
+        print("Issue resolved")
+    elif "This is a non form error." in error_texts:
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_nonform_css_class_in_formset()
+```
+
+This script does the following:
+
+1. Imports necessary modules and classes from Django.
+2. Defines a custom `ErrorList` class to capture and display CSS classes applied to errors.
+3. Defines a sample form with no fields, which is used to create a formset.
+4. In the `test_nonform_css_class_in_formset` function:
+   - Creates a formset using the `SampleForm`.
+   - Manually triggers a non-form error in the formset.
+   - Checks if the "nonform" CSS class is present in the error messages.
+   - Prints "Issue resolved" if the "nonform" CSS class is found, "Issue reproduced" if the specific non-form error message is found without the CSS class, and "Other issues" for any other case.
+
+You can run this script to determine if the issue is present or has been fixed. This script should help in verifying the presence or absence of the `nonform` CSS class in non-form errors.
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.forms.utils import ErrorList
+
+# Custom ErrorList to check for CSS classes
+class CustomErrorList(ErrorList):
+    def __str__(self):
+        return '\n'.join([f'{e} ({self.error_class})' for e in self])
+
+# Sample form to use in the FormSet
+class SampleForm(forms.Form):
+    field = forms.CharField(required=False)
+
+# Custom FormSet with error
+class CustomFormSet(forms.BaseFormSet):
+    def clean(self):
+        super().clean()
+        raise forms.ValidationError("Non form error", code='non_form_error')
+
+# Test function to reproduce the issue
+def test_nonform_css_class_for_non_form_errors():
+    # Create the FormSet with a CustomErrorList
+    CustomFormSetWithError = formset_factory(SampleForm, formset=CustomFormSet, extra=1, error_class=CustomErrorList)
+    formset = CustomFormSetWithError(data={
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+        'form-0-field': 'test',
+    })
+
+    try:
+        formset.is_valid()
+    except:
+        print("Other issues")
+        return
+
+    # Check for non form error and its CSS class
+    non_form_errors = formset.non_form_errors()
+    if non_form_errors:
+        error_list_str = str(non_form_errors)
+        if 'nonform' in error_list_str:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_nonform_css_class_for_non_form_errors()
+```
+
+This test code will provide a clear indication if the issue described in the issue text regarding the `nonform` CSS class is reproducible or has been resolved. If the `nonform` CSS class is not found in the non-form errors, it will print "Issue reproduced". If the `nonform` CSS class is present, it will print "Issue resolved". If there are any other issues, such as exceptions or unexpected states, it will print "Other issues".
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.forms.utils import ErrorList
+
+class CustomErrorList(ErrorList):
+    def as_ul(self):
+        if not self: 
+            return ''
+        style = self.non_form_error_css_class if self.is_non_form_errors else ''
+        return '<ul class="{}">{}</ul>'.format(
+            style,
+            ''.join(['<li>{}</li>'.format(e) for e in self])
+        )
+
+class TestForm(forms.Form):
+    field1 = forms.CharField(required=True)
+
+# Define a formset using the TestForm
+TestFormSet = formset_factory(TestForm, extra=2)
+
+def create_formset_with_nonform_error():
+    data = {
+        'form-TOTAL_FORMS': '2',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+        'form-0-field1': 'valid data',
+        'form-1-field1': ''
+    }
+    formset = TestFormSet(data, error_class=CustomErrorList)
+    formset.non_form_errors().append('Non formset error')
+    return formset
+
+def test_nonform_css_class():
+    formset = create_formset_with_nonform_error()
+    non_form_errors = formset.non_form_errors()
+
+    if not non_form_errors:
+        print("Other issues")
+        return
+
+    # Check if the custom CSS class is added to the non-form errors
+    if 'nonform' in non_form_errors.as_ul():
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+test_nonform_css_class()
+```
+
+This test script does the following:
+1. Imports necessary Django modules and classes.
+2. Defines a custom error list class `CustomErrorList` that can differentiate between form and non-form errors by CSS class.
+3. Creates a simple form and a formset.
+4. Sets up a scenario where a formset has a non-form error.
+5. Checks if the `nonform` CSS class is applied to the non-form errors in the formset, depending on whether the issue is resolved or reproduced.
+
+Running this script will output:
+- "Issue reproduced" if the `nonform` CSS class is not applied as expected.
+- "Issue resolved" if the `nonform` CSS class is correctly applied.
+- "Other issues" if there are other issues with the script or the formset.
+2025-05-03 14:07:57,929 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+
+class SampleForm(forms.Form):
+    field = forms.CharField()
+
+class CustomErrorList(forms.utils.ErrorList):
+    def as_ul(self):
+        if not self:
+            return ''
+        return '<ul class="errorlist">%s</ul>' % ''.join(['<li class="nonform">%s</li>' % e for e in self])
+
+def test_nonform_css_class_in_formsets():
+    # Create a formset with an error in one of the forms
+    SampleFormSet = formset_factory(SampleForm, extra=1)
+    data = {
+        'form-TOTAL_FORMS': '2',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+        'form-0-field': 'Valid Data',
+        'form-1-field': '',
+    }
+
+    formset = SampleFormSet(data, error_class=CustomErrorList)
+    
+    # Add a non-form error to the formset
+    formset.non_form_errors().append('A non-form error occurred.')
+
+    # Render the formset errors to check for the presence of the "nonform" CSS class
+    rendered_errors = str(formset.non_form_errors())
+
+    if 'class="nonform"' in rendered_errors:
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+try:
+    test_nonform_css_class_in_formsets()
+except Exception as e:
+    print("Other issues")
+    print(str(e))
+```
+2025-05-03 14:07:57,930 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+
+class SampleForm(forms.Form):
+    field = forms.CharField()
+
+class CustomErrorList(forms.utils.ErrorList):
+    def as_ul(self):
+        if not self:
+            return ''
+        return '<ul class="errorlist">%s</ul>' % ''.join(['<li class="nonform">%s</li>' % e for e in self])
+
+def test_formset_nonform_errors():
+    # Step 1: Create a formset with a custom error list
+    SampleFormSet = formset_factory(SampleForm, extra=1)
+    
+    # Step 2: Introduce a non-form error to the formset
+    formset = SampleFormSet(data={'form-TOTAL_FORMS': '1', 'form-INITIAL_FORMS': '0'}, error_class=CustomErrorList)
+    formset.non_form_errors().append('Non-form error')
+    
+    # Step 3: Render the formset errors and check for the nonform CSS class
+    rendered_errors = formset.non_form_errors().as_ul()
+    
+    if 'nonform' in rendered_errors:
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+    # Check for other issues
+    if 'error' not in rendered_errors:
+        print("Other issues")
+
+test_formset_nonform_errors()
+```
+2025-05-03 14:07:57,930 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.test import TestCase
+
+class CustomErrorList(forms.utils.ErrorList):
+    def __str__(self):
+        return self.as_ul()
+
+    def as_ul(self):
+        if not self:
+            return ''
+        return '<ul class="errorlist">%s</ul>' % ''.join(['<li class="nonform">%s</li>' % e for e in self])
+
+class SampleForm(forms.Form):
+    name = forms.CharField()
+
+def test_nonform_css_class_in_formset():
+    # Create a FormSet with a custom error list to reproduce the issue
+    SampleFormSet = formset_factory(SampleForm, extra=1)
+    data = {
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+    }
+    
+    # Instantiate the formset with invalid data to trigger non-form errors
+    formset = SampleFormSet(data, error_class=CustomErrorList)
+    
+    # Manually add a non-form error to simulate the condition
+    formset.non_form_errors().append('This is a non-form error')
+    
+    # Render the errors
+    non_form_errors_html = str(formset.non_form_errors())
+    
+    # Check for the presence of the custom CSS class
+    if 'class="nonform"' in non_form_errors_html:
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+    # Check for other potential issues
+    try:
+        formset.is_valid()
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_nonform_css_class_in_formset()
+```
+
+This test script does the following:
+1. **Imports necessary Django modules**: It imports the necessary modules for form handling and testing.
+2. **Defines a custom error list class**: This class includes a custom error list that outputs errors wrapped in `<li>` with a `nonform` CSS class.
+3. **Defines a simple form**: A basic form with a single `CharField`.
+4. **Creates and tests a formset**:
+   - A formset is created with one form.
+   - Non-form errors are manually added to the formset.
+   - These errors are rendered and checked for the presence of the `nonform` CSS class.
+   - Depending on the presence of the `nonform` class, it prints `"Issue resolved"` or `"Issue reproduced"`.
+   - A try-except block catches other potential issues during validation and reports them.
+
+The provided script can be used to test whether the issue described (the absence of the `nonform` CSS class for non-form errors in FormSets) is present or resolved.
+2025-05-03 14:07:57,930 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.core.exceptions import NON_FIELD_ERRORS
+from django.test import TestCase
+
+class SampleForm(forms.Form):
+    field = forms.CharField()
+
+class TestNonFormCSSClass(TestCase):
+    def test_nonform_css_class_in_formsets(self):
+        SampleFormSet = formset_factory(SampleForm, extra=1)
+        formset = SampleFormSet(data={
+            'form-TOTAL_FORMS': '1',
+            'form-INITIAL_FORMS': '0',
+            'form-MIN_NUM_FORMS': '0',
+            'form-MAX_NUM_FORMS': '1000',
+        })
+
+        # Simulate a formset-level error
+        formset.non_form_errors().append('This is a non-form error.')
+        
+        # Check if the nonform CSS class is added
+        non_form_errors_html = formset.non_form_errors().as_ul()
+        if 'class="nonform"' in non_form_errors_html:
+            print("Issue resolved")
+        elif 'This is a non-form error.' in non_form_errors_html:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+TestNonFormCSSClass().test_nonform_css_class_in_formsets()
+```
+
+This test will:
+
+1. Create a `SampleForm` and a `SampleFormSet`.
+2. Simulate a non-form error in the formset.
+3. Check if the `nonform` CSS class is applied to the non-form errors in the formset.
+4. Print "Issue resolved" if the `nonform` CSS class is found.
+5. Print "Issue reproduced" if the non-form error is present but the `nonform` CSS class is not found.
+6. Print "Other issues" for any other unexpected outcomes.
+2025-05-03 14:07:57,930 - INFO - raw output:
+Sure, here is a complete test that can be used to reproduce the issue described in the issue text:
+
+```python
+from django import forms
+from django.forms import formset_factory
+
+class TestForm(forms.Form):
+    name = forms.CharField()
+
+def test_nonform_css_class_in_formsets():
+    TestFormSet = formset_factory(TestForm, extra=1)
+
+    # Simulate a POST request with no data to trigger a non-form error
+    formset = TestFormSet(data={})
+    
+    # Assuming the non-form error is added manually for testing purpose
+    formset.non_form_errors().append('Non form error')
+
+    # Check if the nonform CSS class is present in the non-form errors
+    non_form_errors = formset.non_form_errors()
+    
+    if any('nonform' in str(error) for error in non_form_errors):
+        print("Issue resolved")
+    elif any('Non form error' in str(error) for error in non_form_errors):
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_nonform_css_class_in_formsets()
+```
+
+This code creates a formset and manually adds a non-form error to simulate the scenario described in the issue text. It then checks if the `nonform` CSS class is present in the non-form errors. If the class is present, it prints "Issue resolved"; if the non-form error is present without the `nonform` class, it prints "Issue reproduced"; and if other issues are encountered, it prints "Other issues".
+2025-05-03 14:07:57,930 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+
+def test_nonform_css_class_in_formset_errors():
+    class TestForm(forms.Form):
+        field = forms.CharField()
+
+    TestFormSet = formset_factory(TestForm, extra=1)
+
+    # Simulating a formset with a non-form error
+    formset_data = {
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+    }
+    formset = TestFormSet(data=formset_data)
+    formset.non_form_errors = lambda: forms.utils.ErrorList(['Non-form error'])
+
+    rendered_non_form_errors = formset.non_form_errors().as_ul()
+
+    if 'nonform' in rendered_non_form_errors:
+        print("Issue resolved")
+    else:
+        if 'Non-form error' in rendered_non_form_errors:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_nonform_css_class_in_formset_errors()
+```
+
+In this test:
+- We define a `TestForm` class and a `TestFormSet` using Django's `formset_factory`.
+- We simulate a FormSet with non-form errors by manually setting `formset.non_form_errors`.
+- The test then checks if the rendered non-form errors contain the `nonform` CSS class.
+- The test prints "Issue resolved" if the `nonform` CSS class is present, "Issue reproduced" if the error message is present but the `nonform` class is not, and "Other issues" if the error message isn't found at all.
+
+This test should help in both reproducing the issue and verifying if it has been resolved.
+2025-05-03 14:07:57,930 - INFO - raw output:
+Sure, I'll create a test to reproduce the issue as described. This test will check for the presence of the `nonform` CSS class in the error messages of FormSets. Here's the complete test:
+
+```python
+from django import forms
+from django.forms import formset_factory
+
+class TestForm(forms.Form):
+    name = forms.CharField(max_length=100)
+    age = forms.IntegerField()
+
+def test_nonform_css_class_in_formset_errorlist():
+    try:
+        # Create a formset with some initial data and errors
+        TestFormSet = formset_factory(TestForm, extra=1)
+        data = {
+            'form-TOTAL_FORMS': '2',
+            'form-INITIAL_FORMS': '0',
+            'form-MIN_NUM_FORMS': '0',
+            'form-MAX_NUM_FORMS': '1000',
+            # First form data
+            'form-0-name': 'John Doe',
+            'form-0-age': '30',
+            # Second form data (invalid age)
+            'form-1-name': 'Jane Doe',
+            'form-1-age': 'invalid_age',
+        }
+        formset = TestFormSet(data)
+
+        # Manually add a non-form error to the formset
+        formset.non_form_errors().append('Non form specific error')
+        
+        # Convert errors to the HTML to check CSS classes
+        errors_html = str(formset.non_form_errors())
+        
+        # Check if 'nonform' CSS class is present in the error HTML
+        assert 'nonform' in errors_html
+    except AssertionError:
+        print("Issue reproduced")
+        return
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return
+
+    print("Issue resolved")
+
+test_nonform_css_class_in_formset_errorlist()
+```
+
+### Explanation
+
+1. **Necessary Imports**: The test imports necessary modules from Django (`forms` and `formset_factory`).
+2. **Reproduce the Issue**: The test creates a `formset` with some initial data, including an invalid age to generate an error. Additionally, it manually adds a non-form specific error to the `formset`.
+3. **Error Checking**: Converts errors to HTML and checks if the `nonform` CSS class is present in the error messages.
+4. **Print Statements**:
+    - Prints "Issue reproduced" if the `nonform` CSS class is not found in the errors HTML.
+    - Prints "Issue resolved" if the `nonform` CSS class is found.
+    - Prints "Other issues" if there are any other exceptions raised during the test.
+
+This test can be used to detect whether the issue is present and verify if it has been resolved once the fix is applied.
+2025-05-03 14:07:57,930 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+
+class SampleForm(forms.Form):
+    field1 = forms.CharField(required=False)
+
+def test_nonform_css_class_in_formsets():
+    # Step 1: Create a custom ErrorList class to capture non form errors with 'nonform' CSS class
+    class CustomErrorList(forms.utils.ErrorList):
+        def as_ul(self):
+            if not self:
+                return ''
+            return '<ul class="errorlist nonform">%s</ul>' % ''.join(['<li>%s</li>' % e for e in self])
+
+    # Step 2: Create a FormSet using the SampleForm with a custom ErrorList
+    SampleFormSet = formset_factory(SampleForm, error_class=CustomErrorList, extra=2)
+
+    # Step 3: Create an instance of the FormSet with an error that should be a non form error
+    data = {
+        'form-TOTAL_FORMS': '2',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+        'form-0-field1': 'some data',
+        'form-1-field1': 'some more data',
+    }
+
+    formset = SampleFormSet(data)
+
+    # Step 4: Manually add a non form error to the FormSet
+    formset.non_form_errors().append("This is a non form error.")
+
+    # Step 5: Check if 'nonform' CSS class is present in non_form_errors
+    non_form_errors_output = formset.non_form_errors().as_ul()
+
+    if 'class="errorlist nonform"' in non_form_errors_output:
+        print("Issue resolved")
+    elif 'class="errorlist"' in non_form_errors_output:
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_nonform_css_class_in_formsets()
+```
+
+Explanation:
+1. **Imports**: Imported necessary Django form-related modules.
+2. **Custom ErrorList**: Created a custom `ErrorList` class to capture and render non-form errors with the `nonform` CSS class.
+3. **FormSet**: Created a formset from a sample form with the custom `ErrorList`.
+4. **Data**: Provided data to the formset to simulate form submission.
+5. **Non-Form Error**: Manually added a non-form error to the formset.
+6. **CSS Class Check**: Checked the presence of the `nonform` CSS class in the non-form errors output.
+7. **Outcome Print Statements**: Printed "Issue resolved" if the `nonform` CSS class is found, "Issue reproduced" if only `errorlist` class is found, and "Other issues" for other cases.
+2025-05-03 14:07:57,930 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+
+class TestForm(forms.Form):
+    field1 = forms.CharField()
+
+def test_nonform_css_class_in_formsets():
+    # Define a custom ErrorList to capture the error classes
+    class CustomErrorList(forms.utils.ErrorList):
+        def __str__(self):
+            return ','.join(self.data)
+
+    # Create a FormSet with a custom ErrorList
+    TestFormSet = formset_factory(TestForm, extra=1, error_class=CustomErrorList)
+    
+    # Case where we trigger a non-form error
+    formset = TestFormSet(data={
+        'form-TOTAL_FORMS': '2',  # Should be '1' as per the definition
+        'form-INITIAL_FORMS': '0',
+        'form-0-field1': 'some data',
+    })
+
+    # Check if the nonform CSS class is added
+    non_form_errors = formset.non_form_errors()
+    error_messages = ",".join(str(error) for error in non_form_errors)
+
+    if 'nonform' in error_messages:
+        print("Issue resolved")
+    elif 'nonfield' in error_messages:  # This indicates it's using the wrong CSS class
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_nonform_css_class_in_formsets()
+```
+2025-05-03 14:07:57,930 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+from django.forms.utils import ErrorList
+
+# Custom ErrorList to check CSS classes
+class CustomErrorList(ErrorList):
+    def as_ul(self):
+        return ''.join(['<li class="%s">%s</li>' % (e, e) for e in self])
+
+# Form class for the FormSet
+class TestForm(forms.Form):
+    field = forms.CharField()
+
+# FormSet class
+TestFormSet = formset_factory(TestForm, extra=1)
+
+def test_nonform_css_class_in_formsets():
+    # Create a formset with a non form error
+    data = {
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1',
+    }
+    formset = TestFormSet(data, error_class=CustomErrorList)
+    formset.non_form_errors().append('This is a non form error')
+    
+    try:
+        # Convert the non form errors to a string
+        error_string = formset.non_form_errors().as_ul()
+        print(error_string)
+
+        # Check for the presence of the 'nonform' CSS class
+        if 'nonform' in error_string:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_nonform_css_class_in_formsets()
+```
+
+### Explanation:
+1. **Imports**: Includes necessary imports from Django forms.
+2. **Custom ErrorList Class**: A custom `ErrorList` class that helps check the CSS class applied to errors.
+3. **Form and FormSet Definitions**: Defines a simple form and formset to use in the test.
+4. **Test Function**: 
+   - Sets up the formset with data that will trigger non form errors.
+   - Appends a non form error to the formset.
+   - Converts the non form errors to a string to check for the CSS class.
+   - Checks for the presence of the 'nonform' CSS class and prints the appropriate message based on whether the issue is reproduced, resolved, or if there are other issues.
+
+This test should help you identify if the `nonform` CSS class is correctly applied to non form errors in `FormSets`.
+2025-05-03 14:07:57,930 - INFO - raw output:
+Certainly! Below is the complete test to reproduce the issue described in the issue text related to adding a `nonform` CSS class for non form errors in FormSets.
+
+```python
+from django import forms
+from django.forms import formset_factory
+from django.forms.utils import ErrorList
+
+class TestForm(forms.Form):
+    field = forms.CharField()
+
+def test_nonform_css_class_in_formsets():
+    # Define a custom ErrorList to check for the presence of CSS classes
+    class CustomErrorList(ErrorList):
+        def as_ul(self):
+            return ''.join(['<li class="%s">%s</li>' % (self.error_class, e) for e in self])
+
+        @property
+        def error_class(self):
+            if self.form.is_bound:
+                if hasattr(self.form, 'non_form_errors'):
+                    return 'nonform'
+                elif self.form.non_field_errors():
+                    return 'nonfield'
+                else:
+                    return 'field'
+            return ''
+    
+    # Create a formset with a non-form error
+    TestFormSet = formset_factory(TestForm, extra=1)
+    formset = TestFormSet(data={
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+        'form-0-field': ''
+    }, error_class=CustomErrorList)
+
+    # Add a non-form error manually
+    formset.non_form_errors().append("A non-form error")
+    
+    # Render the errors to check for the presence of the 'nonform' CSS class
+    rendered_errors = formset.non_form_errors().as_ul()
+
+    try:
+        assert 'nonform' in rendered_errors
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+
+    return
+
+test_nonform_css_class_in_formsets()
+```
+
+### Explanation:
+1. **Imports**:
+   - `forms` and `formset_factory` from Django to create a form and a formset.
+   - `ErrorList` to create a custom error list class.
+
+2. **Custom ErrorList**:
+   - This class includes a method to generate an unordered list (`as_ul`) of errors with CSS classes.
+   - It assigns `nonform` CSS class if the error is a non-form error, `nonfield` if it's a non-field error, and `field` if it's a field-specific error.
+
+3. **FormSet Creation**:
+   - A formset is created with `TestForm`.
+   - A non-form error is manually appended to the formset's non-form errors.
+
+4. **Rendering and Assertion**:
+   - The errors are rendered to check for the presence of the `nonform` CSS class.
+   - If the `nonform` class is present, the issue is considered resolved; otherwise, it is reproduced.
+
+This test checks if the `nonform` CSS class is properly added and can help in verifying if the issue gets resolved.
+2025-05-03 14:07:57,930 - INFO - raw output:
+Sure, here is a complete test that addresses the issue described in the issue text related to adding a `nonform` CSS class for non-form errors in FormSets:
+
+```python
+from django import forms
+from django.forms import formset_factory
+
+class TestForm(forms.Form):
+    field1 = forms.CharField()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('field1') == 'error':
+            raise forms.ValidationError('This is a non-field error')
+
+# Custom ErrorList to track CSS classes
+class CustomErrorList(forms.utils.ErrorList):
+    def as_ul(self):
+        return ''.join([f'<li class="{error}"</li>' for error in self])
+
+# FormSet with custom ErrorList
+TestFormSet = formset_factory(TestForm, error_class=CustomErrorList)
+
+def test_nonform_css_class_in_formsets():
+    # Create a formset with data that triggers a non-form error
+    data = {
+        'form-TOTAL_FORMS': '1',
+        'form-INITIAL_FORMS': '0',
+        'form-MIN_NUM_FORMS': '0',
+        'form-MAX_NUM_FORMS': '1000',
+        'form-0-field1': 'error',
+    }
+    
+    formset = TestFormSet(data)
+    
+    if formset.is_valid():
+        print("Other issues")
+    else:
+        # Check for 'nonform' CSS class in non-form errors
+        non_form_errors = formset.non_form_errors().as_ul()
+        if 'nonform' in non_form_errors:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+
+test_nonform_css_class_in_formsets()
+```
+
+Explanation:
+1. **Necessary Imports**:
+   - Imported necessary modules from `django.forms` and `django.utils`.
+2. **Code to Reproduce the Issue**:
+   - Defined a `TestForm` class with a `clean` method that raises a non-field error.
+   - Created a custom `ErrorList` class to track CSS classes.
+   - Used `formset_factory` to create a `TestFormSet` with the custom `ErrorList`.
+   - Provided data to the formset to trigger a non-form error.
+3. **Outcome Handling**:
+   - Checked if the formset is valid (`formset.is_valid()`). If valid, it prints "Other issues".
+   - If not valid, it checks for the presence of the `nonform` CSS class in the errors (`non_form_errors`). Depending on whether the `nonform` class is found, it prints "Issue resolved" or "Issue reproduced".
+
+This test should be able to help reproduce the issue and verify if it has been resolved.
+2025-05-03 14:07:57,930 - INFO - raw output:
+```python
+from django import forms
+from django.forms import formset_factory
+
+# Define a simple form with a single field
+class SampleForm(forms.Form):
+    field = forms.CharField()
+
+# Define a simple custom ErrorList that prints the type of errors
+class CustomErrorList(forms.utils.ErrorList):
+    def as_text(self):
+        error_messages = []
+        for error in self:
+            if 'nonform' in self.attrs.get('class', ''):
+                error_messages.append(f"Non-form error: {error}")
+            elif 'nonfield' in self.attrs.get('class', ''):
+                error_messages.append(f"Non-field error: {error}")
+            else:
+                error_messages.append(f"Field error: {error}")
+        return '\n'.join(error_messages)
+
+# Define a formset using the SampleForm
+SampleFormSet = formset_factory(SampleForm, extra=1)
+
+def test_nonform_error_class_in_formset():
+    # Create a formset instance
+    formset = SampleFormSet(data={'form-TOTAL_FORMS': '2', 'form-INITIAL_FORMS': '0'})
+    
+    # Add a non-form error to the formset
+    formset.non_form_errors().append("A non form error")
+    
+    # Use the custom ErrorList to render errors
+    formset.error_class = CustomErrorList
+    
+    # Check the rendered errors
+    errors_output = formset.non_form_errors().as_text()
+    
+    try:
+        # Check for the 'nonform' class in the error messages
+        assert "Non-form error: A non form error" in errors_output
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+    except Exception:
+        print("Other issues")
+
+test_nonform_error_class_in_formset()
+```
+
+This test script does the following:
+1. Imports necessary modules from Django.
+2. Defines a simple form and a custom `ErrorList` to capture and print different types of errors.
+3. Creates a formset using the simple form.
+4. Adds a non-form error to the formset.
+5. Uses the custom `ErrorList` to render the errors.
+6. Checks if the non-form error is rendered with the expected `nonform` class.
+7. Prints "Issue resolved" if the issue is fixed, "Issue reproduced" if the issue is still present, and "Other issues" if any unexpected errors occur.

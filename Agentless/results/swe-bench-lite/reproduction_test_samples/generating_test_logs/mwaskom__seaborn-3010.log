@@ -1,0 +1,1264 @@
+2025-05-02 17:20:55,985 - INFO - ================ generating test for mwaskom__seaborn-3010 ================
+2025-05-02 17:20:56,069 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+PolyFit is not robust to missing data
+```python
+so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+```
+
+<details><summary>Traceback</summary>
+
+```python-traceback
+---------------------------------------------------------------------------
+LinAlgError                               Traceback (most recent call last)
+File ~/miniconda3/envs/seaborn-py39-latest/lib/python3.9/site-packages/IPython/core/formatters.py:343, in BaseFormatter.__call__(self, obj)
+    341     method = get_real_method(obj, self.print_method)
+    342     if method is not None:
+--> 343         return method()
+    344     return None
+    345 else:
+
+File ~/code/seaborn/seaborn/_core/plot.py:265, in Plot._repr_png_(self)
+    263 def _repr_png_(self) -> tuple[bytes, dict[str, float]]:
+--> 265     return self.plot()._repr_png_()
+
+File ~/code/seaborn/seaborn/_core/plot.py:804, in Plot.plot(self, pyplot)
+    800 """
+    801 Compile the plot spec and return the Plotter object.
+    802 """
+    803 with theme_context(self._theme_with_defaults()):
+--> 804     return self._plot(pyplot)
+
+File ~/code/seaborn/seaborn/_core/plot.py:822, in Plot._plot(self, pyplot)
+    819 plotter._setup_scales(self, common, layers, coord_vars)
+    821 # Apply statistical transform(s)
+--> 822 plotter._compute_stats(self, layers)
+    824 # Process scale spec for semantic variables and coordinates computed by stat
+    825 plotter._setup_scales(self, common, layers)
+
+File ~/code/seaborn/seaborn/_core/plot.py:1110, in Plotter._compute_stats(self, spec, layers)
+   1108     grouper = grouping_vars
+   1109 groupby = GroupBy(grouper)
+-> 1110 res = stat(df, groupby, orient, scales)
+   1112 if pair_vars:
+   1113     data.frames[coord_vars] = res
+
+File ~/code/seaborn/seaborn/_stats/regression.py:41, in PolyFit.__call__(self, data, groupby, orient, scales)
+     39 def __call__(self, data, groupby, orient, scales):
+---> 41     return groupby.apply(data, self._fit_predict)
+
+File ~/code/seaborn/seaborn/_core/groupby.py:109, in GroupBy.apply(self, data, func, *args, **kwargs)
+    106 grouper, groups = self._get_groups(data)
+    108 if not grouper:
+--> 109     return self._reorder_columns(func(data, *args, **kwargs), data)
+    111 parts = {}
+    112 for key, part_df in data.groupby(grouper, sort=False):
+
+File ~/code/seaborn/seaborn/_stats/regression.py:30, in PolyFit._fit_predict(self, data)
+     28     xx = yy = []
+     29 else:
+---> 30     p = np.polyfit(x, y, self.order)
+     31     xx = np.linspace(x.min(), x.max(), self.gridsize)
+     32     yy = np.polyval(p, xx)
+
+File <__array_function__ internals>:180, in polyfit(*args, **kwargs)
+
+File ~/miniconda3/envs/seaborn-py39-latest/lib/python3.9/site-packages/numpy/lib/polynomial.py:668, in polyfit(x, y, deg, rcond, full, w, cov)
+    666 scale = NX.sqrt((lhs*lhs).sum(axis=0))
+    667 lhs /= scale
+--> 668 c, resids, rank, s = lstsq(lhs, rhs, rcond)
+    669 c = (c.T/scale).T  # broadcast scale coefficients
+    671 # warn on rank reduction, which indicates an ill conditioned matrix
+
+File <__array_function__ internals>:180, in lstsq(*args, **kwargs)
+
+File ~/miniconda3/envs/seaborn-py39-latest/lib/python3.9/site-packages/numpy/linalg/linalg.py:2300, in lstsq(a, b, rcond)
+   2297 if n_rhs == 0:
+   2298     # lapack can't handle n_rhs = 0 - so allocate the array one larger in that axis
+   2299     b = zeros(b.shape[:-2] + (m, n_rhs + 1), dtype=b.dtype)
+-> 2300 x, resids, rank, s = gufunc(a, b, rcond, signature=signature, extobj=extobj)
+   2301 if m == 0:
+   2302     x[...] = 0
+
+File ~/miniconda3/envs/seaborn-py39-latest/lib/python3.9/site-packages/numpy/linalg/linalg.py:101, in _raise_linalgerror_lstsq(err, flag)
+    100 def _raise_linalgerror_lstsq(err, flag):
+--> 101     raise LinAlgError("SVD did not converge in Linear Least Squares")
+
+LinAlgError: SVD did not converge in Linear Least Squares
+
+```
+
+</details>
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:56,072 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:16:47,873 - INFO - ================ generating test for mwaskom__seaborn-3010 ================
+2025-05-03 14:16:47,889 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+PolyFit is not robust to missing data
+```python
+so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+```
+
+<details><summary>Traceback</summary>
+
+```python-traceback
+---------------------------------------------------------------------------
+LinAlgError                               Traceback (most recent call last)
+File ~/miniconda3/envs/seaborn-py39-latest/lib/python3.9/site-packages/IPython/core/formatters.py:343, in BaseFormatter.__call__(self, obj)
+    341     method = get_real_method(obj, self.print_method)
+    342     if method is not None:
+--> 343         return method()
+    344     return None
+    345 else:
+
+File ~/code/seaborn/seaborn/_core/plot.py:265, in Plot._repr_png_(self)
+    263 def _repr_png_(self) -> tuple[bytes, dict[str, float]]:
+--> 265     return self.plot()._repr_png_()
+
+File ~/code/seaborn/seaborn/_core/plot.py:804, in Plot.plot(self, pyplot)
+    800 """
+    801 Compile the plot spec and return the Plotter object.
+    802 """
+    803 with theme_context(self._theme_with_defaults()):
+--> 804     return self._plot(pyplot)
+
+File ~/code/seaborn/seaborn/_core/plot.py:822, in Plot._plot(self, pyplot)
+    819 plotter._setup_scales(self, common, layers, coord_vars)
+    821 # Apply statistical transform(s)
+--> 822 plotter._compute_stats(self, layers)
+    824 # Process scale spec for semantic variables and coordinates computed by stat
+    825 plotter._setup_scales(self, common, layers)
+
+File ~/code/seaborn/seaborn/_core/plot.py:1110, in Plotter._compute_stats(self, spec, layers)
+   1108     grouper = grouping_vars
+   1109 groupby = GroupBy(grouper)
+-> 1110 res = stat(df, groupby, orient, scales)
+   1112 if pair_vars:
+   1113     data.frames[coord_vars] = res
+
+File ~/code/seaborn/seaborn/_stats/regression.py:41, in PolyFit.__call__(self, data, groupby, orient, scales)
+     39 def __call__(self, data, groupby, orient, scales):
+---> 41     return groupby.apply(data, self._fit_predict)
+
+File ~/code/seaborn/seaborn/_core/groupby.py:109, in GroupBy.apply(self, data, func, *args, **kwargs)
+    106 grouper, groups = self._get_groups(data)
+    108 if not grouper:
+--> 109     return self._reorder_columns(func(data, *args, **kwargs), data)
+    111 parts = {}
+    112 for key, part_df in data.groupby(grouper, sort=False):
+
+File ~/code/seaborn/seaborn/_stats/regression.py:30, in PolyFit._fit_predict(self, data)
+     28     xx = yy = []
+     29 else:
+---> 30     p = np.polyfit(x, y, self.order)
+     31     xx = np.linspace(x.min(), x.max(), self.gridsize)
+     32     yy = np.polyval(p, xx)
+
+File <__array_function__ internals>:180, in polyfit(*args, **kwargs)
+
+File ~/miniconda3/envs/seaborn-py39-latest/lib/python3.9/site-packages/numpy/lib/polynomial.py:668, in polyfit(x, y, deg, rcond, full, w, cov)
+    666 scale = NX.sqrt((lhs*lhs).sum(axis=0))
+    667 lhs /= scale
+--> 668 c, resids, rank, s = lstsq(lhs, rhs, rcond)
+    669 c = (c.T/scale).T  # broadcast scale coefficients
+    671 # warn on rank reduction, which indicates an ill conditioned matrix
+
+File <__array_function__ internals>:180, in lstsq(*args, **kwargs)
+
+File ~/miniconda3/envs/seaborn-py39-latest/lib/python3.9/site-packages/numpy/linalg/linalg.py:2300, in lstsq(a, b, rcond)
+   2297 if n_rhs == 0:
+   2298     # lapack can't handle n_rhs = 0 - so allocate the array one larger in that axis
+   2299     b = zeros(b.shape[:-2] + (m, n_rhs + 1), dtype=b.dtype)
+-> 2300 x, resids, rank, s = gufunc(a, b, rcond, signature=signature, extobj=extobj)
+   2301 if m == 0:
+   2302     x[...] = 0
+
+File ~/miniconda3/envs/seaborn-py39-latest/lib/python3.9/site-packages/numpy/linalg/linalg.py:101, in _raise_linalgerror_lstsq(err, flag)
+    100 def _raise_linalgerror_lstsq(err, flag):
+--> 101     raise LinAlgError("SVD did not converge in Linear Least Squares")
+
+LinAlgError: SVD did not converge in Linear Least Squares
+
+```
+
+</details>
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 14:16:47,889 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:16:47,896 - INFO - Creating API request
+2025-05-03 14:16:49,505 - INFO - API response ChatCompletion(id='chatcmpl-BTCdskbHKrIw9ZdErO3t455w7SzR2', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Attempt to create a plot with missing data\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        plot.plot()\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    except Exception as e:\n        print("Other issues")\n        return\n\n    print("Issue resolved")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299808, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=162, prompt_tokens=1540, total_tokens=1702, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:16:49,505 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:16:49,513 - INFO - Creating API request
+2025-05-03 14:17:31,413 - INFO - API response ChatCompletion(id='chatcmpl-BTCdtGfC7s0bZZZ6CyB6yDwFtVb2c', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport seaborn.objects as so\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Data with a missing value\n        x = [1, 2, 3, None, 4]\n        y = [1, 2, 3, 4, 5]\n\n        # Attempt to plot with the PolyFit feature\n        p = so.Plot(x, y).add(so.Line(), so.PolyFit())\n        p.plot()\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\n# Run the test\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport seaborn.objects as so\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Reproducing the issue with missing data in the x-values\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        \n        # Attempt to plot, which should raise the issue if it still exists\n        plot.plot()\n\n        # If no exception is raised, we consider the issue resolved\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        # If the specific LinAlgError is raised, it means the issue is reproduced\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # Catch any other exceptions, which indicates other issues\n        print("Other issues")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Attempt to create and plot data with a missing value\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        # Check if the LinAlgError related to SVD convergence is raised\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # Catch any other exceptions that may be raised\n        print("Other issues")\n        print(f"Unexpected error: {e}")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Reproduce the issue with missing data\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit(order=1))\n        plot.plot()\n        print("Issue reproduced")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_polyfit_with_missing_data()\n```\n\nThis test script:\n1. Imports the necessary modules.\n2. Contains code to reproduce the issue described in the issue text.\n3. Prints "Issue reproduced" if a `LinAlgError` related to SVD convergence is raised, indicating that the issue is present.\n4. Prints "Other issues" if any other exceptions are raised, indicating there might be other issues with the source code.\n\nYou can use this script to verify if the issue is reproduced or resolved. If the code runs without any exceptions, you can introduce a check to print "Issue resolved".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_missing_data() -> None:\n    try:\n        # Attempt to reproduce the issue\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_polyfit_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Attempt to create a plot with missing data and PolyFit\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {e}")\n    else:\n        print("Issue resolved")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport seaborn.objects as so\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Define the data with a missing value\n        x_data = [1, 2, 3, None, 4]\n        y_data = [1, 2, 3, 4, 5]\n        \n        # Attempt to create the plot and apply PolyFit\n        plot = so.Plot(x_data, y_data).add(so.Line(), so.PolyFit())\n        \n        # Force the plot to render, which should raise the error if the issue is present\n        plot.plot()\n        \n        # If the plot is created without error, the issue is resolved\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        # Check if the error is the specific LinAlgError that indicates the issue\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # Catch any other exceptions and report them as other issues\n        print("Other issues")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\nimport pandas as pd\n\ndef test_polyfit_missing_data() -> None:\n    try:\n        # Creating a plot with missing data\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        plot.plot()\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n            return\n        else:\n            print("Other issues")\n            return\n    except Exception as e:\n        print("Other issues")\n        return\n\n    print("Issue resolved")\n\ntest_polyfit_missing_data()\n```\n\nThis test script does the following:\n1. Creates a plot using the `seaborn.objects` module with missing data points.\n2. Attempts to render the plot and catches exceptions.\n3. Checks for the specific `LinAlgError` related to the issue described (SVD not converging in Linear Least Squares).\n4. Prints "Issue reproduced" if the specific error is caught, "Issue resolved" if no exception is caught, and "Other issues" for any other exceptions.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport seaborn.objects as so\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Attempt to create the plot with missing data\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        # Check if the specific error related to PolyFit is raised\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # Catch any other potential exceptions\n        print("Other issues")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        _ = plot.plot()\n    except np.linalg.LinAlgError as e:\n        if \'SVD did not converge in Linear Least Squares\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {e}")\n    else:\n        print("Issue resolved")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport seaborn.objects as so\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Code to reproduce the issue\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n            return\n        else:\n            print("Other issues")\n            return\n    except Exception as e:\n        print("Other issues")\n        return\n    \n    # If no exceptions, issue is considered resolved\n    print("Issue resolved")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Trying to reproduce the issue\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Reproducing the issue\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        result = plot.plot()\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if \'SVD did not converge\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_missing_data_issue():\n    try:\n        # Attempt to create a plot with missing data\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_polyfit_missing_data_issue()\n```\n\nThis test script does the following:\n1. It imports the necessary modules.\n2. It attempts to reproduce the issue by creating a plot with missing data.\n3. It prints "Issue resolved" if no error occurs.\n4. It prints "Issue reproduced" if the specific `LinAlgError` related to the issue is caught.\n5. It prints "Other issues" if any other exception is caught.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Attempt to create the plot with missing data\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5])\n        plot.add(so.Line(), so.PolyFit())\n        plot.plot()\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n            return\n        else:\n            print("Other issues")\n            return\n    except Exception as e:\n        print("Other issues")\n        return\n    \n    print("Issue resolved")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\nimport matplotlib.pyplot as plt\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Attempt to reproduce the issue\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        plot.plot()\n        print("Issue reproduced")  # If this line is reached, the issue is still present\n    except np.linalg.LinAlgError:\n        # Catch the specific error that indicates the issue is reproduced\n        print("Issue reproduced")\n    except Exception as e:\n        # Catch any other issues that may arise\n        print("Other issues")\n        print(e)\n        return\n\n    try:\n        # If no exception was raised, check if the issue is resolved\n        plot.plot()\n        print("Issue resolved")\n    except Exception as e:\n        # If any exception is raised during this, it means the issue is still present\n        print("Issue reproduced")\n        print(e)\n\ntest_polyfit_with_missing_data()\n```\n\nIn this test:\n1. We import the necessary modules: `seaborn.objects`, `numpy`, and `matplotlib.pyplot`.\n2. We define a function `test_polyfit_with_missing_data()` to encapsulate the test logic.\n3. Inside the function, we attempt to reproduce the issue by creating a plot with missing data and adding a polynomial fit.\n4. We handle the specific `np.linalg.LinAlgError` that indicates the presence of the issue.\n5. We catch any other exceptions to identify additional issues.\n6. If no exceptions are raised, we print "Issue resolved", indicating that the issue might have been fixed.\n\nThe function ensures that it robustly checks for the presence and resolution of the issue as described in the provided issue text.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport seaborn.objects as so\nimport matplotlib.pyplot as plt\n\ndef test_polyfit_with_missing_data() -> None:\n    try:\n        # Setup the data with missing values\n        x = [1, 2, 3, None, 4]\n        y = [1, 2, 3, 4, 5]\n\n        # Attempt to create the plot which should trigger the issue\n        plot = so.Plot(x, y).add(so.Line(), so.PolyFit())\n        plot.plot()\n\n        # If no exception is raised, check if the plot is correct or if there are other issues\n        plt.show()\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        # If LinAlgError is raised, the issue is reproduced\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # Any other exceptions indicate other issues\n        print("Other issues")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Attempt to reproduce the issue\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_polyfit_with_missing_data()\n```\n\nThis script includes:\n1. Necessary imports from seaborn and numpy.\n2. Code to reproduce the issue described in the issue text.\n3. Prints "Issue reproduced" if the `LinAlgError` with the specific message is raised.\n4. Prints "Issue resolved" if the code executes without raising that specific error.\n5. Prints "Other issues" if any other exception is raised.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Reproducing the issue\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        plot.plot()\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\nimport warnings\n\ndef test_polyfit_missing_data():\n    try:\n        # Generate the plot with PolyFit and missing data\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        plot.plot()\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    except Exception as e:\n        print("Other issues")\n        return\n\n    # If no exception is raised, the issue is considered resolved\n    print("Issue resolved")\n\ntest_polyfit_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport seaborn.objects as so\n\ndef test_polyfit_missing_data():\n    try:\n        # This is the code that is supposed to reproduce the issue\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        plot.plot()\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    except Exception as e:\n        print("Other issues")\n        return\n\n    print("Issue resolved")\n    \ntest_polyfit_missing_data()\n```\n\nThis test script:\n1. Imports necessary modules and functions.\n2. Attempts to reproduce the issue by running the problematic code.\n3. Catches the specific `np.linalg.LinAlgError` and checks if it matches the expected error message.\n4. Prints "Issue reproduced" if the expected error is raised.\n5. Catches any other exceptions and prints "Other issues".\n6. Prints "Issue resolved" if no exceptions are raised, indicating the issue has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\nimport warnings\n\ndef test_polyfit_with_missing_data():\n    # Suppressing warnings for cleaner output\n    with warnings.catch_warnings():\n        warnings.simplefilter("ignore", category=RuntimeWarning)\n        \n        try:\n            # Attempt to reproduce the issue\n            so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        except np.linalg.LinAlgError as e:\n            if "SVD did not converge in Linear Least Squares" in str(e):\n                print("Issue reproduced")\n                return\n            else:\n                print("Other issues")\n                return\n        except Exception as e:\n            print("Other issues")\n            return\n        \n        print("Issue resolved")\n\ntest_polyfit_with_missing_data()\n```\n\nThe provided test script attempts to reproduce the issue by running the code snippet that caused the error, catching the specific exception related to the linear least squares fitting problem due to missing data points, and prints relevant messages based on the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_missing_data():\n    try:\n        # Attempt to reproduce the issue\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        plot.plot()\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_polyfit_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_missing_data() -> None:\n    try:\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        plot.plot()\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {str(e)}")\n\ntest_polyfit_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Attempt to create a plot with PolyFit and missing data\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        # Trigger the plotting to reproduce the issue\n        plot.plot()\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    except Exception as e:\n        print("Other issues")\n        return\n\n    print("Issue resolved")\n\ntest_polyfit_with_missing_data()\n```\n\nThis test script is designed to reproduce the issue described in the repository. It attempts to create a plot using `seaborn.objects.Plot` with missing data and apply a polynomial fit using `PolyFit`. If the specific `LinAlgError` due to SVD convergence failure is raised, it prints "Issue reproduced". If any other exception is raised, it prints "Other issues". If no exceptions are raised, it prints "Issue resolved".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport seaborn.objects as so\n\ndef test_polyfit_with_missing_data() -> None:\n    try:\n        # Create the problematic plot\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        # Trigger the rendering of the plot (this is where the error might occur)\n        plot.plot()\n    except np.linalg.LinAlgError as e:\n        # Check if the specific exception for the issue has been raised\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    except Exception as e:\n        # Catch any other exceptions that might be raised\n        print("Other issues")\n        return\n\n    # If no exceptions are raised, consider the issue resolved\n    print("Issue resolved")\n\n# Execute the test\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Data with missing value\n        x = [1, 2, 3, None, 4]\n        y = [1, 2, 3, 4, 5]\n        \n        # Attempt to create a plot which should raise an exception\n        so.Plot(x, y).add(so.Line(), so.PolyFit())\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_missing_data_issue():\n    try:\n        # Code to reproduce the issue described in the issue text\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n    else:\n        print("Issue resolved")\n\ntest_polyfit_missing_data_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport seaborn.objects as so\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Attempt to create a plot with missing data and apply PolyFit\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        plot.plot()\n\n        # If no error occurs, print "Issue resolved"\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        # If a numpy LinAlgError occurs, check the error message\n        if "SVD did not converge" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        # If any other exception occurs, mark it as other issues\n        print("Other issues")\n\ntest_polyfit_with_missing_data()\n```\n\nThis script will help reproduce the issue described, and also indicate whether the issue has been resolved or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_missing_data():\n    try:\n        # Create a plot with missing data\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        # Invoke the plot method which triggers the plotting and internal computations\n        plot.plot()\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n    else:\n        print("Issue resolved")\n\ntest_polyfit_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        plot.plot()\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Create a plot with None value in the data\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        plot.plot()\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n            return\n        else:\n            print("Other issues")\n            return\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return\n    \n    print("Issue resolved")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_missing_data():\n    try:\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_polyfit_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # This is the code to reproduce the issue described\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit()).plot()\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    except Exception as e:\n        print("Other issues")\n        return\n    \n    print("Issue resolved")\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_with_missing_data():\n    try:\n        # Attempt to reproduce the issue\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        print("Issue resolved")\n    except np.linalg.LinAlgError:\n        # Catch the specific error that indicates the issue has been reproduced\n        print("Issue reproduced")\n    except Exception as e:\n        # Catch any other issues that may arise\n        print("Other issues")\n        print(e)\n\ntest_polyfit_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_missing_data():\n    try:\n        # Attempt to create a plot with missing data\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_polyfit_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport seaborn.objects as so\n\ndef test_PolyFit_issue_with_missing_data():\n    try:\n        # Create the plot with missing data\n        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        # Attempt to generate the plot, which should raise an error if the issue is present\n        plot.plot()\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_PolyFit_issue_with_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='```python\nimport seaborn.objects as so\nimport numpy as np\n\ndef test_polyfit_missing_data():\n    try:\n        # Attempt to plot with missing data\n        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())\n        print("Issue resolved")\n    except np.linalg.LinAlgError as e:\n        if "SVD did not converge in Linear Least Squares" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_polyfit_missing_data()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299809, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=7419, prompt_tokens=1540, total_tokens=8959, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Attempt to create a plot with missing data
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        plot.plot()
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    except Exception as e:
+        print("Other issues")
+        return
+
+    print("Issue resolved")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import numpy as np
+import seaborn.objects as so
+
+def test_polyfit_with_missing_data():
+    try:
+        # Data with a missing value
+        x = [1, 2, 3, None, 4]
+        y = [1, 2, 3, 4, 5]
+
+        # Attempt to plot with the PolyFit feature
+        p = so.Plot(x, y).add(so.Line(), so.PolyFit())
+        p.plot()
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+# Run the test
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import numpy as np
+import seaborn.objects as so
+
+def test_polyfit_with_missing_data():
+    try:
+        # Reproducing the issue with missing data in the x-values
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        
+        # Attempt to plot, which should raise the issue if it still exists
+        plot.plot()
+
+        # If no exception is raised, we consider the issue resolved
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        # If the specific LinAlgError is raised, it means the issue is reproduced
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # Catch any other exceptions, which indicates other issues
+        print("Other issues")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Attempt to create and plot data with a missing value
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        # Check if the LinAlgError related to SVD convergence is raised
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # Catch any other exceptions that may be raised
+        print("Other issues")
+        print(f"Unexpected error: {e}")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Reproduce the issue with missing data
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit(order=1))
+        plot.plot()
+        print("Issue reproduced")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_polyfit_with_missing_data()
+```
+
+This test script:
+1. Imports the necessary modules.
+2. Contains code to reproduce the issue described in the issue text.
+3. Prints "Issue reproduced" if a `LinAlgError` related to SVD convergence is raised, indicating that the issue is present.
+4. Prints "Other issues" if any other exceptions are raised, indicating there might be other issues with the source code.
+
+You can use this script to verify if the issue is reproduced or resolved. If the code runs without any exceptions, you can introduce a check to print "Issue resolved".
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_missing_data() -> None:
+    try:
+        # Attempt to reproduce the issue
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_polyfit_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Attempt to create a plot with missing data and PolyFit
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {e}")
+    else:
+        print("Issue resolved")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import numpy as np
+import seaborn.objects as so
+
+def test_polyfit_with_missing_data():
+    try:
+        # Define the data with a missing value
+        x_data = [1, 2, 3, None, 4]
+        y_data = [1, 2, 3, 4, 5]
+        
+        # Attempt to create the plot and apply PolyFit
+        plot = so.Plot(x_data, y_data).add(so.Line(), so.PolyFit())
+        
+        # Force the plot to render, which should raise the error if the issue is present
+        plot.plot()
+        
+        # If the plot is created without error, the issue is resolved
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        # Check if the error is the specific LinAlgError that indicates the issue
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # Catch any other exceptions and report them as other issues
+        print("Other issues")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+import pandas as pd
+
+def test_polyfit_missing_data() -> None:
+    try:
+        # Creating a plot with missing data
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        plot.plot()
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+            return
+        else:
+            print("Other issues")
+            return
+    except Exception as e:
+        print("Other issues")
+        return
+
+    print("Issue resolved")
+
+test_polyfit_missing_data()
+```
+
+This test script does the following:
+1. Creates a plot using the `seaborn.objects` module with missing data points.
+2. Attempts to render the plot and catches exceptions.
+3. Checks for the specific `LinAlgError` related to the issue described (SVD not converging in Linear Least Squares).
+4. Prints "Issue reproduced" if the specific error is caught, "Issue resolved" if no exception is caught, and "Other issues" for any other exceptions.
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import numpy as np
+import seaborn.objects as so
+
+def test_polyfit_with_missing_data():
+    try:
+        # Attempt to create the plot with missing data
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        # Check if the specific error related to PolyFit is raised
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # Catch any other potential exceptions
+        print("Other issues")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        _ = plot.plot()
+    except np.linalg.LinAlgError as e:
+        if 'SVD did not converge in Linear Least Squares' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {e}")
+    else:
+        print("Issue resolved")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import numpy as np
+import seaborn.objects as so
+
+def test_polyfit_with_missing_data():
+    try:
+        # Code to reproduce the issue
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+            return
+        else:
+            print("Other issues")
+            return
+    except Exception as e:
+        print("Other issues")
+        return
+    
+    # If no exceptions, issue is considered resolved
+    print("Issue resolved")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Trying to reproduce the issue
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Reproducing the issue
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        result = plot.plot()
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if 'SVD did not converge' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_missing_data_issue():
+    try:
+        # Attempt to create a plot with missing data
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_polyfit_missing_data_issue()
+```
+
+This test script does the following:
+1. It imports the necessary modules.
+2. It attempts to reproduce the issue by creating a plot with missing data.
+3. It prints "Issue resolved" if no error occurs.
+4. It prints "Issue reproduced" if the specific `LinAlgError` related to the issue is caught.
+5. It prints "Other issues" if any other exception is caught.
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Attempt to create the plot with missing data
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5])
+        plot.add(so.Line(), so.PolyFit())
+        plot.plot()
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+            return
+        else:
+            print("Other issues")
+            return
+    except Exception as e:
+        print("Other issues")
+        return
+    
+    print("Issue resolved")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+import matplotlib.pyplot as plt
+
+def test_polyfit_with_missing_data():
+    try:
+        # Attempt to reproduce the issue
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        plot.plot()
+        print("Issue reproduced")  # If this line is reached, the issue is still present
+    except np.linalg.LinAlgError:
+        # Catch the specific error that indicates the issue is reproduced
+        print("Issue reproduced")
+    except Exception as e:
+        # Catch any other issues that may arise
+        print("Other issues")
+        print(e)
+        return
+
+    try:
+        # If no exception was raised, check if the issue is resolved
+        plot.plot()
+        print("Issue resolved")
+    except Exception as e:
+        # If any exception is raised during this, it means the issue is still present
+        print("Issue reproduced")
+        print(e)
+
+test_polyfit_with_missing_data()
+```
+
+In this test:
+1. We import the necessary modules: `seaborn.objects`, `numpy`, and `matplotlib.pyplot`.
+2. We define a function `test_polyfit_with_missing_data()` to encapsulate the test logic.
+3. Inside the function, we attempt to reproduce the issue by creating a plot with missing data and adding a polynomial fit.
+4. We handle the specific `np.linalg.LinAlgError` that indicates the presence of the issue.
+5. We catch any other exceptions to identify additional issues.
+6. If no exceptions are raised, we print "Issue resolved", indicating that the issue might have been fixed.
+
+The function ensures that it robustly checks for the presence and resolution of the issue as described in the provided issue text.
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import numpy as np
+import seaborn.objects as so
+import matplotlib.pyplot as plt
+
+def test_polyfit_with_missing_data() -> None:
+    try:
+        # Setup the data with missing values
+        x = [1, 2, 3, None, 4]
+        y = [1, 2, 3, 4, 5]
+
+        # Attempt to create the plot which should trigger the issue
+        plot = so.Plot(x, y).add(so.Line(), so.PolyFit())
+        plot.plot()
+
+        # If no exception is raised, check if the plot is correct or if there are other issues
+        plt.show()
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        # If LinAlgError is raised, the issue is reproduced
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # Any other exceptions indicate other issues
+        print("Other issues")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Attempt to reproduce the issue
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_polyfit_with_missing_data()
+```
+
+This script includes:
+1. Necessary imports from seaborn and numpy.
+2. Code to reproduce the issue described in the issue text.
+3. Prints "Issue reproduced" if the `LinAlgError` with the specific message is raised.
+4. Prints "Issue resolved" if the code executes without raising that specific error.
+5. Prints "Other issues" if any other exception is raised.
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Reproducing the issue
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        plot.plot()
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+import warnings
+
+def test_polyfit_missing_data():
+    try:
+        # Generate the plot with PolyFit and missing data
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        plot.plot()
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    except Exception as e:
+        print("Other issues")
+        return
+
+    # If no exception is raised, the issue is considered resolved
+    print("Issue resolved")
+
+test_polyfit_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import numpy as np
+import seaborn.objects as so
+
+def test_polyfit_missing_data():
+    try:
+        # This is the code that is supposed to reproduce the issue
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        plot.plot()
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    except Exception as e:
+        print("Other issues")
+        return
+
+    print("Issue resolved")
+    
+test_polyfit_missing_data()
+```
+
+This test script:
+1. Imports necessary modules and functions.
+2. Attempts to reproduce the issue by running the problematic code.
+3. Catches the specific `np.linalg.LinAlgError` and checks if it matches the expected error message.
+4. Prints "Issue reproduced" if the expected error is raised.
+5. Catches any other exceptions and prints "Other issues".
+6. Prints "Issue resolved" if no exceptions are raised, indicating the issue has been fixed.
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+import warnings
+
+def test_polyfit_with_missing_data():
+    # Suppressing warnings for cleaner output
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        
+        try:
+            # Attempt to reproduce the issue
+            so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        except np.linalg.LinAlgError as e:
+            if "SVD did not converge in Linear Least Squares" in str(e):
+                print("Issue reproduced")
+                return
+            else:
+                print("Other issues")
+                return
+        except Exception as e:
+            print("Other issues")
+            return
+        
+        print("Issue resolved")
+
+test_polyfit_with_missing_data()
+```
+
+The provided test script attempts to reproduce the issue by running the code snippet that caused the error, catching the specific exception related to the linear least squares fitting problem due to missing data points, and prints relevant messages based on the outcome.
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_missing_data():
+    try:
+        # Attempt to reproduce the issue
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        plot.plot()
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_polyfit_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_missing_data() -> None:
+    try:
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        plot.plot()
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {str(e)}")
+
+test_polyfit_missing_data()
+```
+2025-05-03 14:17:31,414 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Attempt to create a plot with PolyFit and missing data
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        # Trigger the plotting to reproduce the issue
+        plot.plot()
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    except Exception as e:
+        print("Other issues")
+        return
+
+    print("Issue resolved")
+
+test_polyfit_with_missing_data()
+```
+
+This test script is designed to reproduce the issue described in the repository. It attempts to create a plot using `seaborn.objects.Plot` with missing data and apply a polynomial fit using `PolyFit`. If the specific `LinAlgError` due to SVD convergence failure is raised, it prints "Issue reproduced". If any other exception is raised, it prints "Other issues". If no exceptions are raised, it prints "Issue resolved".
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import numpy as np
+import seaborn.objects as so
+
+def test_polyfit_with_missing_data() -> None:
+    try:
+        # Create the problematic plot
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        # Trigger the rendering of the plot (this is where the error might occur)
+        plot.plot()
+    except np.linalg.LinAlgError as e:
+        # Check if the specific exception for the issue has been raised
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    except Exception as e:
+        # Catch any other exceptions that might be raised
+        print("Other issues")
+        return
+
+    # If no exceptions are raised, consider the issue resolved
+    print("Issue resolved")
+
+# Execute the test
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Data with missing value
+        x = [1, 2, 3, None, 4]
+        y = [1, 2, 3, 4, 5]
+        
+        # Attempt to create a plot which should raise an exception
+        so.Plot(x, y).add(so.Line(), so.PolyFit())
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_missing_data_issue():
+    try:
+        # Code to reproduce the issue described in the issue text
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+    else:
+        print("Issue resolved")
+
+test_polyfit_missing_data_issue()
+```
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import numpy as np
+import seaborn.objects as so
+
+def test_polyfit_with_missing_data():
+    try:
+        # Attempt to create a plot with missing data and apply PolyFit
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        plot.plot()
+
+        # If no error occurs, print "Issue resolved"
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        # If a numpy LinAlgError occurs, check the error message
+        if "SVD did not converge" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        # If any other exception occurs, mark it as other issues
+        print("Other issues")
+
+test_polyfit_with_missing_data()
+```
+
+This script will help reproduce the issue described, and also indicate whether the issue has been resolved or if there are other issues.
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_missing_data():
+    try:
+        # Create a plot with missing data
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        # Invoke the plot method which triggers the plotting and internal computations
+        plot.plot()
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+    else:
+        print("Issue resolved")
+
+test_polyfit_missing_data()
+```
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        plot.plot()
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Create a plot with None value in the data
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        plot.plot()
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+            return
+        else:
+            print("Other issues")
+            return
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return
+    
+    print("Issue resolved")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_missing_data():
+    try:
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_polyfit_missing_data()
+```
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # This is the code to reproduce the issue described
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit()).plot()
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    except Exception as e:
+        print("Other issues")
+        return
+    
+    print("Issue resolved")
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_with_missing_data():
+    try:
+        # Attempt to reproduce the issue
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        print("Issue resolved")
+    except np.linalg.LinAlgError:
+        # Catch the specific error that indicates the issue has been reproduced
+        print("Issue reproduced")
+    except Exception as e:
+        # Catch any other issues that may arise
+        print("Other issues")
+        print(e)
+
+test_polyfit_with_missing_data()
+```
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_missing_data():
+    try:
+        # Attempt to create a plot with missing data
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_polyfit_missing_data()
+```
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import numpy as np
+import seaborn.objects as so
+
+def test_PolyFit_issue_with_missing_data():
+    try:
+        # Create the plot with missing data
+        plot = so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        # Attempt to generate the plot, which should raise an error if the issue is present
+        plot.plot()
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_PolyFit_issue_with_missing_data()
+```
+2025-05-03 14:17:31,415 - INFO - raw output:
+```python
+import seaborn.objects as so
+import numpy as np
+
+def test_polyfit_missing_data():
+    try:
+        # Attempt to plot with missing data
+        so.Plot([1, 2, 3, None, 4], [1, 2, 3, 4, 5]).add(so.Line(), so.PolyFit())
+        print("Issue resolved")
+    except np.linalg.LinAlgError as e:
+        if "SVD did not converge in Linear Least Squares" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_polyfit_missing_data()
+```

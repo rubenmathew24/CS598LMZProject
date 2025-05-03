@@ -1,0 +1,483 @@
+2025-05-02 17:20:57,831 - INFO - ================ generating test for sympy__sympy-17630 ================
+2025-05-02 17:20:57,943 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+Exception when multiplying BlockMatrix containing ZeroMatrix blocks
+When a block matrix with zero blocks is defined
+
+```
+>>> from sympy import *
+>>> a = MatrixSymbol("a", 2, 2)
+>>> z = ZeroMatrix(2, 2)
+>>> b = BlockMatrix([[a, z], [z, z]])
+```
+
+then block-multiplying it once seems to work fine:
+
+```
+>>> block_collapse(b * b)
+Matrix([
+[a**2, 0],
+[0, 0]])
+>>> b._blockmul(b)
+Matrix([
+[a**2, 0],
+[0, 0]])
+```
+
+but block-multiplying twice throws an exception:
+
+```
+>>> block_collapse(b * b * b)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 297, in block_collapse
+    result = rule(expr)
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/strategies/core.py", line 11, in exhaustive_rl
+    new, old = rule(expr), expr
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/strategies/core.py", line 44, in chain_rl
+    expr = rule(expr)
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/strategies/core.py", line 11, in exhaustive_rl
+    new, old = rule(expr), expr
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/strategies/core.py", line 33, in conditioned_rl
+    return rule(expr)
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/strategies/core.py", line 95, in switch_rl
+    return rl(expr)
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 361, in bc_matmul
+    matrices[i] = A._blockmul(B)
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 91, in _blockmul
+    self.colblocksizes == other.rowblocksizes):
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 80, in colblocksizes
+    return [self.blocks[0, i].cols for i in range(self.blockshape[1])]
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 80, in <listcomp>
+    return [self.blocks[0, i].cols for i in range(self.blockshape[1])]
+AttributeError: 'Zero' object has no attribute 'cols'
+>>> b._blockmul(b)._blockmul(b)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 91, in _blockmul
+    self.colblocksizes == other.rowblocksizes):
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 80, in colblocksizes
+    return [self.blocks[0, i].cols for i in range(self.blockshape[1])]
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 80, in <listcomp>
+    return [self.blocks[0, i].cols for i in range(self.blockshape[1])]
+AttributeError: 'Zero' object has no attribute 'cols'
+```
+
+This seems to be caused by the fact that the zeros in `b._blockmul(b)` are not `ZeroMatrix` but `Zero`:
+
+```
+>>> type(b._blockmul(b).blocks[0, 1])
+<class 'sympy.core.numbers.Zero'>
+```
+
+However, I don't understand SymPy internals well enough to find out why this happens. I use Python 3.7.4 and sympy 1.4 (installed with pip).
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:57,946 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:58:22,007 - INFO - ================ generating test for sympy__sympy-17630 ================
+2025-05-03 14:58:22,037 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+Exception when multiplying BlockMatrix containing ZeroMatrix blocks
+When a block matrix with zero blocks is defined
+
+```
+>>> from sympy import *
+>>> a = MatrixSymbol("a", 2, 2)
+>>> z = ZeroMatrix(2, 2)
+>>> b = BlockMatrix([[a, z], [z, z]])
+```
+
+then block-multiplying it once seems to work fine:
+
+```
+>>> block_collapse(b * b)
+Matrix([
+[a**2, 0],
+[0, 0]])
+>>> b._blockmul(b)
+Matrix([
+[a**2, 0],
+[0, 0]])
+```
+
+but block-multiplying twice throws an exception:
+
+```
+>>> block_collapse(b * b * b)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 297, in block_collapse
+    result = rule(expr)
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/strategies/core.py", line 11, in exhaustive_rl
+    new, old = rule(expr), expr
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/strategies/core.py", line 44, in chain_rl
+    expr = rule(expr)
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/strategies/core.py", line 11, in exhaustive_rl
+    new, old = rule(expr), expr
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/strategies/core.py", line 33, in conditioned_rl
+    return rule(expr)
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/strategies/core.py", line 95, in switch_rl
+    return rl(expr)
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 361, in bc_matmul
+    matrices[i] = A._blockmul(B)
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 91, in _blockmul
+    self.colblocksizes == other.rowblocksizes):
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 80, in colblocksizes
+    return [self.blocks[0, i].cols for i in range(self.blockshape[1])]
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 80, in <listcomp>
+    return [self.blocks[0, i].cols for i in range(self.blockshape[1])]
+AttributeError: 'Zero' object has no attribute 'cols'
+>>> b._blockmul(b)._blockmul(b)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 91, in _blockmul
+    self.colblocksizes == other.rowblocksizes):
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 80, in colblocksizes
+    return [self.blocks[0, i].cols for i in range(self.blockshape[1])]
+  File "/home/jan/.pyenv/versions/3.7.4/lib/python3.7/site-packages/sympy/matrices/expressions/blockmatrix.py", line 80, in <listcomp>
+    return [self.blocks[0, i].cols for i in range(self.blockshape[1])]
+AttributeError: 'Zero' object has no attribute 'cols'
+```
+
+This seems to be caused by the fact that the zeros in `b._blockmul(b)` are not `ZeroMatrix` but `Zero`:
+
+```
+>>> type(b._blockmul(b).blocks[0, 1])
+<class 'sympy.core.numbers.Zero'>
+```
+
+However, I don't understand SymPy internals well enough to find out why this happens. I use Python 3.7.4 and sympy 1.4 (installed with pip).
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 14:58:22,037 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:58:22,048 - INFO - Creating API request
+2025-05-03 14:58:23,735 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:58:23,735 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:58:28,740 - INFO - Creating API request
+2025-05-03 14:58:30,413 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:58:30,413 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:58:35,418 - INFO - Creating API request
+2025-05-03 14:58:37,055 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:58:37,056 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:58:42,058 - INFO - Creating API request
+2025-05-03 14:58:43,828 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:58:43,829 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:58:48,831 - INFO - Creating API request
+2025-05-03 14:58:50,586 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:58:50,586 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:58:55,590 - INFO - Creating API request
+2025-05-03 14:58:57,355 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:58:57,355 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:59:02,359 - INFO - Creating API request
+2025-05-03 14:59:04,109 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:59:04,109 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:59:09,113 - INFO - Creating API request
+2025-05-03 14:59:10,688 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:59:10,689 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:59:15,692 - INFO - Creating API request
+2025-05-03 14:59:17,249 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:59:17,249 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:59:22,252 - INFO - Creating API request
+2025-05-03 14:59:23,946 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:59:23,946 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:59:28,950 - INFO - Creating API request
+2025-05-03 14:59:30,431 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:59:30,432 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:59:35,434 - INFO - Creating API request
+2025-05-03 14:59:36,922 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:59:36,923 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:59:41,925 - INFO - Creating API request
+2025-05-03 14:59:43,506 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:59:43,507 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:59:48,512 - INFO - Creating API request
+2025-05-03 14:59:50,066 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:59:50,066 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 14:59:55,071 - INFO - Creating API request
+2025-05-03 14:59:56,644 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 14:59:56,644 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:00:01,646 - INFO - Creating API request
+2025-05-03 15:00:03,358 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:00:03,359 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:00:08,359 - INFO - Creating API request
+2025-05-03 15:00:09,874 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:00:09,874 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:00:14,877 - INFO - Creating API request
+2025-05-03 15:00:16,425 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:00:16,425 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:00:21,431 - INFO - Creating API request
+2025-05-03 15:00:23,098 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:00:23,098 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:00:28,099 - INFO - Creating API request
+2025-05-03 15:00:29,814 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:00:29,814 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:00:34,820 - INFO - Creating API request
+2025-05-03 15:00:36,437 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:00:36,437 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:00:41,443 - INFO - Creating API request
+2025-05-03 15:00:43,209 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:00:43,209 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:00:48,211 - INFO - Creating API request
+2025-05-03 15:00:49,871 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:00:49,871 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:00:54,873 - INFO - Creating API request
+2025-05-03 15:00:56,653 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:00:56,653 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:01:01,659 - INFO - Creating API request
+2025-05-03 15:01:03,207 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:01:03,207 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:01:08,211 - INFO - Creating API request
+2025-05-03 15:01:09,797 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:01:09,797 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:01:14,801 - INFO - Creating API request
+2025-05-03 15:01:16,304 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:01:16,304 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:01:21,309 - INFO - Creating API request
+2025-05-03 15:01:22,929 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:01:22,929 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:01:27,935 - INFO - Creating API request
+2025-05-03 15:01:29,507 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:01:29,508 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:01:34,513 - INFO - Creating API request
+2025-05-03 15:01:36,138 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:01:36,139 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:01:41,144 - INFO - Creating API request
+2025-05-03 15:01:42,707 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:01:42,707 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:01:47,710 - INFO - Creating API request
+2025-05-03 15:01:49,351 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:01:49,352 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:01:54,355 - INFO - Creating API request
+2025-05-03 15:01:55,925 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:01:55,925 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:02:00,930 - INFO - Creating API request
+2025-05-03 15:02:02,605 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:02:02,605 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:02:07,609 - INFO - Creating API request
+2025-05-03 15:02:09,223 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:02:09,224 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:02:14,229 - INFO - Creating API request
+2025-05-03 15:02:15,982 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:02:15,983 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:02:20,987 - INFO - Creating API request
+2025-05-03 15:02:22,664 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:02:22,664 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:02:27,668 - INFO - Creating API request
+2025-05-03 15:02:29,299 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:02:29,299 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:02:34,303 - INFO - Creating API request
+2025-05-03 15:02:35,961 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:02:35,961 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:02:40,964 - INFO - Creating API request
+2025-05-03 15:02:42,686 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:02:42,687 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:02:47,691 - INFO - API response None
+2025-05-03 15:02:47,692 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 15:02:47,714 - INFO - Creating API request
+2025-05-03 15:02:49,426 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:02:49,427 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:02:54,430 - INFO - Creating API request
+2025-05-03 15:02:56,368 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:02:56,368 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:03:01,372 - INFO - Creating API request
+2025-05-03 15:03:02,973 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:03:02,973 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:03:07,977 - INFO - Creating API request
+2025-05-03 15:03:09,899 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:03:09,899 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:03:14,905 - INFO - Creating API request
+2025-05-03 15:03:16,474 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:03:16,475 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:03:21,478 - INFO - Creating API request
+2025-05-03 15:03:23,116 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:03:23,117 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:03:28,119 - INFO - Creating API request
+2025-05-03 15:03:29,773 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:03:29,774 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:03:34,776 - INFO - Creating API request
+2025-05-03 15:03:36,453 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:03:36,454 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:03:41,457 - INFO - Creating API request
+2025-05-03 15:03:43,323 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:03:43,324 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:03:48,329 - INFO - Creating API request
+2025-05-03 15:03:49,984 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:03:49,984 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:03:54,987 - INFO - Creating API request
+2025-05-03 15:03:56,567 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:03:56,567 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:04:01,570 - INFO - Creating API request
+2025-05-03 15:04:03,219 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:04:03,219 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:04:08,221 - INFO - Creating API request
+2025-05-03 15:04:09,854 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:04:09,855 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:04:14,860 - INFO - Creating API request
+2025-05-03 15:04:16,515 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:04:16,516 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:04:21,519 - INFO - Creating API request
+2025-05-03 15:04:23,140 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:04:23,142 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:04:28,147 - INFO - Creating API request
+2025-05-03 15:04:29,774 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:04:29,774 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:04:34,779 - INFO - Creating API request
+2025-05-03 15:04:36,691 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:04:36,691 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:04:41,692 - INFO - Creating API request
+2025-05-03 15:04:43,274 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:04:43,274 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:04:48,276 - INFO - Creating API request
+2025-05-03 15:04:50,056 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:04:50,056 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:04:55,059 - INFO - Creating API request
+2025-05-03 15:04:56,682 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:04:56,682 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:05:01,687 - INFO - Creating API request
+2025-05-03 15:05:03,326 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:05:03,326 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:05:08,331 - INFO - Creating API request
+2025-05-03 15:05:10,020 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:05:10,020 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:05:15,025 - INFO - Creating API request
+2025-05-03 15:05:16,774 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:05:16,774 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:05:21,779 - INFO - Creating API request
+2025-05-03 15:05:23,432 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:05:23,432 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:05:28,438 - INFO - Creating API request
+2025-05-03 15:05:29,963 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:05:29,963 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:05:34,965 - INFO - Creating API request
+2025-05-03 15:05:36,623 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:05:36,624 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:05:41,629 - INFO - Creating API request
+2025-05-03 15:05:43,239 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:05:43,240 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:05:48,245 - INFO - Creating API request
+2025-05-03 15:05:49,844 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:05:49,844 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:05:54,849 - INFO - Creating API request
+2025-05-03 15:05:56,629 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:05:56,630 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:06:01,636 - INFO - Creating API request
+2025-05-03 15:06:03,381 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:06:03,381 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:06:08,384 - INFO - Creating API request
+2025-05-03 15:06:10,098 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:06:10,099 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:06:15,104 - INFO - Creating API request
+2025-05-03 15:06:16,641 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:06:16,641 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:06:21,646 - INFO - Creating API request
+2025-05-03 15:06:23,132 - INFO - API connection error. Waiting...
+2025-05-03 15:06:23,132 - INFO - Connection error.
+2025-05-03 15:06:28,135 - INFO - Creating API request
+2025-05-03 15:06:29,948 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:06:29,948 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:06:34,948 - INFO - Creating API request
+2025-05-03 15:06:36,870 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:06:36,870 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:06:41,876 - INFO - Creating API request
+2025-05-03 15:06:43,756 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:06:43,756 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:06:48,762 - INFO - Creating API request
+2025-05-03 15:06:50,595 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:06:50,595 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:06:55,600 - INFO - Creating API request
+2025-05-03 15:06:57,378 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:06:57,379 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:07:02,384 - INFO - Creating API request
+2025-05-03 15:07:05,728 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:07:05,728 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:07:10,734 - INFO - Creating API request
+2025-05-03 15:07:12,669 - INFO - Rate limit exceeded. Waiting...
+2025-05-03 15:07:12,670 - INFO - Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-05-03 15:07:17,675 - INFO - API response None
+2025-05-03 15:07:17,676 - INFO - raw output:
+
+2025-05-03 15:07:17,676 - INFO - raw output:
+

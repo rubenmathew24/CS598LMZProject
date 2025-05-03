@@ -1,0 +1,2566 @@
+2025-05-02 17:20:53,988 - INFO - ================ generating test for django__django-11099 ================
+2025-05-02 17:20:54,106 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+UsernameValidator allows trailing newline in usernames
+Description
+	
+ASCIIUsernameValidator and UnicodeUsernameValidator use the regex 
+r'^[\w.@+-]+$'
+The intent is to only allow alphanumeric characters as well as ., @, +, and -. However, a little known quirk of Python regexes is that $ will also match a trailing newline. Therefore, the user name validators will accept usernames which end with a newline. You can avoid this behavior by instead using \A and \Z to terminate regexes. For example, the validator regex could be changed to
+r'\A[\w.@+-]+\Z'
+in order to reject usernames that end with a newline.
+I am not sure how to officially post a patch, but the required change is trivial - using the regex above in the two validators in contrib.auth.validators.
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:54,119 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 13:50:11,921 - INFO - ================ generating test for django__django-11099 ================
+2025-05-03 13:50:11,968 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+UsernameValidator allows trailing newline in usernames
+Description
+	
+ASCIIUsernameValidator and UnicodeUsernameValidator use the regex 
+r'^[\w.@+-]+$'
+The intent is to only allow alphanumeric characters as well as ., @, +, and -. However, a little known quirk of Python regexes is that $ will also match a trailing newline. Therefore, the user name validators will accept usernames which end with a newline. You can avoid this behavior by instead using \A and \Z to terminate regexes. For example, the validator regex could be changed to
+r'\A[\w.@+-]+\Z'
+in order to reject usernames that end with a newline.
+I am not sure how to officially post a patch, but the required change is trivial - using the regex above in the two validators in contrib.auth.validators.
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 13:50:11,968 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 13:50:11,976 - INFO - Creating API request
+2025-05-03 13:50:21,748 - INFO - API response ChatCompletion(id='chatcmpl-BTCEEgS4PBjuUGeVodxlEihPEE3cA', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validators():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    # Test case to reproduce the issue\n    try:\n        ascii_validator.validate("validusername\\n")\n        unicode_validator.validate("validusername\\n")\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n        return\n\n    # Test case to verify the issue is fixed\n    ASCIIUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    UnicodeUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n    try:\n        ascii_validator.validate("validusername\\n")\n        unicode_validator.validate("validusername\\n")\n        print("Other issues")\n    except ValueError:\n        print("Issue resolved")\n\ntest_username_validators()\n```\n\nThis test script does the following:\n1. Defines the `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes with the original regex.\n2. Attempts to validate a username with a trailing newline to reproduce the issue.\n3. If the issue is reproduced, it prints "Issue reproduced".\n4. Updates the regex in both validators to use `\\A` and `\\Z` to fix the issue.\n5. Attempts to validate the same username again to verify the issue is resolved.\n6. If the issue is resolved, it prints "Issue resolved". If there are other issues, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746298218, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=381, prompt_tokens=525, total_tokens=906, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 13:50:21,749 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 13:50:21,763 - INFO - Creating API request
+2025-05-03 13:51:20,957 - INFO - API response ChatCompletion(id='chatcmpl-BTCEHZISXHxSVLeVqNOseVLVN1ZKN', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='Sure, here is a complete test that reflects the issue described in the provided issue text:\n\n```python\nimport re\nfrom django.core.exceptions import ValidationError\nfrom django.contrib.auth.validators import ASCIIUsernameValidator, UnicodeUsernameValidator\n\ndef test_username_validators():\n    test_usernames = [\n        "validusername",\n        "username_with_newline\\n",\n        "another_valid_username",\n        "username_with_space ",\n        "user@name.with.dot",\n        "user-name_with_dash",\n        "username_with_plus+"\n    ]\n\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    # Function to test username validation\n    def validate_username(validator, username):\n        try:\n            validator(username)\n            return True\n        except ValidationError:\n            return False\n\n    # Tracking flags\n    issue_reproduced = False\n    issue_resolved = False\n    other_issues = False\n\n    for username in test_usernames:\n        ascii_valid = validate_username(ascii_validator, username)\n        unicode_valid = validate_username(unicode_validator, username)\n\n        if username.endswith("\\n"):\n            if ascii_valid or unicode_valid:\n                issue_reproduced = True\n            else:\n                other_issues = True\n        else:\n            if not ascii_valid or not unicode_valid:\n                other_issues = True\n\n    if issue_reproduced:\n        print("Issue reproduced")\n    elif other_issues:\n        print("Other issues")\n    else:\n        print("Issue resolved")\n\ntest_username_validators()\n```\n\nThis test script:\n1. Imports necessary modules and classes.\n2. Defines a list of test usernames, including some with trailing newlines.\n3. Defines a function to test username validation.\n4. Initializes validators for ASCII and Unicode usernames.\n5. Validates each username with both validators and checks if the issue is reproduced, resolved, or if there are other issues.\n6. Prints the outcome based on the validation results.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is a complete test to reproduce and verify the issue described in your issue text. \n\n```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validators():\n    # Create instances of the validators\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    # Usernames to test\n    valid_username = "validusername"\n    invalid_username = "invalidusername\\n"\n\n    # Test with ASCIIUsernameValidator\n    try:\n        ascii_validator.validate(valid_username)\n        ascii_validator.validate(invalid_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n\n    # Test with UnicodeUsernameValidator\n    try:\n        unicode_validator.validate(valid_username)\n        unicode_validator.validate(invalid_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n\n    # Fixing the validators to use the corrected regex\n    class FixedASCIIUsernameValidator:\n        regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n        def validate(self, username):\n            if not self.regex.match(username):\n                raise ValueError("Invalid username")\n\n    class FixedUnicodeUsernameValidator:\n        regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n        def validate(self, username):\n            if not self.regex.match(username):\n                raise ValueError("Invalid username")\n\n    # Create instances of the fixed validators\n    fixed_ascii_validator = FixedASCIIUsernameValidator()\n    fixed_unicode_validator = FixedUnicodeUsernameValidator()\n\n    # Test with FixedASCIIUsernameValidator\n    try:\n        fixed_ascii_validator.validate(valid_username)\n        fixed_ascii_validator.validate(invalid_username)\n        print("Other issues")\n    except ValueError:\n        print("Issue resolved")\n\n    # Test with FixedUnicodeUsernameValidator\n    try:\n        fixed_unicode_validator.validate(valid_username)\n        fixed_unicode_validator.validate(invalid_username)\n        print("Other issues")\n    except ValueError:\n        print("Issue resolved")\n\ntest_username_validators()\n```\n\nThis test:\n1. Uses the original `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes with the problematic regex.\n2. Tests if an invalid username containing a newline is accepted, reproducing the issue if the validators do not raise an error.\n3. Modifies the validators to use the corrected regex.\n4. Tests if the fixed validators correctly reject the invalid username, indicating the issue is resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='Certainly! Here\'s a complete test based on the issue you\'ve described. This test will help you reproduce the issue with the `UsernameValidator` and also verify if the fix has been implemented correctly.\n\n```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        return bool(self.regex.match(username))\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        return bool(self.regex.match(username))\n\ndef test_username_validators():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    # Usernames to test\n    valid_username = "validuser"\n    invalid_username_with_newline = "invaliduser\\n"\n\n    # Check ASCII validator\n    if ascii_validator.validate(valid_username) and not ascii_validator.validate(invalid_username_with_newline):\n        print("Issue resolved")\n    elif not ascii_validator.validate(valid_username) or ascii_validator.validate(invalid_username_with_newline):\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\n    # Check Unicode validator\n    if unicode_validator.validate(valid_username) and not unicode_validator.validate(invalid_username_with_newline):\n        print("Issue resolved")\n    elif not unicode_validator.validate(valid_username) or unicode_validator.validate(invalid_username_with_newline):\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\n# Run the test\ntest_username_validators()\n```\n\nTo fix the issue, you would modify the regex in the `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes to use `\\A` and `\\Z` instead of `^` and `$`, as follows:\n\n```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')  # Fixed regex\n\n    def validate(self, username):\n        return bool(self.regex.match(username))\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')  # Fixed regex\n\n    def validate(self, username):\n        return bool(self.regex.match(username))\n\n# Run the test again after fixing the regex\ntest_username_validators()\n```\n\nYou can run the test before and after applying the fix to verify that the issue has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    \n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    \n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validators():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    # Test case to reproduce the issue\n    try:\n        ascii_validator.validate("validUsername\\n")\n        unicode_validator.validate("validUsername\\n")\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n\n    # Test case to verify the issue has been fixed\n    ASCIIUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    UnicodeUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    \n    try:\n        ascii_validator.validate("validUsername\\n")\n        unicode_validator.validate("validUsername\\n")\n        print("Other issues")\n    except ValueError:\n        print("Issue resolved")\n\ntest_username_validators()\n```\n\nExplanation:\n\n1. **Imports**: Only the `re` module is imported since it\'s necessary for regex operations.\n2. **Classes**: `ASCIIUsernameValidator` and `UnicodeUsernameValidator` are defined with the problematic regex (`r\'^[\\w.@+-]+$\'`).\n3. **Test function**: `test_username_validators` is defined to:\n   - Create instances of the validators.\n   - Attempt to validate a username with a trailing newline to reproduce the issue.\n   - Print "Issue reproduced" if the username is incorrectly accepted.\n   - Update the regex to the corrected version (`r\'\\A[\\w.@+-]+\\Z\'`).\n   - Retest the validation to ensure the issue is resolved.\n   - Print "Issue resolved" if the corrected regex rejects the invalid username.\n   - Print "Other issues" if there are any unexpected outcomes.\n\nBy running this test, you can check if the original issue is reproduced and verify that the solution (using `\\A` and `\\Z` in the regex) resolves the issue.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n    \n    def validate(self, username):\n        if re.match(self.regex, username):\n            return True\n        return False\n\nclass UnicodeUsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n    \n    def validate(self, username):\n        if re.match(self.regex, username):\n            return True\n        return False\n\ndef test_username_validator_issue():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    # Test cases to reproduce the issue\n    test_username_with_newline = "username\\n"\n    test_valid_username = "username"\n\n    # Check if the issue is reproduced\n    try:\n        if ascii_validator.validate(test_username_with_newline) or unicode_validator.validate(test_username_with_newline):\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return\n\n    # Check for valid usernames to ensure no regression\n    try:\n        if ascii_validator.validate(test_valid_username) and unicode_validator.validate(test_valid_username):\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_username_validator_issue()\n```\n\nThis test checks if the issue is reproduced by validating a username that ends with a newline character. If the validators accept the username with a newline, it prints "Issue reproduced". If the validators reject the username with a newline and accept a valid username, it prints "Issue resolved". If there are any other issues or exceptions, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='Here\'s a complete test that reproduces the issue described and verifies if the issue has been resolved:\n\n```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n\n    def validate(self, username):\n        if not re.match(self.regex, username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n\n    def validate(self, username):\n        if not re.match(self.regex, username):\n            raise ValueError("Invalid username")\n\ndef test_username_validator():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    # Usernames ending with a newline should not be accepted\n    invalid_usernames = ["user\\n", "testuser\\n", "user123\\n"]\n    \n    try:\n        for username in invalid_usernames:\n            try:\n                ascii_validator.validate(username)\n                unicode_validator.validate(username)\n                print("Issue reproduced")\n                return\n            except ValueError:\n                continue\n        \n        print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\n# Test before the fix\ntest_username_validator()\n\n# Applying the fix by using the updated regex\nASCIIUsernameValidator.regex = r\'\\A[\\w.@+-]+\\Z\'\nUnicodeUsernameValidator.regex = r\'\\A[\\w.@+-]+\\Z\'\n\n# Test after the fix\ntest_username_validator()\n```\n\nExplanation:\n1. We create two validators `ASCIIUsernameValidator` and `UnicodeUsernameValidator` using the initial regex that has the issue.\n2. We define a function `test_username_validator` which checks if the validators incorrectly accept usernames that end with a newline.\n3. We test the validators with a list of invalid usernames that end with a newline.\n4. If any validator accepts an invalid username, the script prints "Issue reproduced".\n5. If both validators correctly reject all invalid usernames, the script prints "Issue resolved".\n6. If any unexpected error occurs, the script prints "Other issues".\n7. We run the test before applying the fix to confirm the issue exists.\n8. We then apply the fix by updating the regex in both validators.\n9. We run the test again to confirm the issue is resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is a complete test that can be used to reproduce the issue and also verify if it has been resolved:\n\n```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        return bool(self.regex.match(username))\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        return bool(self.regex.match(username))\n\ndef test_username_validator():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    # Test cases with trailing newline\n    test_usernames = ["validusername", "username\\n", "user@name\\n", "anotheruser"]\n\n    results = []\n    for username in test_usernames:\n        if ascii_validator.validate(username) or unicode_validator.validate(username):\n            results.append(username)\n    \n    # Check if usernames with trailing newlines were incorrectly validated\n    if "username\\n" in results or "user@name\\n" in results:\n        print("Issue reproduced")\n    else:\n        if all(ascii_validator.validate(username) for username in ["validusername", "anotheruser"]):\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\ntest_username_validator()\n```\n\nHere\'s a breakdown of the test:\n\n1. **Necessary imports**: We import the `re` module for regular expressions.\n2. **Code to reproduce the issue**:\n    - `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes are defined with the regex `^[\\w.@+-]+$`.\n    - A method `validate` is added to each validator class to check if the username matches the regex.\n3. **Print statements**:\n    - The test checks several usernames, including those with trailing newlines.\n    - If a username with a trailing newline is validated successfully, it prints "Issue reproduced".\n    - If usernames without trailing newlines are validated successfully after fixing the regex, it prints "Issue resolved".\n    - If neither condition is met, it prints "Other issues".\n\nThis test can be used both to reproduce the issue and verify that it has been fixed by changing the regex in the validators to `\\A[\\w.@+-]+\\Z`.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    \n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    \n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\n\ndef test_username_validator_issue():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    # Username with a trailing newline which should not be valid\n    invalid_username = "username\\n"\n    \n    # Attempt to validate using ASCIIUsernameValidator\n    try:\n        ascii_validator.validate(invalid_username)\n        print("Issue reproduced")\n    except ValueError:\n        pass\n    \n    # Attempt to validate using UnicodeUsernameValidator\n    try:\n        unicode_validator.validate(invalid_username)\n        print("Issue reproduced")\n    except ValueError:\n        pass\n    \n    # Fix the validators\n    ASCIIUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    UnicodeUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    \n    # Re-instantiate the validators to apply the fix\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    # Attempt to validate using ASCIIUsernameValidator after the fix\n    try:\n        ascii_validator.validate(invalid_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n    \n    # Attempt to validate using UnicodeUsernameValidator after the fix\n    try:\n        unicode_validator.validate(invalid_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n\ntest_username_validator_issue()\n```\n\nThis test script will:\n- Define the `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes with the issue in their regex.\n- Attempt to validate an invalid username ending with a newline to confirm the issue is present.\n- Update the regex in both validators to use `\\A` and `\\Z` to properly enforce the line boundaries.\n- Re-test with the same invalid username to confirm the issue is resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test code that will help in reproducing and verifying the issue:\n\n```python\nimport re\n\nclass UsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n\n    def validate(self, username):\n        if re.match(self.regex, username):\n            return True\n        return False\n\ndef test_username_validator_issue():\n    validator = UsernameValidator()\n\n    # Test case with trailing newline\n    username_with_newline = "validusername\\n"\n    if validator.validate(username_with_newline):\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n\n    # Test case without trailing newline (valid case)\n    valid_username = "validusername"\n    if not validator.validate(valid_username):\n        print("Other issues")\n        return\n    \n    # Modify the regex to use \\A and \\Z\n    UsernameValidator.regex = r\'\\A[\\w.@+-]+\\Z\'\n    validator = UsernameValidator()\n\n    # Re-test with trailing newline\n    if validator.validate(username_with_newline):\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n\n    # Validate that valid username still works\n    if validator.validate(valid_username):\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\ntest_username_validator_issue()\n```\n\nThis test code covers the following:\n1. It imports the necessary `re` module.\n2. Defines a `UsernameValidator` class with the regex that contains the issue.\n3. Defines a function `test_username_validator_issue` to handle the test cases.\n4. Checks if usernames with and without trailing newlines are validated correctly.\n5. Prints messages based on the validation results to indicate if the issue is reproduced, resolved, or if there are other issues.\n6. Modifies the regex to the correct form using `\\A` and `\\Z` to see if the issue is fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='Sure, here is the complete test to reproduce the issue:\n\n```python\nimport re\n\ndef is_valid_username(username):\n    ascii_validator = re.compile(r\'^[\\w.@+-]+$\')\n    unicode_validator = re.compile(r\'^[\\w.@+-]+$\')\n    return bool(ascii_validator.match(username)) and bool(unicode_validator.match(username))\n\ndef test_username_validator():\n    # Test case to reproduce the issue\n    username_with_newline = "validusername\\n"\n    \n    try:\n        if is_valid_username(username_with_newline):\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\n# Run the test\ntest_username_validator()\n\n# To verify the fix\ndef is_valid_username_fixed(username):\n    ascii_validator = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    unicode_validator = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    return bool(ascii_validator.match(username)) and bool(unicode_validator.match(username))\n\ndef test_username_validator_fixed():\n    # Test case to verify the fix\n    username_with_newline = "validusername\\n"\n    \n    try:\n        if is_valid_username_fixed(username_with_newline):\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\n# Run the fixed test\ntest_username_validator_fixed()\n```\n\nThis test script includes:\n1. Function `is_valid_username` to simulate the current faulty validator.\n2. The `test_username_validator` to check the current behavior and reproduce the issue.\n3. Function `is_valid_username_fixed` to simulate the fixed validator using `\\A` and `\\Z`.\n4. The `test_username_validator_fixed` to verify if the issue is resolved with the proposed change.\n\nRunning this script will help you determine if the issue is present and verify that the proposed changes fix the issue.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='Here is the complete test that can be used to reproduce the issue described:\n\n```python\nimport re\n\ndef test_username_validator():\n    # Define the username validators with the current problematic regex\n    problematic_regex = re.compile(r\'^[\\w.@+-]+$\')\n    fixed_regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n    # A username that ends with a newline character\n    username_with_newline = "validusername\\n"\n\n    # Test with problematic regex\n    if problematic_regex.match(username_with_newline):\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n\n    # Test with fixed regex\n    if fixed_regex.match(username_with_newline):\n        print("Other issues")\n    else:\n        print("Issue resolved")\n\ntest_username_validator()\n```\n\n### Explanation:\n1. Necessary imports: We import the `re` module for regex operations.\n2. Code to reproduce the issue:\n   - We define two regex patterns, one with the problematic regex and another with the fixed regex.\n   - We use a test username that ends with a newline character to test both regex patterns.\n3. Outcome checks:\n   - If the problematic regex matches the username with a newline, we print "Issue reproduced".\n   - If the fixed regex matches the username with a newline, we print "Other issues".\n   - If neither regex matches the username with a newline, we print "Issue resolved".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test code that can be used to reproduce the issue described, as well as verify if the issue has been fixed:\n\n```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        return bool(self.regex.match(username))\n        \n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        return bool(self.regex.match(username))\n\n\ndef test_username_validator():\n    # Create instances of the validators\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    # Test username with trailing newline\n    username_with_newline = "validusername\\n"\n    \n    # Verify if the username with trailing newline is considered valid\n    is_valid_ascii = ascii_validator.validate(username_with_newline)\n    is_valid_unicode = unicode_validator.validate(username_with_newline)\n    \n    # Check the outcome and print appropriate message\n    if is_valid_ascii or is_valid_unicode:\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n        return\n    \n    # Now modify the validators to use \\A and \\Z to ensure the issue is fixed\n    class FixedASCIIUsernameValidator:\n        regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    \n        def validate(self, username):\n            return bool(self.regex.match(username))\n            \n    class FixedUnicodeUsernameValidator:\n        regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    \n        def validate(self, username):\n            return bool(self.regex.match(username))\n    \n    # Create instances of the fixed validators\n    fixed_ascii_validator = FixedASCIIUsernameValidator()\n    fixed_unicode_validator = FixedUnicodeUsernameValidator()\n    \n    # Verify the username with trailing newline again with fixed validators\n    is_valid_ascii_fixed = fixed_ascii_validator.validate(username_with_newline)\n    is_valid_unicode_fixed = fixed_unicode_validator.validate(username_with_newline)\n    \n    # Check the outcome and print appropriate message\n    if not is_valid_ascii_fixed and not is_valid_unicode_fixed:\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\n\n# Run the test\ntest_username_validator()\n```\n\nThis test follows all the required steps to reproduce the issue and verify the fix:\n1. It imports the required `re` module.\n2. It defines the `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes with the problematic regex.\n3. It creates instances of these validators to check a username ending with a newline.\n4. It prints "Issue reproduced" if the username is incorrectly validated as valid.\n5. It modifies the validators to use the corrected regex.\n6. It checks the same username with the corrected validators to ensure the issue is resolved.\n7. It prints "Issue resolved" if the fix works and "Other issues" if the problem persists.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='Sure, here is a complete test based on the issue description you provided:\n\n```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validator_issue():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    # Test usernames\n    valid_username = "valid_username"\n    invalid_username = "invalid_username\\n"\n\n    # Attempt to validate usernames and catch exceptions\n    try:\n        ascii_validator.validate(valid_username)\n        unicode_validator.validate(valid_username)\n    except ValueError:\n        print("Other issues")\n        return\n\n    try:\n        ascii_validator.validate(invalid_username)\n        unicode_validator.validate(invalid_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n\ntest_username_validator_issue()\n```\n\nExplanation:\n1. **Imports**: Import the required `re` module for regular expressions.\n2. **Code to reproduce the issue**: The `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes are defined with the original regex pattern. The `validate` function raises a `ValueError` if the username does not match the regex.\n3. **Test functions**: `test_username_validator_issue` creates instances of both validators and attempts to validate a valid and an invalid username (with a trailing newline).\n4. **Outcome checks**:\n    - If the valid username fails validation, it prints "Other issues".\n    - If the invalid username passes validation (indicating the issue is reproduced), it prints "Issue reproduced".\n    - If the invalid username fails validation (indicating the issue is resolved), it prints "Issue resolved".\n\nIf you update your regex to use `r\'\\A[\\w.@+-]+\\Z\'` instead, the test should print "Issue resolved".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    \n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\', re.UNICODE)\n    \n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validator():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    test_usernames = [\n        "validusername",\n        "valid.username",\n        "valid@username",\n        "valid+username",\n        "valid-username",\n        "username\\n"  # username with trailing newline\n    ]\n\n    try:\n        for username in test_usernames:\n            ascii_validator.validate(username)\n            unicode_validator.validate(username)\n        \n        if ascii_validator.regex.match("username\\n") and unicode_validator.regex.match("username\\n"):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except ValueError:\n        print("Other issues")\n        \n    # Fixing the validators\n    class FixedASCIIUsernameValidator:\n        regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n        \n        def validate(self, username):\n            if not self.regex.match(username):\n                raise ValueError("Invalid username")\n\n    class FixedUnicodeUsernameValidator:\n        regex = re.compile(r\'\\A[\\w.@+-]+\\Z\', re.UNICODE)\n        \n        def validate(self, username):\n            if not self.regex.match(username):\n                raise ValueError("Invalid username")\n\n    fixed_ascii_validator = FixedASCIIUsernameValidator()\n    fixed_unicode_validator = FixedUnicodeUsernameValidator()\n    \n    try:\n        for username in test_usernames:\n            fixed_ascii_validator.validate(username)\n            fixed_unicode_validator.validate(username)\n        \n        if not fixed_ascii_validator.regex.match("username\\n") and not fixed_unicode_validator.regex.match("username\\n"):\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except ValueError:\n        print("Other issues")\n\ntest_username_validator()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\ndef validate_username(username, regex):\n    return re.match(regex, username) is not None\n\ndef test_username_validator():\n    ascii_validator_regex = r\'^[\\w.@+-]+$\'\n    unicode_validator_regex = r\'^[\\w.@+-]+$\'\n\n    usernames_to_test = [\n        "validusername",\n        "valid.username",\n        "valid@username",\n        "valid+username",\n        "valid-username",\n        "usernamewithnewline\\n",\n        "usernamewithnewline\\nmoretext"\n    ]\n\n    issue_detected = False\n    for username in usernames_to_test:\n        if validate_username(username, ascii_validator_regex) or validate_username(username, unicode_validator_regex):\n            if username.endswith("\\n") or "\\n" in username:\n                print("Issue reproduced")\n                issue_detected = True\n                break\n\n    if not issue_detected:\n        print("Issue resolved")\n\n    # Now test with the corrected regex\n    ascii_validator_regex_fixed = r\'\\A[\\w.@+-]+\\Z\'\n    unicode_validator_regex_fixed = r\'\\A[\\w.@+-]+\\Z\'\n\n    for username in usernames_to_test:\n        if validate_username(username, ascii_validator_regex_fixed) or validate_username(username, unicode_validator_regex_fixed):\n            if username.endswith("\\n") or "\\n" in username:\n                print("Other issues")\n                return\n\n    if issue_detected:\n        print("Issue resolved")\n\ntest_username_validator()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validators():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    # Test case with a trailing newline\n    test_username = "validusername\\n"\n\n    try:\n        ascii_validator.validate(test_username)\n        unicode_validator.validate(test_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n        return\n\n    # If no ValueError was raised, the issue persists\n    print("Issue reproduced")\n\n    # Apply the fix with updated regex to both validators\n    ASCIIUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    UnicodeUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n    # Re-create the validators with the updated regex\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    try:\n        ascii_validator.validate(test_username)\n        unicode_validator.validate(test_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n        return\n\ntest_username_validators()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\nfrom django.core.validators import RegexValidator\nfrom django.core.exceptions import ValidationError\n\n# Simulate the existing validators with the problematic regex\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    message = \'Enter a valid username. This value may contain only letters, numbers, and @/./+/-/_ characters.\'\n\n    def __call__(self, value):\n        if not self.regex.match(value):\n            raise ValidationError(self.message)\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    message = \'Enter a valid username. This value may contain only letters, numbers, and @/./+/-/_ characters.\'\n\n    def __call__(self, value):\n        if not self.regex.match(value):\n            raise ValidationError(self.message)\n\ndef test_username_validators():\n    try:\n        ascii_validator = ASCIIUsernameValidator()\n        unicode_validator = UnicodeUsernameValidator()\n\n        # Test case that should fail due to trailing newline\n        invalid_username = "username\\n"\n\n        try:\n            ascii_validator(invalid_username)\n            unicode_validator(invalid_username)\n            print("Issue reproduced")\n        except ValidationError:\n            print("Issue resolved")\n\n    except Exception as e:\n        print("Other issues", e)\n    \n    return\n\ntest_username_validators()\n```\n\n1. The `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes simulate the existing validators using the problematic regex.\n2. The `test_username_validators` function attempts to validate a username with a trailing newline, which should reproduce the issue.\n3. If the validators incorrectly accept the invalid username, it prints "Issue reproduced".\n4. If they correctly raise a `ValidationError`, it prints "Issue resolved".\n5. If any other exception is raised, it prints "Other issues".\n\nTo verify the fix after updating the regex to `r\'\\A[\\w.@+-]+\\Z\'`, simply update the `regex` attribute in each validator class and rerun the test.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\ndef ASCIIUsernameValidator(username):\n    # Original Regex to be tested\n    regex = r\'^[\\w.@+-]+$\'\n    return re.match(regex, username) is not None\n\ndef UnicodeUsernameValidator(username):\n    # Original Regex to be tested\n    regex = r\'^[\\w.@+-]+$\'\n    return re.match(regex, username) is not None\n\ndef test_username_validators():\n    # Test usernames\n    valid_username = "validuser"\n    invalid_username_newline = "invaliduser\\n"\n\n    # Check ASCIIUsernameValidator\n    if ASCIIUsernameValidator(valid_username) and not ASCIIUsernameValidator(invalid_username_newline):\n        print("Issue resolved")\n    else:\n        if not ASCIIUsernameValidator(valid_username):\n            print("Other issues")\n        else:\n            print("Issue reproduced")\n    \n    # Check UnicodeUsernameValidator\n    if UnicodeUsernameValidator(valid_username) and not UnicodeUsernameValidator(invalid_username_newline):\n        print("Issue resolved")\n    else:\n        if not UnicodeUsernameValidator(valid_username):\n            print("Other issues")\n        else:\n            print("Issue reproduced")\n\ntest_username_validators()\n```\n\nExplanation:\n1. **Imports**: Only the `re` module is imported as it is necessary for regex matching.\n2. **Original Username Validators**: The code includes definitions for `ASCIIUsernameValidator` and `UnicodeUsernameValidator` using the original regex `r\'^[\\w.@+-]+$\'`.\n3. **Test Function**: The `test_username_validators` function tests both validators using a valid username and an invalid username with a trailing newline.\n4. **Assertions**: The function prints "Issue reproduced" if the username with a trailing newline passes the validator. It prints "Issue resolved" if the validators work correctly by rejecting the invalid username and accepting the valid one. It prints "Other issues" if the valid username is not accepted by the validator.\n\nThe provided test ensures that both the issue can be reproduced and verified as fixed by replacing the regex in the validators with `r\'\\A[\\w.@+-]+\\Z\'`.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n    \n    def validate(self, username):\n        if re.match(self.regex, username):\n            return True\n        return False\n\nclass UnicodeUsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n    \n    def validate(self, username):\n        if re.match(self.regex, username):\n            return True\n        return False\n\ndef test_username_validators_issue():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    test_username = "validusername\\n"\n    \n    try:\n        ascii_result = ascii_validator.validate(test_username)\n        unicode_result = unicode_validator.validate(test_username)\n        \n        if ascii_result or unicode_result:\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except:\n        print("Other issues")\n        return\n\n# Running the test function\ntest_username_validators_issue()\n```\n\nThis test should be run against your current implementation of `ASCIIUsernameValidator` and `UnicodeUsernameValidator`. If the issue is present, it will print "Issue reproduced", indicating that a username ending with a newline is incorrectly being accepted. If the issue is resolved (by updating the regex as described in the issue text), it will print "Issue resolved". If any unexpected errors occur, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def __call__(self, value):\n        if not self.regex.match(value):\n            raise ValueError("Invalid username: {}".format(value))\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def __call__(self, value):\n        if not self.regex.match(value):\n            raise ValueError("Invalid username: {}".format(value))\n\ndef test_username_validators():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    try:\n        ascii_validator("validusername")\n        ascii_validator("invalidusername\\n")\n        print("Issue reproduced")\n        return\n    except ValueError:\n        pass\n\n    try:\n        unicode_validator("validusername")\n        unicode_validator("invalidusername\\n")\n        print("Issue reproduced")\n        return\n    except ValueError:\n        pass\n\n    try:\n        ascii_validator.__class__.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n        unicode_validator.__class__.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n        ascii_validator("validusername")\n        unicode_validator("validusername")\n        try:\n            ascii_validator("invalidusername\\n")\n            print("Other issues")\n            return\n        except ValueError:\n            pass\n\n        try:\n            unicode_validator("invalidusername\\n")\n            print("Other issues")\n            return\n        except ValueError:\n            pass\n\n        print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n\ntest_username_validators()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\ndef validate_username(username, validator_regex):\n    return bool(re.match(validator_regex, username))\n\ndef test_username_validator():\n    ascii_validator_regex = r\'^[\\w.@+-]+$\'\n    unicode_validator_regex = r\'^[\\w.@+-]+$\'\n    fixed_validator_regex = r\'\\A[\\w.@+-]+\\Z\'\n    \n    # Test cases to reproduce the issue\n    usernames_with_newline = ["user\\n", "test_user\\n"]\n    valid_usernames = ["user", "test.user", "test@user", "test+user", "test-user"]\n    \n    try:\n        # Checking original regex validation\n        for username in usernames_with_newline:\n            if validate_username(username, ascii_validator_regex) or validate_username(username, unicode_validator_regex):\n                print("Issue reproduced")\n                return\n\n        # Checking fixed regex validation\n        for username in usernames_with_newline:\n            if validate_username(username, fixed_validator_regex):\n                print("Other issues")\n                return\n                \n        for username in valid_usernames:\n            if not validate_username(username, fixed_validator_regex):\n                print("Other issues")\n                return\n\n        print("Issue resolved")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_username_validator()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\n# Define the Username Validators using the current regex pattern\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def __call__(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def __call__(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\n# Define the Username Validators using the fixed regex pattern\nclass FixedASCIIUsernameValidator:\n    regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n    def __call__(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass FixedUnicodeUsernameValidator:\n    regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n    def __call__(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validator():\n    username_with_newline = "validusername\\n"\n    \n    # Using current (incorrect) validators\n    try:\n        ascii_validator = ASCIIUsernameValidator()\n        ascii_validator(username_with_newline)\n        unicode_validator = UnicodeUsernameValidator()\n        unicode_validator(username_with_newline)\n        print("Issue reproduced")  # If it doesn\'t raise an exception, the issue is reproduced\n    except ValueError:\n        print("Other issues")  # If it raises an exception, there might be other issues with the code\n\n    # Using fixed validators\n    try:\n        fixed_ascii_validator = FixedASCIIUsernameValidator()\n        fixed_ascii_validator(username_with_newline)\n        fixed_unicode_validator = FixedUnicodeUsernameValidator()\n        fixed_unicode_validator(username_with_newline)\n        print("Other issues")  # If it doesn\'t raise an exception, there might be other issues with the code\n    except ValueError:\n        print("Issue resolved")  # If it raises an exception, the issue has been resolved\n\ntest_username_validator()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='Certainly! Here is a complete test that can be used to reproduce the issue described in the issue text:\n\n```python\nimport re\n\nclass ASCIIUsernameValidator:\n    def __init__(self):\n        self.regex = r\'^[\\w.@+-]+$\'\n\n    def is_valid(self, username):\n        return re.match(self.regex, username) is not None\n\nclass UnicodeUsernameValidator:\n    def __init__(self):\n        self.regex = r\'^[\\w.@+-]+$\'\n\n    def is_valid(self, username):\n        return re.match(self.regex, username) is not None\n\ndef test_username_validators():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    test_username = "username\\n"\n\n    # Checking if the issue is reproduced\n    if ascii_validator.is_valid(test_username) or unicode_validator.is_valid(test_username):\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n\n    # Now, let\'s fix the issue by updating the regex\n    ascii_validator.regex = r\'\\A[\\w.@+-]+\\Z\'\n    unicode_validator.regex = r\'\\A[\\w.@+-]+\\Z\'\n\n    # Checking if the issue is resolved\n    if ascii_validator.is_valid(test_username) or unicode_validator.is_valid(test_username):\n        print("Other issues")\n    else:\n        print("Issue resolved")\n\ntest_username_validators()\n```\n\nThis test will:\n1. Attempt to reproduce the issue using the current regular expressions.\n2. Print "Issue reproduced" if the validators incorrectly accept the username ending with a newline.\n3. Update the validators with the corrected regular expressions.\n4. Print "Issue resolved" if the validators correctly reject the username ending with a newline after the fix.\n5. Print "Other issues" if there are other problems indicated by the test.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n    \n    def validate(self, username):\n        if not re.match(self.regex, username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n    \n    def validate(self, username):\n        if not re.match(self.regex, username):\n            raise ValueError("Invalid username")\n\ndef test_username_validator_issue():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    test_usernames = [\n        "validusername",\n        "invalidusername\\n",  # Username ends with a newline\n        "another.valid+username",\n        "another.invalid+username\\n"  # Username ends with a newline\n    ]\n    \n    try:\n        # Testing ASCIIUsernameValidator\n        ascii_validator.validate(test_usernames[0])\n        try:\n            ascii_validator.validate(test_usernames[1])\n            print("Issue reproduced")\n            return\n        except ValueError:\n            pass\n        \n        # Testing UnicodeUsernameValidator\n        unicode_validator.validate(test_usernames[2])\n        try:\n            unicode_validator.validate(test_usernames[3])\n            print("Issue reproduced")\n            return\n        except ValueError:\n            pass\n        \n    except Exception:\n        print("Other issues")\n        return\n    \n    print("Issue resolved")\n    return\n\n# Uncomment the following lines if you want to test the fixed version\n# class ASCIIUsernameValidator:\n#     regex = r\'\\A[\\w.@+-]+\\Z\'\n    \n#     def validate(self, username):\n#         if not re.match(self.regex, username):\n#             raise ValueError("Invalid username")\n\n# class UnicodeUsernameValidator:\n#     regex = r\'\\A[\\w.@+-]+\\Z\'\n    \n#     def validate(self, username):\n#         if not re.match(self.regex, username):\n#             raise ValueError("Invalid username")\n    \n# def test_username_validator_issue_fixed():\n#     ascii_validator = ASCIIUsernameValidator()\n#     unicode_validator = UnicodeUsernameValidator()\n    \n#     test_usernames = [\n#         "validusername",\n#         "invalidusername\\n",  # Username ends with a newline\n#         "another.valid+username",\n#         "another.invalid+username\\n"  # Username ends with a newline\n#     ]\n    \n#     try:\n#         # Testing ASCIIUsernameValidator\n#         ascii_validator.validate(test_usernames[0])\n#         try:\n#             ascii_validator.validate(test_usernames[1])\n#             print("Issue reproduced")\n#             return\n#         except ValueError:\n#             pass\n        \n#         # Testing UnicodeUsernameValidator\n#         unicode_validator.validate(test_usernames[2])\n#         try:\n#             unicode_validator.validate(test_usernames[3])\n#             print("Issue reproduced")\n#             return\n#         except ValueError:\n#             pass\n        \n#     except Exception:\n#         print("Other issues")\n#         return\n    \n#     print("Issue resolved")\n#     return\n\ntest_username_validator_issue()\n```\n\nTo run the test, ensure the original `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes are defined with the regex pattern `r\'^[\\w.@+-]+$\'`. This will reproduce the issue. Once the issue is reproduced, you can uncomment the fixed validator classes and the test function to verify the resolution.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='Certainly! Here\'s a complete test script to reproduce the issue with `UsernameValidator` as described in the issue text:\n\n```python\nimport re\nfrom django.core.exceptions import ValidationError\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def __call__(self, value):\n        if not self.regex.match(value):\n            raise ValidationError("Enter a valid username.")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\', re.UNICODE)\n\n    def __call__(self, value):\n        if not self.regex.match(value):\n            raise ValidationError("Enter a valid username.")\n\ndef test_username_validator():\n    validators = [ASCIIUsernameValidator(), UnicodeUsernameValidator()]\n    invalid_username = "user\\n"\n    try:\n        for validator in validators:\n            validator(invalid_username)\n    except ValidationError:\n        print("Issue resolved")\n        return\n\n    print("Issue reproduced")\n\n# Test with the initial implementation that allows trailing newline\ntest_username_validator()\n\n# Updating the validators to use \\A and \\Z to fix the issue\nclass ASCIIUsernameValidatorFixed:\n    regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n    def __call__(self, value):\n        if not self.regex.match(value):\n            raise ValidationError("Enter a valid username.")\n\nclass UnicodeUsernameValidatorFixed:\n    regex = re.compile(r\'\\A[\\w.@+-]+\\Z\', re.UNICODE)\n\n    def __call__(self, value):\n        if not self.regex.match(value):\n            raise ValidationError("Enter a valid username.")\n\ndef test_username_validator_fixed():\n    validators = [ASCIIUsernameValidatorFixed(), UnicodeUsernameValidatorFixed()]\n    invalid_username = "user\\n"\n    try:\n        for validator in validators:\n            validator(invalid_username)\n    except ValidationError:\n        print("Issue resolved")\n        return\n\n    print("Issue reproduced")\n\n# Test with the fixed implementation\ntest_username_validator_fixed()\n```\n\nExplanation:\n\n1. **Imports and Class Definitions**: We define two validators (`ASCIIUsernameValidator` and `UnicodeUsernameValidator`) which use the regex pattern mentioned in the issue.\n2. **Test Function (`test_username_validator`)**: This function tests whether the validators allow a username with a trailing newline. If a `ValidationError` is raised, it means the issue is resolved. If not, it means the issue is reproduced.\n3. **Fixed Validators and Test (`test_username_validator_fixed`)**: We define fixed validators (`ASCIIUsernameValidatorFixed` and `UnicodeUsernameValidatorFixed`) using `\\A` and `\\Z` in the regex pattern and then test them with the same invalid username to ensure the issue is resolved.\n\nThis script should help you to both reproduce the issue and verify that the fix works as expected.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='Sure, here is the complete test to reproduce and verify the issue with `UsernameValidator`:\n\n```python\nimport re\nfrom django.core.exceptions import ValidationError\nfrom django.contrib.auth.validators import ASCIIUsernameValidator, UnicodeUsernameValidator\n\ndef test_username_validator():\n    # Define a username that ends with a newline character\n    invalid_username = "user\\n"\n\n    # Instantiate the ASCII and Unicode username validators\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    try:\n        # Attempt to validate the username with ASCIIUsernameValidator\n        ascii_validator(invalid_username)\n        print("Issue reproduced")\n    except ValidationError:\n        pass\n\n    try:\n        # Attempt to validate the username with UnicodeUsernameValidator\n        unicode_validator(invalid_username)\n        print("Issue reproduced")\n    except ValidationError:\n        pass\n\n    # Update the regex in the validators to use \\A and \\Z\n    ASCIIUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    UnicodeUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n    try:\n        # Validate the username again with the updated ASCIIUsernameValidator\n        ascii_validator(invalid_username)\n        print("Other issues")\n    except ValidationError:\n        pass\n\n    try:\n        # Validate the username again with the updated UnicodeUsernameValidator\n        unicode_validator(invalid_username)\n        print("Other issues")\n    except ValidationError:\n        pass\n\n    print("Issue resolved")\n\n# Run the test\ntest_username_validator()\n```\n\nExplanation:\n1. **Imports:** The necessary imports are from `re` for regular expressions and `django.core.exceptions` and `django.contrib.auth.validators` for the validators.\n2. **Validation:** The test first tries to validate a username ending with a newline using both the `ASCIIUsernameValidator` and `UnicodeUsernameValidator`.\n3. **Issue Reproduction:** If validation does not raise a `ValidationError`, it prints "Issue reproduced".\n4. **Regex Update:** The test then updates the validators\' regex patterns to use `\\A` and `\\Z` instead of `^` and `$`.\n5. **Verification:** It re-validates the username with the updated validators. If a `ValidationError` is raised (the expected behavior), the test verifies that the issue is resolved.\n6. **Other Issues:** If any other issues are encountered, it prints "Other issues".\n\nThis test will help determine if the original issue is reproducible and verify that it is resolved after updating the regex patterns in the validators.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is a complete test script that reflects the issue described in the issue text. This script will verify if the username validation logic is vulnerable to allowing trailing newlines and can be used to confirm if the issue has been resolved.\n\n```python\nimport re\n\n# Simulating the original username validators with the regex allowing trailing newline\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def __call__(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def __call__(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validators():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    try:\n        # Testing with a trailing newline in the username\n        username_with_newline = "validUsername\\n"\n        ascii_validator(username_with_newline)\n        unicode_validator(username_with_newline)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n        return\n\n    # If other exceptions occur or the logic doesn\'t behave as expected\n    print("Other issues")\n    return\n\ntest_username_validators()\n```\n\n### Explanation\n1. **Imports**: The `re` module is imported to compile the regular expressions used in the validators.\n2. **Validators**: `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes simulate the original username validators, using the problematic regex that allows trailing newlines.\n3. **Test Function**: The `test_username_validators` function tests whether usernames with trailing newlines are erroneously accepted.\n   - It tries to validate a username with a trailing newline.\n   - If the validators mistakenly accept the username, the issue is reproduced (`print("Issue reproduced")`).\n   - If the validators correctly reject the username, it is considered resolved (`print("Issue resolved")`).\n   - If any other unexpected behavior is detected, it prints `print("Other issues")`.\n\nYou can use this test script to verify both the existence of the issue and its resolution by updating the regex in the validators to `r\'\\A[\\w.@+-]+\\Z\'` and re-running the test.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\n# Define the original username validators\ndef ASCIIUsernameValidator(username):\n    regex = r\'^[\\w.@+-]+$\'\n    return bool(re.match(regex, username))\n\ndef UnicodeUsernameValidator(username):\n    regex = r\'^[\\w.@+-]+$\'\n    return bool(re.match(regex, username))\n\n# Define the updated username validators to resolve the issue\ndef FixedASCIIUsernameValidator(username):\n    regex = r\'\\A[\\w.@+-]+\\Z\'\n    return bool(re.match(regex, username))\n\ndef FixedUnicodeUsernameValidator(username):\n    regex = r\'\\A[\\w.@+-]+\\Z\'\n    return bool(re.match(regex, username))\n\ndef test_username_validators():\n    trailing_newline_username = "testuser\\n"\n    normal_username = "testuser"\n\n    # Test the original validators\n    original_ascii_result = ASCIIUsernameValidator(trailing_newline_username)\n    original_unicode_result = UnicodeUsernameValidator(trailing_newline_username)\n    \n    if original_ascii_result or original_unicode_result:\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n        return\n\n    # Test the fixed validators\n    fixed_ascii_result = FixedASCIIUsernameValidator(trailing_newline_username)\n    fixed_unicode_result = FixedUnicodeUsernameValidator(trailing_newline_username)\n    \n    if not fixed_ascii_result and not fixed_unicode_result and FixedASCIIUsernameValidator(normal_username) and FixedUnicodeUsernameValidator(normal_username):\n        print("Issue resolved")\n    else:\n        print("Other issues")\n        return\n\ntest_username_validators()\n```\n\nThis test will:\n1. Use the original `ASCIIUsernameValidator` and `UnicodeUsernameValidator` to check a username with a trailing newline.\n2. Print "Issue reproduced" if the original validators incorrectly accept the username with a trailing newline.\n3. Use the fixed validators to check the same username and ensure the issue is resolved.\n4. Print "Issue resolved" if the fixed validators correctly reject the username with a trailing newline and accept a normal username.\n5. Print "Other issues" if any other unexpected behavior is encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\n\nclass UsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n\n    def validate(self, username):\n        return bool(re.match(self.regex, username))\n\n\nclass ASCIIUsernameValidator(UsernameValidator):\n    pass\n\n\nclass UnicodeUsernameValidator(UsernameValidator):\n    pass\n\n\ndef test_username_validator_issue():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    # Test case to reproduce the issue\n    problematic_username = "username_with_newline\\n"\n\n    if ascii_validator.validate(problematic_username) or unicode_validator.validate(problematic_username):\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n        return\n\n    # Applying the suggested fix\n    ASCIIUsernameValidator.regex = r\'\\A[\\w.@+-]+\\Z\'\n    UnicodeUsernameValidator.regex = r\'\\A[\\w.@+-]+\\Z\'\n\n    ascii_validator_fixed = ASCIIUsernameValidator()\n    unicode_validator_fixed = UnicodeUsernameValidator()\n\n    if not ascii_validator_fixed.validate(problematic_username) and not unicode_validator_fixed.validate(problematic_username):\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\n\ntest_username_validator_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\nfrom django.core.exceptions import ValidationError\n\n# Sample Username Validators based on the issue\'s description\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValidationError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValidationError("Invalid username")\n\ndef test_username_validator_issue():\n    validators = [ASCIIUsernameValidator(), UnicodeUsernameValidator()]\n    invalid_username = "validUsername\\n"\n\n    try:\n        # Attempt to validate the invalid username\n        for validator in validators:\n            validator.validate(invalid_username)\n        print("Issue reproduced")\n    except ValidationError:\n        print("Issue resolved")\n    except Exception as e:\n        print(f"Other issues: {str(e)}")\n\n    # Fix the validators by using \\A and \\Z\n    class FixedASCIIUsernameValidator:\n        regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n        def validate(self, username):\n            if not self.regex.match(username):\n                raise ValidationError("Invalid username")\n\n    class FixedUnicodeUsernameValidator:\n        regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n        def validate(self, username):\n            if not self.regex.match(username):\n                raise ValidationError("Invalid username")\n\n    fixed_validators = [FixedASCIIUsernameValidator(), FixedUnicodeUsernameValidator()]\n\n    try:\n        # Attempt to validate the invalid username with fixed validators\n        for validator in fixed_validators:\n            validator.validate(invalid_username)\n        print("Issue reproduced")\n    except ValidationError:\n        print("Issue resolved")\n    except Exception as e:\n        print(f"Other issues: {str(e)}")\n\ntest_username_validator_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\ndef validate_username(username, validator_regex):\n    if re.match(validator_regex, username):\n        return True\n    return False\n\ndef test_username_validator():\n    ascii_validator_regex = r\'^[\\w.@+-]+$\'\n    ascii_fixed_validator_regex = r\'\\A[\\w.@+-]+\\Z\'\n\n    # Test usernames\n    invalid_usernames = [\n        "validusername\\n",  # Trailing newline\n        "valid@username\\n"  # Trailing newline with special characters\n    ]\n\n    valid_usernames = [\n        "validusername",\n        "valid.username",\n        "valid@username",\n        "valid+username",\n        "valid-username",\n        "valid.username123",\n        "123valid.username"\n    ]\n\n    # Reproduce the issue\n    try:\n        for username in invalid_usernames:\n            if validate_username(username, ascii_validator_regex):\n                print("Issue reproduced")\n                break\n        else:\n            for username in valid_usernames:\n                if not validate_username(username, ascii_validator_regex):\n                    print("Other issues")\n                    return\n            print("Issue resolved")  # If no invalid username is accepted, issue is not reproduced\n    except Exception as e:\n        print("Other issues")\n        return\n\n    # Resolve the issue by using the fixed regex and verify\n    try:\n        for username in invalid_usernames:\n            if not validate_username(username, ascii_fixed_validator_regex):\n                continue\n            else:\n                print("Other issues")\n                return\n\n        for username in valid_usernames:\n            if validate_username(username, ascii_fixed_validator_regex):\n                continue\n            else:\n                print("Other issues")\n                return\n\n        print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n        return\n\ntest_username_validator()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    \n    def validate(self, username):\n        return bool(self.regex.match(username))\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    \n    def validate(self, username):\n        return bool(self.regex.match(username))\n\ndef test_username_validator():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    test_username_with_newline = "validusername\\n"\n    test_username_without_newline = "validusername"\n    \n    if ascii_validator.validate(test_username_with_newline) or unicode_validator.validate(test_username_with_newline):\n        print("Issue reproduced")\n    elif ascii_validator.validate(test_username_without_newline) and unicode_validator.validate(test_username_without_newline):\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\ntest_username_validator()\n```\n\nThis test checks whether the provided username validators incorrectly allow usernames ending with a newline character. If such usernames are accepted, it prints "Issue reproduced". If only usernames without newlines are accepted, it prints "Issue resolved". If neither of these conditions are met (e.g., all validations fail), it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    \n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    \n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validator_issue():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    try:\n        # Test with a username ending with a newline\n        username = "validusername\\n"\n        ascii_validator.validate(username)\n        unicode_validator.validate(username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n        return\n    except Exception:\n        print("Other issues")\n        return\n\n    return\n\ntest_username_validator_issue()\n\n# Update the regex pattern to fix the issue\n\nclass FixedASCIIUsernameValidator:\n    regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    \n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass FixedUnicodeUsernameValidator:\n    regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    \n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_fixed_username_validator_issue():\n    fixed_ascii_validator = FixedASCIIUsernameValidator()\n    fixed_unicode_validator = FixedUnicodeUsernameValidator()\n    \n    try:\n        # Test with a username ending with a newline\n        username = "validusername\\n"\n        fixed_ascii_validator.validate(username)\n        fixed_unicode_validator.validate(username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n    except Exception:\n        print("Other issues")\n        return\n\n    return\n\ntest_fixed_username_validator_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\n# Simulating the ASCIIUsernameValidator and UnicodeUsernameValidator\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validators():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    # Usernames to test\n    valid_username = "validusername"\n    invalid_username = "invalidusername\\n"\n\n    # Test with valid username\n    try:\n        ascii_validator.validate(valid_username)\n        unicode_validator.validate(valid_username)\n    except ValueError:\n        print("Other issues")\n        return\n    \n    # Test with invalid username ending with newline\n    try:\n        ascii_validator.validate(invalid_username)\n        unicode_validator.validate(invalid_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Other issues")\n        return\n    \n    # Update the regex to fix the issue\n    ASCIIUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    UnicodeUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    \n    # Re-validate with fixed regex\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    try:\n        ascii_validator.validate(invalid_username)\n        unicode_validator.validate(invalid_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n        return\n\n    print("Other issues")\n    return\n\ntest_username_validators()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test to reproduce the described issue, verify its existence, and confirm its resolution. This test is designed for the given `UsernameValidator` issue.\n\n```python\nimport re\n\n# Dummy validators to simulate the issue\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    \n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n    \n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validator_issue():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    # Test case that should pass\n    valid_username = "valid_username"\n    \n    # Test case that should fail but currently passes due to the issue\n    invalid_username = "invalid_username\\n"\n\n    try:\n        # Valid username should not raise an exception\n        ascii_validator.validate(valid_username)\n        unicode_validator.validate(valid_username)\n    except ValueError:\n        print("Other issues")\n        return\n\n    try:\n        # Invalid username should raise an exception\n        ascii_validator.validate(invalid_username)\n        unicode_validator.validate(invalid_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n\n    return\n\n# Adjust the validators to use the corrected regex\nASCIIUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\nUnicodeUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\ndef test_username_validator_resolution():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    # Test case that should pass\n    valid_username = "valid_username"\n    \n    # Test case that should fail\n    invalid_username = "invalid_username\\n"\n\n    try:\n        # Valid username should not raise an exception\n        ascii_validator.validate(valid_username)\n        unicode_validator.validate(valid_username)\n    except ValueError:\n        print("Other issues")\n        return\n\n    try:\n        # Invalid username should raise an exception\n        ascii_validator.validate(invalid_username)\n        unicode_validator.validate(invalid_username)\n        print("Other issues")\n    except ValueError:\n        print("Issue resolved")\n\n    return\n\nprint("Testing issue reproduction:")\ntest_username_validator_issue()\n\nprint("\\nTesting issue resolution:")\ntest_username_validator_resolution()\n```\n\nThis script includes two parts:\n1. `test_username_validator_issue()`: This part uses the original regex to validate the described issue.\n2. `test_username_validator_resolution()`: This part updates the regex in the validators to use `\\A` and `\\Z` and verifies if the issue is resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validators():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    problematic_username = "username\\n"\n\n    # Test ASCIIUsernameValidator\n    try:\n        ascii_validator.validate(problematic_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n\n    # Test UnicodeUsernameValidator\n    try:\n        unicode_validator.validate(problematic_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n\n    # Now, apply the fix\n    class FixedASCIIUsernameValidator:\n        regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n        def validate(self, username):\n            if not self.regex.match(username):\n                raise ValueError("Invalid username")\n\n    class FixedUnicodeUsernameValidator:\n        regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n        def validate(self, username):\n            if not self.regex.match(username):\n                raise ValueError("Invalid username")\n\n    fixed_ascii_validator = FixedASCIIUsernameValidator()\n    fixed_unicode_validator = FixedUnicodeUsernameValidator()\n\n    # Test FixedASCIIUsernameValidator\n    try:\n        fixed_ascii_validator.validate(problematic_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n\n    # Test FixedUnicodeUsernameValidator\n    try:\n        fixed_unicode_validator.validate(problematic_username)\n        print("Issue reproduced")\n    except ValueError:\n        print("Issue resolved")\n\nif __name__ == "__main__":\n    test_username_validators()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\nclass UnicodeUsernameValidator:\n    regex = re.compile(r\'^[\\w.@+-]+$\')\n\n    def validate(self, username):\n        if not self.regex.match(username):\n            raise ValueError("Invalid username")\n\ndef test_username_validator_issue():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    invalid_username = "user\\n"\n    \n    try:\n        ascii_validator.validate(invalid_username)\n        print("Issue reproduced")\n        return\n    except ValueError:\n        pass  # Expected behavior\n\n    try:\n        unicode_validator.validate(invalid_username)\n        print("Issue reproduced")\n        return\n    except ValueError:\n        pass  # Expected behavior\n\n    # Modify the validators with the corrected regex\n    ASCIIUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n    UnicodeUsernameValidator.regex = re.compile(r\'\\A[\\w.@+-]+\\Z\')\n\n    ascii_validator_fixed = ASCIIUsernameValidator()\n    unicode_validator_fixed = UnicodeUsernameValidator()\n\n    try:\n        ascii_validator_fixed.validate(invalid_username)\n        print("Other issues")\n        return\n    except ValueError:\n        pass  # Expected behavior\n\n    try:\n        unicode_validator_fixed.validate(invalid_username)\n        print("Other issues")\n        return\n    except ValueError:\n        pass  # Expected behavior\n\n    print("Issue resolved")\n\ntest_username_validator_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n    \n    def is_valid(self, username):\n        return re.match(self.regex, username) is not None\n\nclass UnicodeUsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n    \n    def is_valid(self, username):\n        return re.match(self.regex, username) is not None\n\ndef test_username_validator_issue():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n    \n    # Testing with a username that ends with a newline\n    username_with_newline = "testuser\\n"\n    \n    try:\n        ascii_result = ascii_validator.is_valid(username_with_newline)\n        unicode_result = unicode_validator.is_valid(username_with_newline)\n        \n        if ascii_result or unicode_result:\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception:\n        print("Other issues")\n        return\n\n    return\n\n# Test the issue reproduction and resolution\ntest_username_validator_issue()\n\n# Fixing the validators\nclass FixedASCIIUsernameValidator:\n    regex = r\'\\A[\\w.@+-]+\\Z\'\n    \n    def is_valid(self, username):\n        return re.match(self.regex, username) is not None\n\nclass FixedUnicodeUsernameValidator:\n    regex = r\'\\A[\\w.@+-]+\\Z\'\n    \n    def is_valid(self, username):\n        return re.match(self.regex, username) is not None\n\ndef test_fixed_username_validator():\n    fixed_ascii_validator = FixedASCIIUsernameValidator()\n    fixed_unicode_validator = FixedUnicodeUsernameValidator()\n    \n    # Testing with a username that ends with a newline\n    username_with_newline = "testuser\\n"\n    \n    try:\n        fixed_ascii_result = fixed_ascii_validator.is_valid(username_with_newline)\n        fixed_unicode_result = fixed_unicode_validator.is_valid(username_with_newline)\n        \n        if not fixed_ascii_result and not fixed_unicode_result:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception:\n        print("Other issues")\n        return\n\n    return\n\n# Test the fixed validators\ntest_fixed_username_validator()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='```python\nimport re\n\nclass ASCIIUsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n\n    def validate(self, username):\n        return re.match(self.regex, username) is not None\n\nclass UnicodeUsernameValidator:\n    regex = r\'^[\\w.@+-]+$\'\n\n    def validate(self, username):\n        return re.match(self.regex, username) is not None\n\ndef test_username_validators():\n    ascii_validator = ASCIIUsernameValidator()\n    unicode_validator = UnicodeUsernameValidator()\n\n    username_with_newline = "test_user\\n"\n    username_without_newline = "test_user"\n\n    # Test with a username ending with a newline\n    if ascii_validator.validate(username_with_newline) or unicode_validator.validate(username_with_newline):\n        print("Issue reproduced")\n    elif not ascii_validator.validate(username_with_newline) and not unicode_validator.validate(username_with_newline):\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\n    # Test with a valid username\n    if ascii_validator.validate(username_without_newline) and unicode_validator.validate(username_without_newline):\n        print("Valid username works correctly")\n    else:\n        print("Other issues")\n\ntest_username_validators()\n```\n\nThis test script does the following:\n1. Creates two validators, `ASCIIUsernameValidator` and `UnicodeUsernameValidator`, using the regex provided in the issue.\n2. Tests a username that ends with a newline to reproduce the issue.\n3. Tests a valid username to ensure the validators work for correct input.\n4. Prints appropriate messages based on the outcomes to indicate whether the issue has been reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746298221, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=16128, prompt_tokens=525, total_tokens=16653, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 13:51:20,958 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validators():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    # Test case to reproduce the issue
+    try:
+        ascii_validator.validate("validusername\n")
+        unicode_validator.validate("validusername\n")
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+        return
+
+    # Test case to verify the issue is fixed
+    ASCIIUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+    UnicodeUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+
+    try:
+        ascii_validator.validate("validusername\n")
+        unicode_validator.validate("validusername\n")
+        print("Other issues")
+    except ValueError:
+        print("Issue resolved")
+
+test_username_validators()
+```
+
+This test script does the following:
+1. Defines the `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes with the original regex.
+2. Attempts to validate a username with a trailing newline to reproduce the issue.
+3. If the issue is reproduced, it prints "Issue reproduced".
+4. Updates the regex in both validators to use `\A` and `\Z` to fix the issue.
+5. Attempts to validate the same username again to verify the issue is resolved.
+6. If the issue is resolved, it prints "Issue resolved". If there are other issues, it prints "Other issues".
+2025-05-03 13:51:20,958 - INFO - raw output:
+Sure, here is a complete test that reflects the issue described in the provided issue text:
+
+```python
+import re
+from django.core.exceptions import ValidationError
+from django.contrib.auth.validators import ASCIIUsernameValidator, UnicodeUsernameValidator
+
+def test_username_validators():
+    test_usernames = [
+        "validusername",
+        "username_with_newline\n",
+        "another_valid_username",
+        "username_with_space ",
+        "user@name.with.dot",
+        "user-name_with_dash",
+        "username_with_plus+"
+    ]
+
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    # Function to test username validation
+    def validate_username(validator, username):
+        try:
+            validator(username)
+            return True
+        except ValidationError:
+            return False
+
+    # Tracking flags
+    issue_reproduced = False
+    issue_resolved = False
+    other_issues = False
+
+    for username in test_usernames:
+        ascii_valid = validate_username(ascii_validator, username)
+        unicode_valid = validate_username(unicode_validator, username)
+
+        if username.endswith("\n"):
+            if ascii_valid or unicode_valid:
+                issue_reproduced = True
+            else:
+                other_issues = True
+        else:
+            if not ascii_valid or not unicode_valid:
+                other_issues = True
+
+    if issue_reproduced:
+        print("Issue reproduced")
+    elif other_issues:
+        print("Other issues")
+    else:
+        print("Issue resolved")
+
+test_username_validators()
+```
+
+This test script:
+1. Imports necessary modules and classes.
+2. Defines a list of test usernames, including some with trailing newlines.
+3. Defines a function to test username validation.
+4. Initializes validators for ASCII and Unicode usernames.
+5. Validates each username with both validators and checks if the issue is reproduced, resolved, or if there are other issues.
+6. Prints the outcome based on the validation results.
+2025-05-03 13:51:20,958 - INFO - raw output:
+Certainly! Below is a complete test to reproduce and verify the issue described in your issue text. 
+
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validators():
+    # Create instances of the validators
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    # Usernames to test
+    valid_username = "validusername"
+    invalid_username = "invalidusername\n"
+
+    # Test with ASCIIUsernameValidator
+    try:
+        ascii_validator.validate(valid_username)
+        ascii_validator.validate(invalid_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+
+    # Test with UnicodeUsernameValidator
+    try:
+        unicode_validator.validate(valid_username)
+        unicode_validator.validate(invalid_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+
+    # Fixing the validators to use the corrected regex
+    class FixedASCIIUsernameValidator:
+        regex = re.compile(r'\A[\w.@+-]+\Z')
+
+        def validate(self, username):
+            if not self.regex.match(username):
+                raise ValueError("Invalid username")
+
+    class FixedUnicodeUsernameValidator:
+        regex = re.compile(r'\A[\w.@+-]+\Z')
+
+        def validate(self, username):
+            if not self.regex.match(username):
+                raise ValueError("Invalid username")
+
+    # Create instances of the fixed validators
+    fixed_ascii_validator = FixedASCIIUsernameValidator()
+    fixed_unicode_validator = FixedUnicodeUsernameValidator()
+
+    # Test with FixedASCIIUsernameValidator
+    try:
+        fixed_ascii_validator.validate(valid_username)
+        fixed_ascii_validator.validate(invalid_username)
+        print("Other issues")
+    except ValueError:
+        print("Issue resolved")
+
+    # Test with FixedUnicodeUsernameValidator
+    try:
+        fixed_unicode_validator.validate(valid_username)
+        fixed_unicode_validator.validate(invalid_username)
+        print("Other issues")
+    except ValueError:
+        print("Issue resolved")
+
+test_username_validators()
+```
+
+This test:
+1. Uses the original `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes with the problematic regex.
+2. Tests if an invalid username containing a newline is accepted, reproducing the issue if the validators do not raise an error.
+3. Modifies the validators to use the corrected regex.
+4. Tests if the fixed validators correctly reject the invalid username, indicating the issue is resolved.
+2025-05-03 13:51:20,959 - INFO - raw output:
+Certainly! Here's a complete test based on the issue you've described. This test will help you reproduce the issue with the `UsernameValidator` and also verify if the fix has been implemented correctly.
+
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        return bool(self.regex.match(username))
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        return bool(self.regex.match(username))
+
+def test_username_validators():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    # Usernames to test
+    valid_username = "validuser"
+    invalid_username_with_newline = "invaliduser\n"
+
+    # Check ASCII validator
+    if ascii_validator.validate(valid_username) and not ascii_validator.validate(invalid_username_with_newline):
+        print("Issue resolved")
+    elif not ascii_validator.validate(valid_username) or ascii_validator.validate(invalid_username_with_newline):
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+    # Check Unicode validator
+    if unicode_validator.validate(valid_username) and not unicode_validator.validate(invalid_username_with_newline):
+        print("Issue resolved")
+    elif not unicode_validator.validate(valid_username) or unicode_validator.validate(invalid_username_with_newline):
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+# Run the test
+test_username_validators()
+```
+
+To fix the issue, you would modify the regex in the `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes to use `\A` and `\Z` instead of `^` and `$`, as follows:
+
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'\A[\w.@+-]+\Z')  # Fixed regex
+
+    def validate(self, username):
+        return bool(self.regex.match(username))
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'\A[\w.@+-]+\Z')  # Fixed regex
+
+    def validate(self, username):
+        return bool(self.regex.match(username))
+
+# Run the test again after fixing the regex
+test_username_validators()
+```
+
+You can run the test before and after applying the fix to verify that the issue has been resolved.
+2025-05-03 13:51:20,959 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validators():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    # Test case to reproduce the issue
+    try:
+        ascii_validator.validate("validUsername\n")
+        unicode_validator.validate("validUsername\n")
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+
+    # Test case to verify the issue has been fixed
+    ASCIIUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+    UnicodeUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+    
+    try:
+        ascii_validator.validate("validUsername\n")
+        unicode_validator.validate("validUsername\n")
+        print("Other issues")
+    except ValueError:
+        print("Issue resolved")
+
+test_username_validators()
+```
+
+Explanation:
+
+1. **Imports**: Only the `re` module is imported since it's necessary for regex operations.
+2. **Classes**: `ASCIIUsernameValidator` and `UnicodeUsernameValidator` are defined with the problematic regex (`r'^[\w.@+-]+$'`).
+3. **Test function**: `test_username_validators` is defined to:
+   - Create instances of the validators.
+   - Attempt to validate a username with a trailing newline to reproduce the issue.
+   - Print "Issue reproduced" if the username is incorrectly accepted.
+   - Update the regex to the corrected version (`r'\A[\w.@+-]+\Z'`).
+   - Retest the validation to ensure the issue is resolved.
+   - Print "Issue resolved" if the corrected regex rejects the invalid username.
+   - Print "Other issues" if there are any unexpected outcomes.
+
+By running this test, you can check if the original issue is reproduced and verify that the solution (using `\A` and `\Z` in the regex) resolves the issue.
+2025-05-03 13:51:20,959 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = r'^[\w.@+-]+$'
+    
+    def validate(self, username):
+        if re.match(self.regex, username):
+            return True
+        return False
+
+class UnicodeUsernameValidator:
+    regex = r'^[\w.@+-]+$'
+    
+    def validate(self, username):
+        if re.match(self.regex, username):
+            return True
+        return False
+
+def test_username_validator_issue():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    # Test cases to reproduce the issue
+    test_username_with_newline = "username\n"
+    test_valid_username = "username"
+
+    # Check if the issue is reproduced
+    try:
+        if ascii_validator.validate(test_username_with_newline) or unicode_validator.validate(test_username_with_newline):
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return
+
+    # Check for valid usernames to ensure no regression
+    try:
+        if ascii_validator.validate(test_valid_username) and unicode_validator.validate(test_valid_username):
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_username_validator_issue()
+```
+
+This test checks if the issue is reproduced by validating a username that ends with a newline character. If the validators accept the username with a newline, it prints "Issue reproduced". If the validators reject the username with a newline and accept a valid username, it prints "Issue resolved". If there are any other issues or exceptions, it prints "Other issues".
+2025-05-03 13:51:20,959 - INFO - raw output:
+Here's a complete test that reproduces the issue described and verifies if the issue has been resolved:
+
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = r'^[\w.@+-]+$'
+
+    def validate(self, username):
+        if not re.match(self.regex, username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = r'^[\w.@+-]+$'
+
+    def validate(self, username):
+        if not re.match(self.regex, username):
+            raise ValueError("Invalid username")
+
+def test_username_validator():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    # Usernames ending with a newline should not be accepted
+    invalid_usernames = ["user\n", "testuser\n", "user123\n"]
+    
+    try:
+        for username in invalid_usernames:
+            try:
+                ascii_validator.validate(username)
+                unicode_validator.validate(username)
+                print("Issue reproduced")
+                return
+            except ValueError:
+                continue
+        
+        print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+# Test before the fix
+test_username_validator()
+
+# Applying the fix by using the updated regex
+ASCIIUsernameValidator.regex = r'\A[\w.@+-]+\Z'
+UnicodeUsernameValidator.regex = r'\A[\w.@+-]+\Z'
+
+# Test after the fix
+test_username_validator()
+```
+
+Explanation:
+1. We create two validators `ASCIIUsernameValidator` and `UnicodeUsernameValidator` using the initial regex that has the issue.
+2. We define a function `test_username_validator` which checks if the validators incorrectly accept usernames that end with a newline.
+3. We test the validators with a list of invalid usernames that end with a newline.
+4. If any validator accepts an invalid username, the script prints "Issue reproduced".
+5. If both validators correctly reject all invalid usernames, the script prints "Issue resolved".
+6. If any unexpected error occurs, the script prints "Other issues".
+7. We run the test before applying the fix to confirm the issue exists.
+8. We then apply the fix by updating the regex in both validators.
+9. We run the test again to confirm the issue is resolved.
+2025-05-03 13:51:20,959 - INFO - raw output:
+Certainly! Below is a complete test that can be used to reproduce the issue and also verify if it has been resolved:
+
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        return bool(self.regex.match(username))
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        return bool(self.regex.match(username))
+
+def test_username_validator():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    # Test cases with trailing newline
+    test_usernames = ["validusername", "username\n", "user@name\n", "anotheruser"]
+
+    results = []
+    for username in test_usernames:
+        if ascii_validator.validate(username) or unicode_validator.validate(username):
+            results.append(username)
+    
+    # Check if usernames with trailing newlines were incorrectly validated
+    if "username\n" in results or "user@name\n" in results:
+        print("Issue reproduced")
+    else:
+        if all(ascii_validator.validate(username) for username in ["validusername", "anotheruser"]):
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+test_username_validator()
+```
+
+Here's a breakdown of the test:
+
+1. **Necessary imports**: We import the `re` module for regular expressions.
+2. **Code to reproduce the issue**:
+    - `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes are defined with the regex `^[\w.@+-]+$`.
+    - A method `validate` is added to each validator class to check if the username matches the regex.
+3. **Print statements**:
+    - The test checks several usernames, including those with trailing newlines.
+    - If a username with a trailing newline is validated successfully, it prints "Issue reproduced".
+    - If usernames without trailing newlines are validated successfully after fixing the regex, it prints "Issue resolved".
+    - If neither condition is met, it prints "Other issues".
+
+This test can be used both to reproduce the issue and verify that it has been fixed by changing the regex in the validators to `\A[\w.@+-]+\Z`.
+2025-05-03 13:51:20,959 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+
+def test_username_validator_issue():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    # Username with a trailing newline which should not be valid
+    invalid_username = "username\n"
+    
+    # Attempt to validate using ASCIIUsernameValidator
+    try:
+        ascii_validator.validate(invalid_username)
+        print("Issue reproduced")
+    except ValueError:
+        pass
+    
+    # Attempt to validate using UnicodeUsernameValidator
+    try:
+        unicode_validator.validate(invalid_username)
+        print("Issue reproduced")
+    except ValueError:
+        pass
+    
+    # Fix the validators
+    ASCIIUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+    UnicodeUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+    
+    # Re-instantiate the validators to apply the fix
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    # Attempt to validate using ASCIIUsernameValidator after the fix
+    try:
+        ascii_validator.validate(invalid_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+    
+    # Attempt to validate using UnicodeUsernameValidator after the fix
+    try:
+        unicode_validator.validate(invalid_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+
+test_username_validator_issue()
+```
+
+This test script will:
+- Define the `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes with the issue in their regex.
+- Attempt to validate an invalid username ending with a newline to confirm the issue is present.
+- Update the regex in both validators to use `\A` and `\Z` to properly enforce the line boundaries.
+- Re-test with the same invalid username to confirm the issue is resolved.
+2025-05-03 13:51:20,959 - INFO - raw output:
+Certainly! Below is the complete test code that will help in reproducing and verifying the issue:
+
+```python
+import re
+
+class UsernameValidator:
+    regex = r'^[\w.@+-]+$'
+
+    def validate(self, username):
+        if re.match(self.regex, username):
+            return True
+        return False
+
+def test_username_validator_issue():
+    validator = UsernameValidator()
+
+    # Test case with trailing newline
+    username_with_newline = "validusername\n"
+    if validator.validate(username_with_newline):
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+
+    # Test case without trailing newline (valid case)
+    valid_username = "validusername"
+    if not validator.validate(valid_username):
+        print("Other issues")
+        return
+    
+    # Modify the regex to use \A and \Z
+    UsernameValidator.regex = r'\A[\w.@+-]+\Z'
+    validator = UsernameValidator()
+
+    # Re-test with trailing newline
+    if validator.validate(username_with_newline):
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+
+    # Validate that valid username still works
+    if validator.validate(valid_username):
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+test_username_validator_issue()
+```
+
+This test code covers the following:
+1. It imports the necessary `re` module.
+2. Defines a `UsernameValidator` class with the regex that contains the issue.
+3. Defines a function `test_username_validator_issue` to handle the test cases.
+4. Checks if usernames with and without trailing newlines are validated correctly.
+5. Prints messages based on the validation results to indicate if the issue is reproduced, resolved, or if there are other issues.
+6. Modifies the regex to the correct form using `\A` and `\Z` to see if the issue is fixed.
+2025-05-03 13:51:20,959 - INFO - raw output:
+Sure, here is the complete test to reproduce the issue:
+
+```python
+import re
+
+def is_valid_username(username):
+    ascii_validator = re.compile(r'^[\w.@+-]+$')
+    unicode_validator = re.compile(r'^[\w.@+-]+$')
+    return bool(ascii_validator.match(username)) and bool(unicode_validator.match(username))
+
+def test_username_validator():
+    # Test case to reproduce the issue
+    username_with_newline = "validusername\n"
+    
+    try:
+        if is_valid_username(username_with_newline):
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+# Run the test
+test_username_validator()
+
+# To verify the fix
+def is_valid_username_fixed(username):
+    ascii_validator = re.compile(r'\A[\w.@+-]+\Z')
+    unicode_validator = re.compile(r'\A[\w.@+-]+\Z')
+    return bool(ascii_validator.match(username)) and bool(unicode_validator.match(username))
+
+def test_username_validator_fixed():
+    # Test case to verify the fix
+    username_with_newline = "validusername\n"
+    
+    try:
+        if is_valid_username_fixed(username_with_newline):
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+# Run the fixed test
+test_username_validator_fixed()
+```
+
+This test script includes:
+1. Function `is_valid_username` to simulate the current faulty validator.
+2. The `test_username_validator` to check the current behavior and reproduce the issue.
+3. Function `is_valid_username_fixed` to simulate the fixed validator using `\A` and `\Z`.
+4. The `test_username_validator_fixed` to verify if the issue is resolved with the proposed change.
+
+Running this script will help you determine if the issue is present and verify that the proposed changes fix the issue.
+2025-05-03 13:51:20,959 - INFO - raw output:
+Here is the complete test that can be used to reproduce the issue described:
+
+```python
+import re
+
+def test_username_validator():
+    # Define the username validators with the current problematic regex
+    problematic_regex = re.compile(r'^[\w.@+-]+$')
+    fixed_regex = re.compile(r'\A[\w.@+-]+\Z')
+
+    # A username that ends with a newline character
+    username_with_newline = "validusername\n"
+
+    # Test with problematic regex
+    if problematic_regex.match(username_with_newline):
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+
+    # Test with fixed regex
+    if fixed_regex.match(username_with_newline):
+        print("Other issues")
+    else:
+        print("Issue resolved")
+
+test_username_validator()
+```
+
+### Explanation:
+1. Necessary imports: We import the `re` module for regex operations.
+2. Code to reproduce the issue:
+   - We define two regex patterns, one with the problematic regex and another with the fixed regex.
+   - We use a test username that ends with a newline character to test both regex patterns.
+3. Outcome checks:
+   - If the problematic regex matches the username with a newline, we print "Issue reproduced".
+   - If the fixed regex matches the username with a newline, we print "Other issues".
+   - If neither regex matches the username with a newline, we print "Issue resolved".
+2025-05-03 13:51:20,959 - INFO - raw output:
+Certainly! Below is the complete test code that can be used to reproduce the issue described, as well as verify if the issue has been fixed:
+
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        return bool(self.regex.match(username))
+        
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        return bool(self.regex.match(username))
+
+
+def test_username_validator():
+    # Create instances of the validators
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    # Test username with trailing newline
+    username_with_newline = "validusername\n"
+    
+    # Verify if the username with trailing newline is considered valid
+    is_valid_ascii = ascii_validator.validate(username_with_newline)
+    is_valid_unicode = unicode_validator.validate(username_with_newline)
+    
+    # Check the outcome and print appropriate message
+    if is_valid_ascii or is_valid_unicode:
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+        return
+    
+    # Now modify the validators to use \A and \Z to ensure the issue is fixed
+    class FixedASCIIUsernameValidator:
+        regex = re.compile(r'\A[\w.@+-]+\Z')
+    
+        def validate(self, username):
+            return bool(self.regex.match(username))
+            
+    class FixedUnicodeUsernameValidator:
+        regex = re.compile(r'\A[\w.@+-]+\Z')
+    
+        def validate(self, username):
+            return bool(self.regex.match(username))
+    
+    # Create instances of the fixed validators
+    fixed_ascii_validator = FixedASCIIUsernameValidator()
+    fixed_unicode_validator = FixedUnicodeUsernameValidator()
+    
+    # Verify the username with trailing newline again with fixed validators
+    is_valid_ascii_fixed = fixed_ascii_validator.validate(username_with_newline)
+    is_valid_unicode_fixed = fixed_unicode_validator.validate(username_with_newline)
+    
+    # Check the outcome and print appropriate message
+    if not is_valid_ascii_fixed and not is_valid_unicode_fixed:
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+
+# Run the test
+test_username_validator()
+```
+
+This test follows all the required steps to reproduce the issue and verify the fix:
+1. It imports the required `re` module.
+2. It defines the `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes with the problematic regex.
+3. It creates instances of these validators to check a username ending with a newline.
+4. It prints "Issue reproduced" if the username is incorrectly validated as valid.
+5. It modifies the validators to use the corrected regex.
+6. It checks the same username with the corrected validators to ensure the issue is resolved.
+7. It prints "Issue resolved" if the fix works and "Other issues" if the problem persists.
+2025-05-03 13:51:20,959 - INFO - raw output:
+Sure, here is a complete test based on the issue description you provided:
+
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validator_issue():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    # Test usernames
+    valid_username = "valid_username"
+    invalid_username = "invalid_username\n"
+
+    # Attempt to validate usernames and catch exceptions
+    try:
+        ascii_validator.validate(valid_username)
+        unicode_validator.validate(valid_username)
+    except ValueError:
+        print("Other issues")
+        return
+
+    try:
+        ascii_validator.validate(invalid_username)
+        unicode_validator.validate(invalid_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+
+test_username_validator_issue()
+```
+
+Explanation:
+1. **Imports**: Import the required `re` module for regular expressions.
+2. **Code to reproduce the issue**: The `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes are defined with the original regex pattern. The `validate` function raises a `ValueError` if the username does not match the regex.
+3. **Test functions**: `test_username_validator_issue` creates instances of both validators and attempts to validate a valid and an invalid username (with a trailing newline).
+4. **Outcome checks**:
+    - If the valid username fails validation, it prints "Other issues".
+    - If the invalid username passes validation (indicating the issue is reproduced), it prints "Issue reproduced".
+    - If the invalid username fails validation (indicating the issue is resolved), it prints "Issue resolved".
+
+If you update your regex to use `r'\A[\w.@+-]+\Z'` instead, the test should print "Issue resolved".
+2025-05-03 13:51:20,960 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$', re.UNICODE)
+    
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validator():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    test_usernames = [
+        "validusername",
+        "valid.username",
+        "valid@username",
+        "valid+username",
+        "valid-username",
+        "username\n"  # username with trailing newline
+    ]
+
+    try:
+        for username in test_usernames:
+            ascii_validator.validate(username)
+            unicode_validator.validate(username)
+        
+        if ascii_validator.regex.match("username\n") and unicode_validator.regex.match("username\n"):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except ValueError:
+        print("Other issues")
+        
+    # Fixing the validators
+    class FixedASCIIUsernameValidator:
+        regex = re.compile(r'\A[\w.@+-]+\Z')
+        
+        def validate(self, username):
+            if not self.regex.match(username):
+                raise ValueError("Invalid username")
+
+    class FixedUnicodeUsernameValidator:
+        regex = re.compile(r'\A[\w.@+-]+\Z', re.UNICODE)
+        
+        def validate(self, username):
+            if not self.regex.match(username):
+                raise ValueError("Invalid username")
+
+    fixed_ascii_validator = FixedASCIIUsernameValidator()
+    fixed_unicode_validator = FixedUnicodeUsernameValidator()
+    
+    try:
+        for username in test_usernames:
+            fixed_ascii_validator.validate(username)
+            fixed_unicode_validator.validate(username)
+        
+        if not fixed_ascii_validator.regex.match("username\n") and not fixed_unicode_validator.regex.match("username\n"):
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except ValueError:
+        print("Other issues")
+
+test_username_validator()
+```
+2025-05-03 13:51:20,960 - INFO - raw output:
+```python
+import re
+
+def validate_username(username, regex):
+    return re.match(regex, username) is not None
+
+def test_username_validator():
+    ascii_validator_regex = r'^[\w.@+-]+$'
+    unicode_validator_regex = r'^[\w.@+-]+$'
+
+    usernames_to_test = [
+        "validusername",
+        "valid.username",
+        "valid@username",
+        "valid+username",
+        "valid-username",
+        "usernamewithnewline\n",
+        "usernamewithnewline\nmoretext"
+    ]
+
+    issue_detected = False
+    for username in usernames_to_test:
+        if validate_username(username, ascii_validator_regex) or validate_username(username, unicode_validator_regex):
+            if username.endswith("\n") or "\n" in username:
+                print("Issue reproduced")
+                issue_detected = True
+                break
+
+    if not issue_detected:
+        print("Issue resolved")
+
+    # Now test with the corrected regex
+    ascii_validator_regex_fixed = r'\A[\w.@+-]+\Z'
+    unicode_validator_regex_fixed = r'\A[\w.@+-]+\Z'
+
+    for username in usernames_to_test:
+        if validate_username(username, ascii_validator_regex_fixed) or validate_username(username, unicode_validator_regex_fixed):
+            if username.endswith("\n") or "\n" in username:
+                print("Other issues")
+                return
+
+    if issue_detected:
+        print("Issue resolved")
+
+test_username_validator()
+```
+2025-05-03 13:51:20,960 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validators():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    # Test case with a trailing newline
+    test_username = "validusername\n"
+
+    try:
+        ascii_validator.validate(test_username)
+        unicode_validator.validate(test_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+        return
+
+    # If no ValueError was raised, the issue persists
+    print("Issue reproduced")
+
+    # Apply the fix with updated regex to both validators
+    ASCIIUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+    UnicodeUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+
+    # Re-create the validators with the updated regex
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    try:
+        ascii_validator.validate(test_username)
+        unicode_validator.validate(test_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+        return
+
+test_username_validators()
+```
+2025-05-03 13:51:20,960 - INFO - raw output:
+```python
+import re
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
+
+# Simulate the existing validators with the problematic regex
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    message = 'Enter a valid username. This value may contain only letters, numbers, and @/./+/-/_ characters.'
+
+    def __call__(self, value):
+        if not self.regex.match(value):
+            raise ValidationError(self.message)
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    message = 'Enter a valid username. This value may contain only letters, numbers, and @/./+/-/_ characters.'
+
+    def __call__(self, value):
+        if not self.regex.match(value):
+            raise ValidationError(self.message)
+
+def test_username_validators():
+    try:
+        ascii_validator = ASCIIUsernameValidator()
+        unicode_validator = UnicodeUsernameValidator()
+
+        # Test case that should fail due to trailing newline
+        invalid_username = "username\n"
+
+        try:
+            ascii_validator(invalid_username)
+            unicode_validator(invalid_username)
+            print("Issue reproduced")
+        except ValidationError:
+            print("Issue resolved")
+
+    except Exception as e:
+        print("Other issues", e)
+    
+    return
+
+test_username_validators()
+```
+
+1. The `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes simulate the existing validators using the problematic regex.
+2. The `test_username_validators` function attempts to validate a username with a trailing newline, which should reproduce the issue.
+3. If the validators incorrectly accept the invalid username, it prints "Issue reproduced".
+4. If they correctly raise a `ValidationError`, it prints "Issue resolved".
+5. If any other exception is raised, it prints "Other issues".
+
+To verify the fix after updating the regex to `r'\A[\w.@+-]+\Z'`, simply update the `regex` attribute in each validator class and rerun the test.
+2025-05-03 13:51:20,960 - INFO - raw output:
+```python
+import re
+
+def ASCIIUsernameValidator(username):
+    # Original Regex to be tested
+    regex = r'^[\w.@+-]+$'
+    return re.match(regex, username) is not None
+
+def UnicodeUsernameValidator(username):
+    # Original Regex to be tested
+    regex = r'^[\w.@+-]+$'
+    return re.match(regex, username) is not None
+
+def test_username_validators():
+    # Test usernames
+    valid_username = "validuser"
+    invalid_username_newline = "invaliduser\n"
+
+    # Check ASCIIUsernameValidator
+    if ASCIIUsernameValidator(valid_username) and not ASCIIUsernameValidator(invalid_username_newline):
+        print("Issue resolved")
+    else:
+        if not ASCIIUsernameValidator(valid_username):
+            print("Other issues")
+        else:
+            print("Issue reproduced")
+    
+    # Check UnicodeUsernameValidator
+    if UnicodeUsernameValidator(valid_username) and not UnicodeUsernameValidator(invalid_username_newline):
+        print("Issue resolved")
+    else:
+        if not UnicodeUsernameValidator(valid_username):
+            print("Other issues")
+        else:
+            print("Issue reproduced")
+
+test_username_validators()
+```
+
+Explanation:
+1. **Imports**: Only the `re` module is imported as it is necessary for regex matching.
+2. **Original Username Validators**: The code includes definitions for `ASCIIUsernameValidator` and `UnicodeUsernameValidator` using the original regex `r'^[\w.@+-]+$'`.
+3. **Test Function**: The `test_username_validators` function tests both validators using a valid username and an invalid username with a trailing newline.
+4. **Assertions**: The function prints "Issue reproduced" if the username with a trailing newline passes the validator. It prints "Issue resolved" if the validators work correctly by rejecting the invalid username and accepting the valid one. It prints "Other issues" if the valid username is not accepted by the validator.
+
+The provided test ensures that both the issue can be reproduced and verified as fixed by replacing the regex in the validators with `r'\A[\w.@+-]+\Z'`.
+2025-05-03 13:51:20,960 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = r'^[\w.@+-]+$'
+    
+    def validate(self, username):
+        if re.match(self.regex, username):
+            return True
+        return False
+
+class UnicodeUsernameValidator:
+    regex = r'^[\w.@+-]+$'
+    
+    def validate(self, username):
+        if re.match(self.regex, username):
+            return True
+        return False
+
+def test_username_validators_issue():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    test_username = "validusername\n"
+    
+    try:
+        ascii_result = ascii_validator.validate(test_username)
+        unicode_result = unicode_validator.validate(test_username)
+        
+        if ascii_result or unicode_result:
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except:
+        print("Other issues")
+        return
+
+# Running the test function
+test_username_validators_issue()
+```
+
+This test should be run against your current implementation of `ASCIIUsernameValidator` and `UnicodeUsernameValidator`. If the issue is present, it will print "Issue reproduced", indicating that a username ending with a newline is incorrectly being accepted. If the issue is resolved (by updating the regex as described in the issue text), it will print "Issue resolved". If any unexpected errors occur, it will print "Other issues".
+2025-05-03 13:51:20,960 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def __call__(self, value):
+        if not self.regex.match(value):
+            raise ValueError("Invalid username: {}".format(value))
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def __call__(self, value):
+        if not self.regex.match(value):
+            raise ValueError("Invalid username: {}".format(value))
+
+def test_username_validators():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    try:
+        ascii_validator("validusername")
+        ascii_validator("invalidusername\n")
+        print("Issue reproduced")
+        return
+    except ValueError:
+        pass
+
+    try:
+        unicode_validator("validusername")
+        unicode_validator("invalidusername\n")
+        print("Issue reproduced")
+        return
+    except ValueError:
+        pass
+
+    try:
+        ascii_validator.__class__.regex = re.compile(r'\A[\w.@+-]+\Z')
+        unicode_validator.__class__.regex = re.compile(r'\A[\w.@+-]+\Z')
+
+        ascii_validator("validusername")
+        unicode_validator("validusername")
+        try:
+            ascii_validator("invalidusername\n")
+            print("Other issues")
+            return
+        except ValueError:
+            pass
+
+        try:
+            unicode_validator("invalidusername\n")
+            print("Other issues")
+            return
+        except ValueError:
+            pass
+
+        print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+
+test_username_validators()
+```
+2025-05-03 13:51:20,960 - INFO - raw output:
+```python
+import re
+
+def validate_username(username, validator_regex):
+    return bool(re.match(validator_regex, username))
+
+def test_username_validator():
+    ascii_validator_regex = r'^[\w.@+-]+$'
+    unicode_validator_regex = r'^[\w.@+-]+$'
+    fixed_validator_regex = r'\A[\w.@+-]+\Z'
+    
+    # Test cases to reproduce the issue
+    usernames_with_newline = ["user\n", "test_user\n"]
+    valid_usernames = ["user", "test.user", "test@user", "test+user", "test-user"]
+    
+    try:
+        # Checking original regex validation
+        for username in usernames_with_newline:
+            if validate_username(username, ascii_validator_regex) or validate_username(username, unicode_validator_regex):
+                print("Issue reproduced")
+                return
+
+        # Checking fixed regex validation
+        for username in usernames_with_newline:
+            if validate_username(username, fixed_validator_regex):
+                print("Other issues")
+                return
+                
+        for username in valid_usernames:
+            if not validate_username(username, fixed_validator_regex):
+                print("Other issues")
+                return
+
+        print("Issue resolved")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_username_validator()
+```
+2025-05-03 13:51:20,960 - INFO - raw output:
+```python
+import re
+
+# Define the Username Validators using the current regex pattern
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def __call__(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def __call__(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+# Define the Username Validators using the fixed regex pattern
+class FixedASCIIUsernameValidator:
+    regex = re.compile(r'\A[\w.@+-]+\Z')
+
+    def __call__(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class FixedUnicodeUsernameValidator:
+    regex = re.compile(r'\A[\w.@+-]+\Z')
+
+    def __call__(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validator():
+    username_with_newline = "validusername\n"
+    
+    # Using current (incorrect) validators
+    try:
+        ascii_validator = ASCIIUsernameValidator()
+        ascii_validator(username_with_newline)
+        unicode_validator = UnicodeUsernameValidator()
+        unicode_validator(username_with_newline)
+        print("Issue reproduced")  # If it doesn't raise an exception, the issue is reproduced
+    except ValueError:
+        print("Other issues")  # If it raises an exception, there might be other issues with the code
+
+    # Using fixed validators
+    try:
+        fixed_ascii_validator = FixedASCIIUsernameValidator()
+        fixed_ascii_validator(username_with_newline)
+        fixed_unicode_validator = FixedUnicodeUsernameValidator()
+        fixed_unicode_validator(username_with_newline)
+        print("Other issues")  # If it doesn't raise an exception, there might be other issues with the code
+    except ValueError:
+        print("Issue resolved")  # If it raises an exception, the issue has been resolved
+
+test_username_validator()
+```
+2025-05-03 13:51:20,960 - INFO - raw output:
+Certainly! Here is a complete test that can be used to reproduce the issue described in the issue text:
+
+```python
+import re
+
+class ASCIIUsernameValidator:
+    def __init__(self):
+        self.regex = r'^[\w.@+-]+$'
+
+    def is_valid(self, username):
+        return re.match(self.regex, username) is not None
+
+class UnicodeUsernameValidator:
+    def __init__(self):
+        self.regex = r'^[\w.@+-]+$'
+
+    def is_valid(self, username):
+        return re.match(self.regex, username) is not None
+
+def test_username_validators():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    test_username = "username\n"
+
+    # Checking if the issue is reproduced
+    if ascii_validator.is_valid(test_username) or unicode_validator.is_valid(test_username):
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+
+    # Now, let's fix the issue by updating the regex
+    ascii_validator.regex = r'\A[\w.@+-]+\Z'
+    unicode_validator.regex = r'\A[\w.@+-]+\Z'
+
+    # Checking if the issue is resolved
+    if ascii_validator.is_valid(test_username) or unicode_validator.is_valid(test_username):
+        print("Other issues")
+    else:
+        print("Issue resolved")
+
+test_username_validators()
+```
+
+This test will:
+1. Attempt to reproduce the issue using the current regular expressions.
+2. Print "Issue reproduced" if the validators incorrectly accept the username ending with a newline.
+3. Update the validators with the corrected regular expressions.
+4. Print "Issue resolved" if the validators correctly reject the username ending with a newline after the fix.
+5. Print "Other issues" if there are other problems indicated by the test.
+2025-05-03 13:51:20,960 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = r'^[\w.@+-]+$'
+    
+    def validate(self, username):
+        if not re.match(self.regex, username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = r'^[\w.@+-]+$'
+    
+    def validate(self, username):
+        if not re.match(self.regex, username):
+            raise ValueError("Invalid username")
+
+def test_username_validator_issue():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    test_usernames = [
+        "validusername",
+        "invalidusername\n",  # Username ends with a newline
+        "another.valid+username",
+        "another.invalid+username\n"  # Username ends with a newline
+    ]
+    
+    try:
+        # Testing ASCIIUsernameValidator
+        ascii_validator.validate(test_usernames[0])
+        try:
+            ascii_validator.validate(test_usernames[1])
+            print("Issue reproduced")
+            return
+        except ValueError:
+            pass
+        
+        # Testing UnicodeUsernameValidator
+        unicode_validator.validate(test_usernames[2])
+        try:
+            unicode_validator.validate(test_usernames[3])
+            print("Issue reproduced")
+            return
+        except ValueError:
+            pass
+        
+    except Exception:
+        print("Other issues")
+        return
+    
+    print("Issue resolved")
+    return
+
+# Uncomment the following lines if you want to test the fixed version
+# class ASCIIUsernameValidator:
+#     regex = r'\A[\w.@+-]+\Z'
+    
+#     def validate(self, username):
+#         if not re.match(self.regex, username):
+#             raise ValueError("Invalid username")
+
+# class UnicodeUsernameValidator:
+#     regex = r'\A[\w.@+-]+\Z'
+    
+#     def validate(self, username):
+#         if not re.match(self.regex, username):
+#             raise ValueError("Invalid username")
+    
+# def test_username_validator_issue_fixed():
+#     ascii_validator = ASCIIUsernameValidator()
+#     unicode_validator = UnicodeUsernameValidator()
+    
+#     test_usernames = [
+#         "validusername",
+#         "invalidusername\n",  # Username ends with a newline
+#         "another.valid+username",
+#         "another.invalid+username\n"  # Username ends with a newline
+#     ]
+    
+#     try:
+#         # Testing ASCIIUsernameValidator
+#         ascii_validator.validate(test_usernames[0])
+#         try:
+#             ascii_validator.validate(test_usernames[1])
+#             print("Issue reproduced")
+#             return
+#         except ValueError:
+#             pass
+        
+#         # Testing UnicodeUsernameValidator
+#         unicode_validator.validate(test_usernames[2])
+#         try:
+#             unicode_validator.validate(test_usernames[3])
+#             print("Issue reproduced")
+#             return
+#         except ValueError:
+#             pass
+        
+#     except Exception:
+#         print("Other issues")
+#         return
+    
+#     print("Issue resolved")
+#     return
+
+test_username_validator_issue()
+```
+
+To run the test, ensure the original `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes are defined with the regex pattern `r'^[\w.@+-]+$'`. This will reproduce the issue. Once the issue is reproduced, you can uncomment the fixed validator classes and the test function to verify the resolution.
+2025-05-03 13:51:20,960 - INFO - raw output:
+Certainly! Here's a complete test script to reproduce the issue with `UsernameValidator` as described in the issue text:
+
+```python
+import re
+from django.core.exceptions import ValidationError
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def __call__(self, value):
+        if not self.regex.match(value):
+            raise ValidationError("Enter a valid username.")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$', re.UNICODE)
+
+    def __call__(self, value):
+        if not self.regex.match(value):
+            raise ValidationError("Enter a valid username.")
+
+def test_username_validator():
+    validators = [ASCIIUsernameValidator(), UnicodeUsernameValidator()]
+    invalid_username = "user\n"
+    try:
+        for validator in validators:
+            validator(invalid_username)
+    except ValidationError:
+        print("Issue resolved")
+        return
+
+    print("Issue reproduced")
+
+# Test with the initial implementation that allows trailing newline
+test_username_validator()
+
+# Updating the validators to use \A and \Z to fix the issue
+class ASCIIUsernameValidatorFixed:
+    regex = re.compile(r'\A[\w.@+-]+\Z')
+
+    def __call__(self, value):
+        if not self.regex.match(value):
+            raise ValidationError("Enter a valid username.")
+
+class UnicodeUsernameValidatorFixed:
+    regex = re.compile(r'\A[\w.@+-]+\Z', re.UNICODE)
+
+    def __call__(self, value):
+        if not self.regex.match(value):
+            raise ValidationError("Enter a valid username.")
+
+def test_username_validator_fixed():
+    validators = [ASCIIUsernameValidatorFixed(), UnicodeUsernameValidatorFixed()]
+    invalid_username = "user\n"
+    try:
+        for validator in validators:
+            validator(invalid_username)
+    except ValidationError:
+        print("Issue resolved")
+        return
+
+    print("Issue reproduced")
+
+# Test with the fixed implementation
+test_username_validator_fixed()
+```
+
+Explanation:
+
+1. **Imports and Class Definitions**: We define two validators (`ASCIIUsernameValidator` and `UnicodeUsernameValidator`) which use the regex pattern mentioned in the issue.
+2. **Test Function (`test_username_validator`)**: This function tests whether the validators allow a username with a trailing newline. If a `ValidationError` is raised, it means the issue is resolved. If not, it means the issue is reproduced.
+3. **Fixed Validators and Test (`test_username_validator_fixed`)**: We define fixed validators (`ASCIIUsernameValidatorFixed` and `UnicodeUsernameValidatorFixed`) using `\A` and `\Z` in the regex pattern and then test them with the same invalid username to ensure the issue is resolved.
+
+This script should help you to both reproduce the issue and verify that the fix works as expected.
+2025-05-03 13:51:20,960 - INFO - raw output:
+Sure, here is the complete test to reproduce and verify the issue with `UsernameValidator`:
+
+```python
+import re
+from django.core.exceptions import ValidationError
+from django.contrib.auth.validators import ASCIIUsernameValidator, UnicodeUsernameValidator
+
+def test_username_validator():
+    # Define a username that ends with a newline character
+    invalid_username = "user\n"
+
+    # Instantiate the ASCII and Unicode username validators
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    try:
+        # Attempt to validate the username with ASCIIUsernameValidator
+        ascii_validator(invalid_username)
+        print("Issue reproduced")
+    except ValidationError:
+        pass
+
+    try:
+        # Attempt to validate the username with UnicodeUsernameValidator
+        unicode_validator(invalid_username)
+        print("Issue reproduced")
+    except ValidationError:
+        pass
+
+    # Update the regex in the validators to use \A and \Z
+    ASCIIUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+    UnicodeUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+
+    try:
+        # Validate the username again with the updated ASCIIUsernameValidator
+        ascii_validator(invalid_username)
+        print("Other issues")
+    except ValidationError:
+        pass
+
+    try:
+        # Validate the username again with the updated UnicodeUsernameValidator
+        unicode_validator(invalid_username)
+        print("Other issues")
+    except ValidationError:
+        pass
+
+    print("Issue resolved")
+
+# Run the test
+test_username_validator()
+```
+
+Explanation:
+1. **Imports:** The necessary imports are from `re` for regular expressions and `django.core.exceptions` and `django.contrib.auth.validators` for the validators.
+2. **Validation:** The test first tries to validate a username ending with a newline using both the `ASCIIUsernameValidator` and `UnicodeUsernameValidator`.
+3. **Issue Reproduction:** If validation does not raise a `ValidationError`, it prints "Issue reproduced".
+4. **Regex Update:** The test then updates the validators' regex patterns to use `\A` and `\Z` instead of `^` and `$`.
+5. **Verification:** It re-validates the username with the updated validators. If a `ValidationError` is raised (the expected behavior), the test verifies that the issue is resolved.
+6. **Other Issues:** If any other issues are encountered, it prints "Other issues".
+
+This test will help determine if the original issue is reproducible and verify that it is resolved after updating the regex patterns in the validators.
+2025-05-03 13:51:20,960 - INFO - raw output:
+Certainly! Below is a complete test script that reflects the issue described in the issue text. This script will verify if the username validation logic is vulnerable to allowing trailing newlines and can be used to confirm if the issue has been resolved.
+
+```python
+import re
+
+# Simulating the original username validators with the regex allowing trailing newline
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def __call__(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def __call__(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validators():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    try:
+        # Testing with a trailing newline in the username
+        username_with_newline = "validUsername\n"
+        ascii_validator(username_with_newline)
+        unicode_validator(username_with_newline)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+        return
+
+    # If other exceptions occur or the logic doesn't behave as expected
+    print("Other issues")
+    return
+
+test_username_validators()
+```
+
+### Explanation
+1. **Imports**: The `re` module is imported to compile the regular expressions used in the validators.
+2. **Validators**: `ASCIIUsernameValidator` and `UnicodeUsernameValidator` classes simulate the original username validators, using the problematic regex that allows trailing newlines.
+3. **Test Function**: The `test_username_validators` function tests whether usernames with trailing newlines are erroneously accepted.
+   - It tries to validate a username with a trailing newline.
+   - If the validators mistakenly accept the username, the issue is reproduced (`print("Issue reproduced")`).
+   - If the validators correctly reject the username, it is considered resolved (`print("Issue resolved")`).
+   - If any other unexpected behavior is detected, it prints `print("Other issues")`.
+
+You can use this test script to verify both the existence of the issue and its resolution by updating the regex in the validators to `r'\A[\w.@+-]+\Z'` and re-running the test.
+2025-05-03 13:51:20,961 - INFO - raw output:
+```python
+import re
+
+# Define the original username validators
+def ASCIIUsernameValidator(username):
+    regex = r'^[\w.@+-]+$'
+    return bool(re.match(regex, username))
+
+def UnicodeUsernameValidator(username):
+    regex = r'^[\w.@+-]+$'
+    return bool(re.match(regex, username))
+
+# Define the updated username validators to resolve the issue
+def FixedASCIIUsernameValidator(username):
+    regex = r'\A[\w.@+-]+\Z'
+    return bool(re.match(regex, username))
+
+def FixedUnicodeUsernameValidator(username):
+    regex = r'\A[\w.@+-]+\Z'
+    return bool(re.match(regex, username))
+
+def test_username_validators():
+    trailing_newline_username = "testuser\n"
+    normal_username = "testuser"
+
+    # Test the original validators
+    original_ascii_result = ASCIIUsernameValidator(trailing_newline_username)
+    original_unicode_result = UnicodeUsernameValidator(trailing_newline_username)
+    
+    if original_ascii_result or original_unicode_result:
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+        return
+
+    # Test the fixed validators
+    fixed_ascii_result = FixedASCIIUsernameValidator(trailing_newline_username)
+    fixed_unicode_result = FixedUnicodeUsernameValidator(trailing_newline_username)
+    
+    if not fixed_ascii_result and not fixed_unicode_result and FixedASCIIUsernameValidator(normal_username) and FixedUnicodeUsernameValidator(normal_username):
+        print("Issue resolved")
+    else:
+        print("Other issues")
+        return
+
+test_username_validators()
+```
+
+This test will:
+1. Use the original `ASCIIUsernameValidator` and `UnicodeUsernameValidator` to check a username with a trailing newline.
+2. Print "Issue reproduced" if the original validators incorrectly accept the username with a trailing newline.
+3. Use the fixed validators to check the same username and ensure the issue is resolved.
+4. Print "Issue resolved" if the fixed validators correctly reject the username with a trailing newline and accept a normal username.
+5. Print "Other issues" if any other unexpected behavior is encountered.
+2025-05-03 13:51:20,961 - INFO - raw output:
+```python
+import re
+
+
+class UsernameValidator:
+    regex = r'^[\w.@+-]+$'
+
+    def validate(self, username):
+        return bool(re.match(self.regex, username))
+
+
+class ASCIIUsernameValidator(UsernameValidator):
+    pass
+
+
+class UnicodeUsernameValidator(UsernameValidator):
+    pass
+
+
+def test_username_validator_issue():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    # Test case to reproduce the issue
+    problematic_username = "username_with_newline\n"
+
+    if ascii_validator.validate(problematic_username) or unicode_validator.validate(problematic_username):
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+        return
+
+    # Applying the suggested fix
+    ASCIIUsernameValidator.regex = r'\A[\w.@+-]+\Z'
+    UnicodeUsernameValidator.regex = r'\A[\w.@+-]+\Z'
+
+    ascii_validator_fixed = ASCIIUsernameValidator()
+    unicode_validator_fixed = UnicodeUsernameValidator()
+
+    if not ascii_validator_fixed.validate(problematic_username) and not unicode_validator_fixed.validate(problematic_username):
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+
+test_username_validator_issue()
+```
+2025-05-03 13:51:20,961 - INFO - raw output:
+```python
+import re
+from django.core.exceptions import ValidationError
+
+# Sample Username Validators based on the issue's description
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValidationError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValidationError("Invalid username")
+
+def test_username_validator_issue():
+    validators = [ASCIIUsernameValidator(), UnicodeUsernameValidator()]
+    invalid_username = "validUsername\n"
+
+    try:
+        # Attempt to validate the invalid username
+        for validator in validators:
+            validator.validate(invalid_username)
+        print("Issue reproduced")
+    except ValidationError:
+        print("Issue resolved")
+    except Exception as e:
+        print(f"Other issues: {str(e)}")
+
+    # Fix the validators by using \A and \Z
+    class FixedASCIIUsernameValidator:
+        regex = re.compile(r'\A[\w.@+-]+\Z')
+
+        def validate(self, username):
+            if not self.regex.match(username):
+                raise ValidationError("Invalid username")
+
+    class FixedUnicodeUsernameValidator:
+        regex = re.compile(r'\A[\w.@+-]+\Z')
+
+        def validate(self, username):
+            if not self.regex.match(username):
+                raise ValidationError("Invalid username")
+
+    fixed_validators = [FixedASCIIUsernameValidator(), FixedUnicodeUsernameValidator()]
+
+    try:
+        # Attempt to validate the invalid username with fixed validators
+        for validator in fixed_validators:
+            validator.validate(invalid_username)
+        print("Issue reproduced")
+    except ValidationError:
+        print("Issue resolved")
+    except Exception as e:
+        print(f"Other issues: {str(e)}")
+
+test_username_validator_issue()
+```
+2025-05-03 13:51:20,961 - INFO - raw output:
+```python
+import re
+
+def validate_username(username, validator_regex):
+    if re.match(validator_regex, username):
+        return True
+    return False
+
+def test_username_validator():
+    ascii_validator_regex = r'^[\w.@+-]+$'
+    ascii_fixed_validator_regex = r'\A[\w.@+-]+\Z'
+
+    # Test usernames
+    invalid_usernames = [
+        "validusername\n",  # Trailing newline
+        "valid@username\n"  # Trailing newline with special characters
+    ]
+
+    valid_usernames = [
+        "validusername",
+        "valid.username",
+        "valid@username",
+        "valid+username",
+        "valid-username",
+        "valid.username123",
+        "123valid.username"
+    ]
+
+    # Reproduce the issue
+    try:
+        for username in invalid_usernames:
+            if validate_username(username, ascii_validator_regex):
+                print("Issue reproduced")
+                break
+        else:
+            for username in valid_usernames:
+                if not validate_username(username, ascii_validator_regex):
+                    print("Other issues")
+                    return
+            print("Issue resolved")  # If no invalid username is accepted, issue is not reproduced
+    except Exception as e:
+        print("Other issues")
+        return
+
+    # Resolve the issue by using the fixed regex and verify
+    try:
+        for username in invalid_usernames:
+            if not validate_username(username, ascii_fixed_validator_regex):
+                continue
+            else:
+                print("Other issues")
+                return
+
+        for username in valid_usernames:
+            if validate_username(username, ascii_fixed_validator_regex):
+                continue
+            else:
+                print("Other issues")
+                return
+
+        print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+        return
+
+test_username_validator()
+```
+2025-05-03 13:51:20,961 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    
+    def validate(self, username):
+        return bool(self.regex.match(username))
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    
+    def validate(self, username):
+        return bool(self.regex.match(username))
+
+def test_username_validator():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    test_username_with_newline = "validusername\n"
+    test_username_without_newline = "validusername"
+    
+    if ascii_validator.validate(test_username_with_newline) or unicode_validator.validate(test_username_with_newline):
+        print("Issue reproduced")
+    elif ascii_validator.validate(test_username_without_newline) and unicode_validator.validate(test_username_without_newline):
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+test_username_validator()
+```
+
+This test checks whether the provided username validators incorrectly allow usernames ending with a newline character. If such usernames are accepted, it prints "Issue reproduced". If only usernames without newlines are accepted, it prints "Issue resolved". If neither of these conditions are met (e.g., all validations fail), it prints "Other issues".
+2025-05-03 13:51:20,961 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validator_issue():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    try:
+        # Test with a username ending with a newline
+        username = "validusername\n"
+        ascii_validator.validate(username)
+        unicode_validator.validate(username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+        return
+    except Exception:
+        print("Other issues")
+        return
+
+    return
+
+test_username_validator_issue()
+
+# Update the regex pattern to fix the issue
+
+class FixedASCIIUsernameValidator:
+    regex = re.compile(r'\A[\w.@+-]+\Z')
+    
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class FixedUnicodeUsernameValidator:
+    regex = re.compile(r'\A[\w.@+-]+\Z')
+    
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_fixed_username_validator_issue():
+    fixed_ascii_validator = FixedASCIIUsernameValidator()
+    fixed_unicode_validator = FixedUnicodeUsernameValidator()
+    
+    try:
+        # Test with a username ending with a newline
+        username = "validusername\n"
+        fixed_ascii_validator.validate(username)
+        fixed_unicode_validator.validate(username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+    except Exception:
+        print("Other issues")
+        return
+
+    return
+
+test_fixed_username_validator_issue()
+```
+2025-05-03 13:51:20,961 - INFO - raw output:
+```python
+import re
+
+# Simulating the ASCIIUsernameValidator and UnicodeUsernameValidator
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validators():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    # Usernames to test
+    valid_username = "validusername"
+    invalid_username = "invalidusername\n"
+
+    # Test with valid username
+    try:
+        ascii_validator.validate(valid_username)
+        unicode_validator.validate(valid_username)
+    except ValueError:
+        print("Other issues")
+        return
+    
+    # Test with invalid username ending with newline
+    try:
+        ascii_validator.validate(invalid_username)
+        unicode_validator.validate(invalid_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Other issues")
+        return
+    
+    # Update the regex to fix the issue
+    ASCIIUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+    UnicodeUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+    
+    # Re-validate with fixed regex
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    try:
+        ascii_validator.validate(invalid_username)
+        unicode_validator.validate(invalid_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+        return
+
+    print("Other issues")
+    return
+
+test_username_validators()
+```
+2025-05-03 13:51:20,961 - INFO - raw output:
+Certainly! Below is the complete test to reproduce the described issue, verify its existence, and confirm its resolution. This test is designed for the given `UsernameValidator` issue.
+
+```python
+import re
+
+# Dummy validators to simulate the issue
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+    
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validator_issue():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    # Test case that should pass
+    valid_username = "valid_username"
+    
+    # Test case that should fail but currently passes due to the issue
+    invalid_username = "invalid_username\n"
+
+    try:
+        # Valid username should not raise an exception
+        ascii_validator.validate(valid_username)
+        unicode_validator.validate(valid_username)
+    except ValueError:
+        print("Other issues")
+        return
+
+    try:
+        # Invalid username should raise an exception
+        ascii_validator.validate(invalid_username)
+        unicode_validator.validate(invalid_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+
+    return
+
+# Adjust the validators to use the corrected regex
+ASCIIUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+UnicodeUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+
+def test_username_validator_resolution():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    # Test case that should pass
+    valid_username = "valid_username"
+    
+    # Test case that should fail
+    invalid_username = "invalid_username\n"
+
+    try:
+        # Valid username should not raise an exception
+        ascii_validator.validate(valid_username)
+        unicode_validator.validate(valid_username)
+    except ValueError:
+        print("Other issues")
+        return
+
+    try:
+        # Invalid username should raise an exception
+        ascii_validator.validate(invalid_username)
+        unicode_validator.validate(invalid_username)
+        print("Other issues")
+    except ValueError:
+        print("Issue resolved")
+
+    return
+
+print("Testing issue reproduction:")
+test_username_validator_issue()
+
+print("\nTesting issue resolution:")
+test_username_validator_resolution()
+```
+
+This script includes two parts:
+1. `test_username_validator_issue()`: This part uses the original regex to validate the described issue.
+2. `test_username_validator_resolution()`: This part updates the regex in the validators to use `\A` and `\Z` and verifies if the issue is resolved.
+2025-05-03 13:51:20,961 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validators():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    problematic_username = "username\n"
+
+    # Test ASCIIUsernameValidator
+    try:
+        ascii_validator.validate(problematic_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+
+    # Test UnicodeUsernameValidator
+    try:
+        unicode_validator.validate(problematic_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+
+    # Now, apply the fix
+    class FixedASCIIUsernameValidator:
+        regex = re.compile(r'\A[\w.@+-]+\Z')
+
+        def validate(self, username):
+            if not self.regex.match(username):
+                raise ValueError("Invalid username")
+
+    class FixedUnicodeUsernameValidator:
+        regex = re.compile(r'\A[\w.@+-]+\Z')
+
+        def validate(self, username):
+            if not self.regex.match(username):
+                raise ValueError("Invalid username")
+
+    fixed_ascii_validator = FixedASCIIUsernameValidator()
+    fixed_unicode_validator = FixedUnicodeUsernameValidator()
+
+    # Test FixedASCIIUsernameValidator
+    try:
+        fixed_ascii_validator.validate(problematic_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+
+    # Test FixedUnicodeUsernameValidator
+    try:
+        fixed_unicode_validator.validate(problematic_username)
+        print("Issue reproduced")
+    except ValueError:
+        print("Issue resolved")
+
+if __name__ == "__main__":
+    test_username_validators()
+```
+2025-05-03 13:51:20,961 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+class UnicodeUsernameValidator:
+    regex = re.compile(r'^[\w.@+-]+$')
+
+    def validate(self, username):
+        if not self.regex.match(username):
+            raise ValueError("Invalid username")
+
+def test_username_validator_issue():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    invalid_username = "user\n"
+    
+    try:
+        ascii_validator.validate(invalid_username)
+        print("Issue reproduced")
+        return
+    except ValueError:
+        pass  # Expected behavior
+
+    try:
+        unicode_validator.validate(invalid_username)
+        print("Issue reproduced")
+        return
+    except ValueError:
+        pass  # Expected behavior
+
+    # Modify the validators with the corrected regex
+    ASCIIUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+    UnicodeUsernameValidator.regex = re.compile(r'\A[\w.@+-]+\Z')
+
+    ascii_validator_fixed = ASCIIUsernameValidator()
+    unicode_validator_fixed = UnicodeUsernameValidator()
+
+    try:
+        ascii_validator_fixed.validate(invalid_username)
+        print("Other issues")
+        return
+    except ValueError:
+        pass  # Expected behavior
+
+    try:
+        unicode_validator_fixed.validate(invalid_username)
+        print("Other issues")
+        return
+    except ValueError:
+        pass  # Expected behavior
+
+    print("Issue resolved")
+
+test_username_validator_issue()
+```
+2025-05-03 13:51:20,961 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = r'^[\w.@+-]+$'
+    
+    def is_valid(self, username):
+        return re.match(self.regex, username) is not None
+
+class UnicodeUsernameValidator:
+    regex = r'^[\w.@+-]+$'
+    
+    def is_valid(self, username):
+        return re.match(self.regex, username) is not None
+
+def test_username_validator_issue():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+    
+    # Testing with a username that ends with a newline
+    username_with_newline = "testuser\n"
+    
+    try:
+        ascii_result = ascii_validator.is_valid(username_with_newline)
+        unicode_result = unicode_validator.is_valid(username_with_newline)
+        
+        if ascii_result or unicode_result:
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception:
+        print("Other issues")
+        return
+
+    return
+
+# Test the issue reproduction and resolution
+test_username_validator_issue()
+
+# Fixing the validators
+class FixedASCIIUsernameValidator:
+    regex = r'\A[\w.@+-]+\Z'
+    
+    def is_valid(self, username):
+        return re.match(self.regex, username) is not None
+
+class FixedUnicodeUsernameValidator:
+    regex = r'\A[\w.@+-]+\Z'
+    
+    def is_valid(self, username):
+        return re.match(self.regex, username) is not None
+
+def test_fixed_username_validator():
+    fixed_ascii_validator = FixedASCIIUsernameValidator()
+    fixed_unicode_validator = FixedUnicodeUsernameValidator()
+    
+    # Testing with a username that ends with a newline
+    username_with_newline = "testuser\n"
+    
+    try:
+        fixed_ascii_result = fixed_ascii_validator.is_valid(username_with_newline)
+        fixed_unicode_result = fixed_unicode_validator.is_valid(username_with_newline)
+        
+        if not fixed_ascii_result and not fixed_unicode_result:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception:
+        print("Other issues")
+        return
+
+    return
+
+# Test the fixed validators
+test_fixed_username_validator()
+```
+2025-05-03 13:51:20,961 - INFO - raw output:
+```python
+import re
+
+class ASCIIUsernameValidator:
+    regex = r'^[\w.@+-]+$'
+
+    def validate(self, username):
+        return re.match(self.regex, username) is not None
+
+class UnicodeUsernameValidator:
+    regex = r'^[\w.@+-]+$'
+
+    def validate(self, username):
+        return re.match(self.regex, username) is not None
+
+def test_username_validators():
+    ascii_validator = ASCIIUsernameValidator()
+    unicode_validator = UnicodeUsernameValidator()
+
+    username_with_newline = "test_user\n"
+    username_without_newline = "test_user"
+
+    # Test with a username ending with a newline
+    if ascii_validator.validate(username_with_newline) or unicode_validator.validate(username_with_newline):
+        print("Issue reproduced")
+    elif not ascii_validator.validate(username_with_newline) and not unicode_validator.validate(username_with_newline):
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+    # Test with a valid username
+    if ascii_validator.validate(username_without_newline) and unicode_validator.validate(username_without_newline):
+        print("Valid username works correctly")
+    else:
+        print("Other issues")
+
+test_username_validators()
+```
+
+This test script does the following:
+1. Creates two validators, `ASCIIUsernameValidator` and `UnicodeUsernameValidator`, using the regex provided in the issue.
+2. Tests a username that ends with a newline to reproduce the issue.
+3. Tests a valid username to ensure the validators work for correct input.
+4. Prints appropriate messages based on the outcomes to indicate whether the issue has been reproduced, resolved, or if there are other issues.

@@ -1,0 +1,2484 @@
+2025-05-02 17:20:55,667 - INFO - ================ generating test for matplotlib__matplotlib-23476 ================
+2025-05-02 17:20:55,758 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+[Bug]: DPI of a figure is doubled after unpickling on M1 Mac
+### Bug summary
+
+When a figure is unpickled, it's dpi is doubled. This behaviour happens every time and if done in a loop it can cause an `OverflowError`.
+
+### Code for reproduction
+
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+print(matplotlib.get_backend())
+print('Matplotlib ver:', matplotlib.__version__)
+print('Platform:', platform.platform())
+print('System:', platform.system())
+print('Release:', platform.release())
+print('Python ver:', platform.python_version())
+
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle','wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0,2*np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+
+
+if __name__ == '__main__':
+    run()
+```
+
+
+### Actual outcome
+
+```
+MacOSX
+Matplotlib ver: 3.5.2
+Platform: macOS-12.4-arm64-arm-64bit
+System: Darwin
+Release: 21.5.0
+Python ver: 3.9.12
+0: 200.0
+1: 400.0
+2: 800.0
+3: 1600.0
+4: 3200.0
+5: 6400.0
+6: 12800.0
+7: 25600.0
+8: 51200.0
+9: 102400.0
+10: 204800.0
+11: 409600.0
+12: 819200.0
+13: 1638400.0
+14: 3276800.0
+15: 6553600.0
+16: 13107200.0
+17: 26214400.0
+18: 52428800.0
+19: 104857600.0
+20: 209715200.0
+21: 419430400.0
+Traceback (most recent call last):
+  File "/Users/wsykala/projects/matplotlib/example.py", line 34, in <module>
+    run()
+  File "/Users/wsykala/projects/matplotlib/example.py", line 30, in run
+    fig, dpi = dump_load_get_dpi(fig)
+  File "/Users/wsykala/projects/matplotlib/example.py", line 20, in dump_load_get_dpi
+    fig2 = pickle.load(blob)
+  File "/Users/wsykala/miniconda3/envs/playground/lib/python3.9/site-packages/matplotlib/figure.py", line 2911, in __setstate__
+    mgr = plt._backend_mod.new_figure_manager_given_figure(num, self)
+  File "/Users/wsykala/miniconda3/envs/playground/lib/python3.9/site-packages/matplotlib/backend_bases.py", line 3499, in new_figure_manager_given_figure
+    canvas = cls.FigureCanvas(figure)
+  File "/Users/wsykala/miniconda3/envs/playground/lib/python3.9/site-packages/matplotlib/backends/backend_macosx.py", line 32, in __init__
+    _macosx.FigureCanvas.__init__(self, width, height)
+OverflowError: signed integer is greater than maximum
+```
+
+### Expected outcome
+
+```
+MacOSX
+Matplotlib ver: 3.5.2
+Platform: macOS-12.4-arm64-arm-64bit
+System: Darwin
+Release: 21.5.0
+Python ver: 3.9.12
+0: 200.0
+1: 200.0
+2: 200.0
+3: 200.0
+4: 200.0
+5: 200.0
+6: 200.0
+7: 200.0
+8: 200.0
+9: 200.0
+10: 200.0
+11: 200.0
+12: 200.0
+13: 200.0
+14: 200.0
+15: 200.0
+16: 200.0
+17: 200.0
+18: 200.0
+19: 200.0
+20: 200.0
+21: 200.0
+22: 200.0
+```
+
+### Additional information
+
+This seems to happen only on M1 MacBooks and the version of python doesn't matter.
+
+### Operating system
+
+OS/X
+
+### Matplotlib Version
+
+3.5.2
+
+### Matplotlib Backend
+
+MacOSX
+
+### Python version
+
+3.9.12
+
+### Jupyter version
+
+_No response_
+
+### Installation
+
+pip
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:55,766 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:14:35,315 - INFO - ================ generating test for matplotlib__matplotlib-23476 ================
+2025-05-03 14:14:35,334 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+[Bug]: DPI of a figure is doubled after unpickling on M1 Mac
+### Bug summary
+
+When a figure is unpickled, it's dpi is doubled. This behaviour happens every time and if done in a loop it can cause an `OverflowError`.
+
+### Code for reproduction
+
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+print(matplotlib.get_backend())
+print('Matplotlib ver:', matplotlib.__version__)
+print('Platform:', platform.platform())
+print('System:', platform.system())
+print('Release:', platform.release())
+print('Python ver:', platform.python_version())
+
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle','wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0,2*np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+
+
+if __name__ == '__main__':
+    run()
+```
+
+
+### Actual outcome
+
+```
+MacOSX
+Matplotlib ver: 3.5.2
+Platform: macOS-12.4-arm64-arm-64bit
+System: Darwin
+Release: 21.5.0
+Python ver: 3.9.12
+0: 200.0
+1: 400.0
+2: 800.0
+3: 1600.0
+4: 3200.0
+5: 6400.0
+6: 12800.0
+7: 25600.0
+8: 51200.0
+9: 102400.0
+10: 204800.0
+11: 409600.0
+12: 819200.0
+13: 1638400.0
+14: 3276800.0
+15: 6553600.0
+16: 13107200.0
+17: 26214400.0
+18: 52428800.0
+19: 104857600.0
+20: 209715200.0
+21: 419430400.0
+Traceback (most recent call last):
+  File "/Users/wsykala/projects/matplotlib/example.py", line 34, in <module>
+    run()
+  File "/Users/wsykala/projects/matplotlib/example.py", line 30, in run
+    fig, dpi = dump_load_get_dpi(fig)
+  File "/Users/wsykala/projects/matplotlib/example.py", line 20, in dump_load_get_dpi
+    fig2 = pickle.load(blob)
+  File "/Users/wsykala/miniconda3/envs/playground/lib/python3.9/site-packages/matplotlib/figure.py", line 2911, in __setstate__
+    mgr = plt._backend_mod.new_figure_manager_given_figure(num, self)
+  File "/Users/wsykala/miniconda3/envs/playground/lib/python3.9/site-packages/matplotlib/backend_bases.py", line 3499, in new_figure_manager_given_figure
+    canvas = cls.FigureCanvas(figure)
+  File "/Users/wsykala/miniconda3/envs/playground/lib/python3.9/site-packages/matplotlib/backends/backend_macosx.py", line 32, in __init__
+    _macosx.FigureCanvas.__init__(self, width, height)
+OverflowError: signed integer is greater than maximum
+```
+
+### Expected outcome
+
+```
+MacOSX
+Matplotlib ver: 3.5.2
+Platform: macOS-12.4-arm64-arm-64bit
+System: Darwin
+Release: 21.5.0
+Python ver: 3.9.12
+0: 200.0
+1: 200.0
+2: 200.0
+3: 200.0
+4: 200.0
+5: 200.0
+6: 200.0
+7: 200.0
+8: 200.0
+9: 200.0
+10: 200.0
+11: 200.0
+12: 200.0
+13: 200.0
+14: 200.0
+15: 200.0
+16: 200.0
+17: 200.0
+18: 200.0
+19: 200.0
+20: 200.0
+21: 200.0
+22: 200.0
+```
+
+### Additional information
+
+This seems to happen only on M1 MacBooks and the version of python doesn't matter.
+
+### Operating system
+
+OS/X
+
+### Matplotlib Version
+
+3.5.2
+
+### Matplotlib Backend
+
+MacOSX
+
+### Python version
+
+3.9.12
+
+### Jupyter version
+
+_No response_
+
+### Installation
+
+pip
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 14:14:35,334 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:14:35,341 - INFO - Creating API request
+2025-05-03 14:14:38,660 - INFO - API response ChatCompletion(id='chatcmpl-BTCbjQzGPS3QBVCjLjcRoH7h8cHM1', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n\n    return fig.dpi\n\ndef test_dpi_issue():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    try:\n        final_dpi = run()\n        if final_dpi == 200.0:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except OverflowError:\n        print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\ntest_dpi_issue()\n```\n\nThis test script will:\n1. Import the necessary modules.\n2. Define the function `dump_load_get_dpi` to pickle and unpickle the figure.\n3. Define the function `run` to create a figure, modify it in a loop, and check the DPI.\n4. Define the test function `test_dpi_issue` to print system information, run the test, and print the appropriate message based on the outcome.\n5. Call `test_dpi_issue` to execute the test.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299675, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=383, prompt_tokens=1450, total_tokens=1833, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:14:38,660 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:14:38,672 - INFO - Creating API request
+2025-05-03 14:16:14,050 - INFO - API response ChatCompletion(id='chatcmpl-BTCbmiZa4RSicYKJ60vzkWjmcyygR', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run_test():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    issue_reproduced = False\n    for i in range(32):\n        if fig.dpi > 200.0:\n            issue_reproduced = True\n            break\n        fig, dpi = dump_load_get_dpi(fig)\n\n    if issue_reproduced:\n        print("Issue reproduced")\n    elif fig.dpi == 200.0:\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\nif __name__ == \'__main__\':\n    run_test()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    try:\n        with open(\'sinus.pickle\', \'wb\') as file:\n            pickle.dump(fig, file)\n\n        with open(\'sinus.pickle\', \'rb\') as blob:\n            fig2 = pickle.load(blob)\n        return fig2, fig2.dpi\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return None, None\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    try:\n        initial_dpi = fig.dpi\n        for i in range(32):\n            fig, dpi = dump_load_get_dpi(fig)\n            if fig is None:\n                return\n            print(f\'{i}: {dpi}\')\n            if dpi != initial_dpi:\n                print("Issue reproduced")\n                return\n        print("Issue resolved")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\nif __name__ == \'__main__\':\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    run()\n```\n\nThis test will:\n1. Import necessary modules.\n2. Define a function `dump_load_get_dpi` to serialize and deserialize a Matplotlib figure.\n3. Define a `run` function to create a figure, perform multiple dump-load cycles, and check for the DPI doubling issue.\n4. Print detailed system and library version information.\n5. Print "Issue reproduced" if the DPI doubling issue is observed.\n6. Print "Issue resolved" if the DPI remains consistent as expected.\n7. Print "Other issues" if any other exceptions are encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef test_dpi_doubling_issue():\n    try:\n        print(matplotlib.get_backend())\n        print(\'Matplotlib ver:\', matplotlib.__version__)\n        print(\'Platform:\', platform.platform())\n        print(\'System:\', platform.system())\n        print(\'Release:\', platform.release())\n        print(\'Python ver:\', platform.python_version())\n\n        def dump_load_get_dpi(fig):\n            with open(\'sinus.pickle\', \'wb\') as file:\n                pickle.dump(fig, file)\n\n            with open(\'sinus.pickle\', \'rb\') as blob:\n                fig2 = pickle.load(blob)\n            return fig2, fig2.dpi\n\n        def run():\n            fig = plt.figure()\n            x = np.linspace(0, 2 * np.pi)\n            y = np.sin(x)\n\n            for i in range(32):\n                print(f\'{i}: {fig.dpi}\')\n                fig, dpi = dump_load_get_dpi(fig)\n\n        run()\n        print("Other issues")\n    except OverflowError:\n        print("Issue reproduced")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_dpi_doubling_issue()\n```\n\n- This test script will print details about the environment, and then attempt to reproduce the issue.\n- If the `OverflowError` is raised, it will print "Issue reproduced".\n- If any other exception occurs, it will print "Other issues" along with the exception message.\n- If no exceptions occur (which is not expected in this case), it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n\n    print("Issue reproduced")\n\ndef test_dpi_issue():\n    try:\n        print(matplotlib.get_backend())\n        print(\'Matplotlib ver:\', matplotlib.__version__)\n        print(\'Platform:\', platform.platform())\n        print(\'System:\', platform.system())\n        print(\'Release:\', platform.release())\n        print(\'Python ver:\', platform.python_version())\n\n        run()\n        \n    except OverflowError:\n        print("Issue reproduced")\n    except Exception as e:\n        print(f"Other issues: {e}")\n    else:\n        print("Issue resolved")\n\ntest_dpi_issue()\n```\n\nThis test script performs the following tasks:\n1. Imports the necessary modules.\n2. Defines a function `dump_load_get_dpi` that pickles and unpickles a Matplotlib figure.\n3. Defines a function `run` that creates a figure, repeatedly pickles and unpickles it, and prints its DPI, aiming to reproduce the issue.\n4. Defines a test function `test_dpi_issue` that prints the system and environment details and then runs the `run` function.\n5. Catches specific exceptions to determine whether the issue is reproduced, resolved, or if there are other issues.\n6. Runs the `test_dpi_issue` function.\n\nBy running this script, you should be able to reproduce the issue if it still exists, or verify that the issue has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\',\'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run_test():\n    try:\n        print(matplotlib.get_backend())\n        print(\'Matplotlib ver:\', matplotlib.__version__)\n        print(\'Platform:\', platform.platform())\n        print(\'System:\', platform.system())\n        print(\'Release:\', platform.release())\n        print(\'Python ver:\', platform.python_version())\n\n        fig = plt.figure()\n        x = np.linspace(0, 2 * np.pi)\n        y = np.sin(x)\n\n        for i in range(32):\n            dpi_before = fig.dpi\n            fig, dpi_after = dump_load_get_dpi(fig)\n            if dpi_after != 200.0:\n                print(f\'Issue reproduced: dpi incremented from {dpi_before} to {dpi_after}\')\n                return\n        \n        print("Issue resolved")\n    except OverflowError as e:\n        print("Issue reproduced: OverflowError occurred")\n    except Exception as e:\n        print("Other issues:", e)\n\nrun_test()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n    \n    # Check if the issue is reproduced\n    if fig.dpi != 200.0:\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n\ndef test_dpi_unpickling():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n    \n    try:\n        run()\n    except OverflowError as e:\n        print(f"OverflowError encountered: {e}")\n        print("Issue reproduced")\n    except Exception as e:\n        print(f"Unexpected error encountered: {e}")\n        print("Other issues")\n\ntest_dpi_unpickling()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    try:\n        for i in range(32):\n            fig, dpi = dump_load_get_dpi(fig)\n            if dpi != 200.0:\n                print(f"Issue reproduced at iteration {i}: DPI is {dpi}")\n                return\n        print("Issue resolved")\n    except OverflowError as e:\n        print(f"OverflowError: {e}")\n        print("Other issues")\n    except Exception as e:\n        print(f"Unexpected error: {e}")\n        print("Other issues")\n\nif __name__ == \'__main__\':\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n    run()\n```\n\nExplanation:\n1. **Necessary Imports:** The script imports the necessary libraries, numpy for numerical operations, matplotlib for plotting, and pickle for serialization.\n2. **Code to Reproduce the Issue:** The `dump_load_get_dpi` function handles the pickling and unpickling of the figure, while the `run` function creates a figure and repeatedly dumps and loads it to check for the DPI issue.\n3. **Outcome Handling:** The script handles three possible outcomes:\n   - If DPI values change and the issue is reproduced, it prints "Issue reproduced" with the iteration number and the incorrect DPI value.\n   - If an `OverflowError` is encountered, it prints the error and "Other issues."\n   - If the loop completes without DPI changes or errors, it prints "Issue resolved."\n4. **System Information:** The script prints relevant system information for debugging and verification purposes before running the test.\n\nYou can run this script to check if the issue described is reproducible or if it has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef test_dpi_doubling_issue():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    def dump_load_get_dpi(fig):\n        with open(\'sinus.pickle\', \'wb\') as file:\n            pickle.dump(fig, file)\n\n        with open(\'sinus.pickle\', \'rb\') as blob:\n            fig2 = pickle.load(blob)\n        return fig2, fig2.dpi\n\n    def run():\n        fig = plt.figure()\n        x = np.linspace(0, 2 * np.pi)\n        y = np.sin(x)\n\n        for i in range(32):\n            if fig.dpi > 200.0:\n                print("Issue reproduced")\n                return\n            fig, dpi = dump_load_get_dpi(fig)\n        \n        print("Issue resolved")\n\n    try:\n        run()\n    except OverflowError:\n        print("Issue reproduced")\n    except Exception:\n        print("Other issues")\n\ntest_dpi_doubling_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run_test():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    issue_reproduced = False\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n        if dpi != 200.0:\n            issue_reproduced = True\n            break\n\n    if issue_reproduced:\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n\ntry:\n    run_test()\nexcept OverflowError as e:\n    print(f"Issue reproduced: {e}")\nexcept Exception as e:\n    print(f"Other issues: {e}")\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run_test():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    try:\n        for i in range(32):\n            print(f\'{i}: {fig.dpi}\')\n            fig, dpi = dump_load_get_dpi(fig)\n            if fig.dpi == 200.0:\n                continue\n            elif fig.dpi > 200.0:\n                print("Issue reproduced")\n                return\n        print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n        print(str(e))\n\nif __name__ == \'__main__\':\n    run_test()\n```\n\nThis script should be used to reproduce the issue described in the provided issue text. It tests the DPI value of a figure after it has been unpickled on an M1 Mac and will print "Issue reproduced" if the issue is observed, "Issue resolved" if the issue does not occur, and "Other issues" if any unexpected errors are encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run_test():\n    print("Testing DPI doubling issue on M1 Mac")\n    print(f"Matplotlib backend: {matplotlib.get_backend()}")\n    print(f"Matplotlib version: {matplotlib.__version__}")\n    print(f"Platform: {platform.platform()}")\n    print(f"System: {platform.system()}")\n    print(f"Release: {platform.release()}")\n    print(f"Python version: {platform.python_version()}")\n\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    issue_reproduced = False\n    other_issue = False\n\n    try:\n        for i in range(32):\n            print(f\'{i}: {fig.dpi}\')\n            fig, dpi = dump_load_get_dpi(fig)\n            if i > 0 and fig.dpi != 200.0:\n                issue_reproduced = True\n                break\n        if issue_reproduced:\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except OverflowError:\n        print("Issue reproduced")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\nif __name__ == \'__main__\':\n    run_test()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    initial_dpi = fig.dpi\n    try:\n        for i in range(32):\n            print(f\'{i}: {fig.dpi}\')\n            fig, dpi = dump_load_get_dpi(fig)\n            if i > 0 and dpi != initial_dpi:\n                print("Issue reproduced")\n                return\n        print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n        return\n\n\nif __name__ == \'__main__\':\n    print(f\'Backend: {matplotlib.get_backend()}\')\n    print(f\'Matplotlib ver: {matplotlib.__version__}\')\n    print(f\'Platform: {platform.platform()}\')\n    print(f\'System: {platform.system()}\')\n    print(f\'Release: {platform.release()}\')\n    print(f\'Python ver: {platform.python_version()}\')\n    run()\n```\n\nThis test includes:\n1. The necessary imports\n2. The code to reproduce the issue described in the issue text\n3. It prints "Issue reproduced" if the outcome indicates that the issue is reproduced\n4. It prints "Issue resolved" if the outcome indicates that the issue has been successfully resolved\n5. It prints "Other issues" if the outcome indicates there are other issues with the source code\n\nRun this script on an M1 MacBook to verify the behavior of the DPI doubling issue.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\',\'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n\n    return fig.dpi\n\ndef test_dpi_issue():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    try:\n        final_dpi = run()\n        if final_dpi == 200.0:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except OverflowError:\n        print("Issue reproduced")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\nif __name__ == \'__main__\':\n    test_dpi_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n        if dpi != 200.0:\n            print("Issue reproduced")\n            return\n\n    print("Issue resolved")\n\nif __name__ == \'__main__\':\n    try:\n        print(matplotlib.get_backend())\n        print(\'Matplotlib ver:\', matplotlib.__version__)\n        print(\'Platform:\', platform.platform())\n        print(\'System:\', platform.system())\n        print(\'Release:\', platform.release())\n        print(\'Python ver:\', platform.python_version())\n\n        run()\n    except Exception as e:\n        print("Other issues")\n        print(e)\n```\n\nThis test script contains:\n1. Necessary imports (`numpy`, `matplotlib`, `pickle`, `platform`).\n2. Code to reproduce the described issue: creation of a figure, dumping and loading it using `pickle`, and checking if the `dpi` value is doubled.\n3. Print statements to indicate the status:\n    - `"Issue reproduced"` if the `dpi` value doubles as described.\n    - `"Issue resolved"` if the `dpi` remains constant.\n    - `"Other issues"` if there are any exceptions or other types of issues.\n\nYou can run this script to reproduce the issue and verify if it has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef test_dpi_doubling_issue():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    def dump_load_get_dpi(fig):\n        with open(\'sinus.pickle\', \'wb\') as file:\n            pickle.dump(fig, file)\n\n        with open(\'sinus.pickle\', \'rb\') as blob:\n            fig2 = pickle.load(blob)\n        return fig2, fig2.dpi\n\n    def run():\n        fig = plt.figure()\n        x = np.linspace(0, 2 * np.pi)\n        y = np.sin(x)\n\n        try:\n            for i in range(32):\n                print(f\'{i}: {fig.dpi}\')\n                fig, dpi = dump_load_get_dpi(fig)\n            \n            # If the loop completes without OverflowError, check if DPI doubled\n            if fig.dpi == 200.0:\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n\n        except OverflowError:\n            print("Issue reproduced")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n    run()\n\ntest_dpi_doubling_issue()\n```\n\n### Explanation:\n\n1. **Necessary Imports**: Imported `numpy`, `matplotlib`, `matplotlib.pyplot`, `pickle`, and `platform` as required.\n2. **Code to Reproduce the Issue**: Implemented the provided code to create a figure, pickle it, unpickle it, and check if the DPI value doubles or maintains its original value.\n3. **Print Statements**:\n   - "Issue reproduced" if the DPI doubles or if an `OverflowError` occurs.\n   - "Issue resolved" if the DPI remains consistent.\n   - "Other issues" if any other unexpected exceptions occur.\n\nThis script will help in verifying whether the issue has been resolved or still persists.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\',\'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n\n    return fig.dpi\n\ndef test_dpi_doubling_issue():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    try:\n        final_dpi = run()\n    except OverflowError:\n        print("Issue reproduced")\n        return\n\n    if final_dpi == 200.0:\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\ntest_dpi_doubling_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        if fig.dpi > 2000000000:  # Arbitrary large value to detect overflow before the system crashes\n            print("Other issues")\n            return\n\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n\n    if fig.dpi == 200.0:\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\nif __name__ == \'__main__\':\n    try:\n        print(matplotlib.get_backend())\n        print(\'Matplotlib ver:\', matplotlib.__version__)\n        print(\'Platform:\', platform.platform())\n        print(\'System:\', platform.system())\n        print(\'Release:\', platform.release())\n        print(\'Python ver:\', platform.python_version())\n\n        run()\n    except Exception as e:\n        print("Other issues")\n        print(e)\n```\n\nThis script includes:\n1. Necessary imports to run the test.\n2. Code to reproduce the issue described in the issue text.\n3. Prints "Issue reproduced" if the `dpi` value doubles each time.\n4. Prints "Issue resolved" if the `dpi` value remains constant at 200.0.\n5. Prints "Other issues" if any other problems occur, such as an `OverflowError` or unexpected exceptions.\n\nMake sure to run this script on an M1 Mac to reproduce the issue, as it’s specifically mentioned to occur on that platform.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run_test():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    try:\n        for i in range(32):\n            print(f\'{i}: {fig.dpi}\')\n            fig, dpi = dump_load_get_dpi(fig)\n\n        # If we reach here, it means the loop has completed without an OverflowError\n        if fig.dpi == 200.0:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except OverflowError:\n        print("Issue reproduced")\n    except Exception as e:\n        print("Other issues:", str(e))\n\nif __name__ == \'__main__\':\n    run_test()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    try:\n        with open(\'sinus.pickle\', \'wb\') as file:\n            pickle.dump(fig, file)\n\n        with open(\'sinus.pickle\', \'rb\') as blob:\n            fig2 = pickle.load(blob)\n        return fig2, fig2.dpi\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return fig, fig.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2*np.pi)\n    y = np.sin(x)\n    issue_reproduced = False\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n        if fig.dpi > 200.0:\n            issue_reproduced = True\n            break\n\n    if issue_reproduced:\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n\nif __name__ == \'__main__\':\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    run()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\',\'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n    return fig.dpi\n\ndef test_dpi_issue():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    try:\n        final_dpi = run()\n        if final_dpi == 200.0:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except OverflowError as e:\n        print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n\ntest_dpi_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef test_dpi_doubling_issue():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    fig = plt.figure()\n    initial_dpi = fig.dpi\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        fig, dpi = dump_load_get_dpi(fig)\n        print(f\'{i}: {dpi}\')\n        if dpi != initial_dpi:\n            print("Issue reproduced")\n            return\n    print("Issue resolved")\n\nif __name__ == \'__main__\':\n    try:\n        test_dpi_doubling_issue()\n    except Exception as e:\n        print("Other issues")\n        print(str(e))\n```\n\nThis code will:\n1. Import the necessary modules.\n2. Define a function to pickle and unpickle the figure and return the new figure and its DPI.\n3. Define a test function that checks for the DPI doubling issue.\n4. Print diagnostic information about the environment.\n5. Create a figure and check if its DPI doubles upon successive pickle/unpickle operations.\n6. Print "Issue reproduced" if the DPI doubles, "Issue resolved" if it remains consistent, or "Other issues" if there\'s any other exception.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n\n    return fig.dpi\n\ndef test_dpi_issue():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    try:\n        final_dpi = run()\n        if final_dpi == 200.0:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except OverflowError:\n        print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n\ntest_dpi_issue()\n```\n\nThis test script:\n1. Contains the necessary imports for numpy, matplotlib, pickle, and platform.\n2. Defines `dump_load_get_dpi` function to dump and load the figure, returning the new figure and its DPI.\n3. Defines `run` function to create a figure, loop 32 times to pickle and unpickle the figure while printing its DPI, and return the final DPI.\n4. Defines `test_dpi_issue` function to print system and matplotlib version information, run the `run` function, and compare the final DPI to determine whether the issue is resolved or reproduced. It also handles an OverflowError to indicate if the issue is reproduced and any other exceptions that might indicate other issues.\n5. Calls `test_dpi_issue` to execute the test.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run_test():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    outcome = "Issue resolved"\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n        if i > 0 and dpi != 200.0:\n            outcome = "Issue reproduced"\n            break\n\n    print(outcome)\n\n\nif __name__ == \'__main__\':\n    try:\n        run_test()\n    except OverflowError:\n        print("Issue reproduced")\n    except Exception as e:\n        print("Other issues:", str(e))\n```\n\nThis test will:\n1. Print the relevant environment information.\n2. Attempt to reproduce the issue by continuously unpickling a figure and checking its DPI.\n3. Print "Issue resolved" if the DPI remains constant as expected.\n4. Print "Issue reproduced" if the DPI doubles as described in the issue.\n5. Print "Other issues" if any other exception occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef test_dpi_doubling_issue():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    def dump_load_get_dpi(fig):\n        with open(\'sinus.pickle\',\'wb\') as file:\n            pickle.dump(fig, file)\n\n        with open(\'sinus.pickle\', \'rb\') as blob:\n            fig2 = pickle.load(blob)\n        return fig2, fig2.dpi\n\n    def run():\n        fig = plt.figure()\n        x = np.linspace(0,2*np.pi)\n        y = np.sin(x)\n\n        for i in range(32):\n            print(f\'{i}: {fig.dpi}\')\n            fig, dpi = dump_load_get_dpi(fig)\n\n    initial_fig_dpi = 200.0\n    try:\n        run()\n        print("Other issues")\n    except OverflowError as e:\n        # Check if the issue is specifically related to the doubling described in the issue\n        if str(e).startswith("signed integer is greater than maximum"):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\n    # Check if the issue has been fixed\n    fig = plt.figure(dpi=initial_fig_dpi)\n    fig, dpi = dump_load_get_dpi(fig)\n    if dpi == initial_fig_dpi:\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\ntest_dpi_doubling_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run_test():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    initial_dpi = fig.dpi\n    issue_reproduced = False\n    other_issues = False\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n        if dpi == initial_dpi:\n            continue\n        elif dpi == initial_dpi * (2 ** (i+1)):\n            issue_reproduced = True\n            break\n        else:\n            other_issues = True\n            break\n\n    if other_issues:\n        print("Other issues")\n    elif issue_reproduced:\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n\nrun_test()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\',\'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    fig = plt.figure()\n    x = np.linspace(0,2*np.pi)\n    y = np.sin(x)\n\n    initial_dpi = fig.dpi\n\n    try:\n        for i in range(32):\n            print(f\'{i}: {fig.dpi}\')\n            fig, dpi = dump_load_get_dpi(fig)\n\n        if fig.dpi == initial_dpi:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except OverflowError:\n        print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n        print(f"Exception: {e}")\n\nif __name__ == \'__main__\':\n    run()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef test_dpi_doubling_issue():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    def dump_load_get_dpi(fig):\n        with open(\'sinus.pickle\', \'wb\') as file:\n            pickle.dump(fig, file)\n\n        with open(\'sinus.pickle\', \'rb\') as blob:\n            fig2 = pickle.load(blob)\n        return fig2, fig2.dpi\n\n    def run():\n        fig = plt.figure()\n        x = np.linspace(0, 2 * np.pi)\n        y = np.sin(x)\n\n        initial_dpi = fig.dpi\n        try:\n            for i in range(32):\n                fig, dpi = dump_load_get_dpi(fig)\n                if dpi != initial_dpi:\n                    print(f\'Issue reproduced at iteration {i}\')\n                    return\n            print("Issue resolved")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n    run()\n\ntest_dpi_doubling_issue()\n```\n\n### Explanation:\n\n1. **Imports**:  All the necessary imports are included at the beginning.\n2. **Printing Environment Details**:  The test prints the backend, Matplotlib version, platform, system, release, and Python version to provide context for the issue.\n3. **Function Definitions**:\n    - `dump_load_get_dpi(fig)`: This function handles the pickling and unpickling of the figure and returns the new figure and its DPI.\n    - `run()`: This function creates a figure and runs the loop to pickle and unpickle the figure 32 times, checking if the DPI has doubled.\n4. **Issue Checking**:\n    - The initial DPI of the figure is saved.\n    - A loop runs 32 times, and after each pickling/unpickling, it checks if the DPI has changed.\n    - If the DPI has changed from the initial value, it prints "Issue reproduced" and exits.\n    - If the loop completes without any DPI change, it prints "Issue resolved".\n    - Any other exceptions encountered during execution cause "Other issues" to be printed.\n\nThis script can be used to both reproduce the issue as described and to verify if the issue has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n\n    return fig.dpi\n\nif __name__ == \'__main__\':\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    final_dpi = run()\n\n    if final_dpi == 200.0:\n        print("Issue resolved")\n    elif final_dpi > 200.0:\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        if fig.dpi > 100_000_000:  # Arbitrary large number to catch the overflow before it happens\n            print("Other issues")\n            return\n        \n        fig, dpi = dump_load_get_dpi(fig)\n\n    if fig.dpi == 200.0:\n        print("Issue resolved")\n    else:\n        print("Issue reproduced")\n\nif __name__ == \'__main__\':\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n    run()\n```\n\nExplanation:\n1. Necessary imports: The script imports `numpy`, `matplotlib`, `pickle`, and `platform` to replicate the issue.\n2. Function `dump_load_get_dpi`: This function saves a `matplotlib` figure object to a pickle file and then loads it back, returning the figure and its DPI.\n3. Function `run`: This function creates a figure and runs a loop 32 times. If the DPI becomes excessively large (e.g., over 100,000,000), it prints "Other issues" and exits. Otherwise, it continues, checking if the DPI equals 200.0 after all iterations.\n4. If the DPI has been modified unexpectedly, it prints "Issue reproduced"; otherwise, "Issue resolved."\n5. The script starts by printing information about the environment and then calls the `run` function to execute the test.\n\nThis test correctly reflects the described issue and can be used to verify both the issue\'s presence and its resolution.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        fig, dpi = dump_load_get_dpi(fig)\n\n        if dpi > 200 and i > 0:\n            print("Issue reproduced")\n            return\n        else:\n            print(f\'{i}: {dpi}\')\n\n    print("Issue resolved")\n\nif __name__ == \'__main__\':\n    try:\n        print(f"Matplotlib ver: {matplotlib.__version__}")\n        print(f"Platform: {platform.platform()}")\n        print(f"System: {platform.system()}")\n        print(f"Release: {platform.release()}")\n        print(f"Python ver: {platform.python_version()}")\n\n        run()\n    except Exception as e:\n        print("Other issues")\n        print(f"Error: {e}")\n```\n\nThis complete test script contains the necessary imports, reproduction of the issue, and checks for the expected outcome. It prints "Issue reproduced" if the DPI value doubles as described, "Issue resolved" if the DPI remains constant, and "Other issues" if any other exceptions occur.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\',\'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0,2*np.pi)\n    y = np.sin(x)\n\n    issue_reproduced = False\n    initial_dpi = fig.dpi\n\n    try:\n        for i in range(32):\n            fig, dpi = dump_load_get_dpi(fig)\n            if dpi != initial_dpi:\n                print(f\'{i}: {fig.dpi}\')\n                initial_dpi = dpi\n                issue_reproduced = True\n\n        if issue_reproduced:\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        if \'OverflowError\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n            print(f"Error details: {e}")\n\nif __name__ == \'__main__\':\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n    run()\n```\n\nThis script will:\n1. Print the necessary environment details.\n2. Attempt to reproduce the issue described in the bug report.\n3. Print "Issue reproduced" if the DPI of the figure doubles after each unpickling or if an `OverflowError` is encountered.\n4. Print "Issue resolved" if the DPI remains constant throughout.\n5. Print "Other issues" if any unexpected errors occur.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    initial_dpi = fig.dpi\n    try:\n        for i in range(32):\n            fig, dpi = dump_load_get_dpi(fig)\n            if dpi != initial_dpi:\n                if dpi == initial_dpi * (2 ** (i + 1)):\n                    print("Issue reproduced")\n                    return\n                else:\n                    print("Other issues")\n                    return\n        print("Issue resolved")\n    except OverflowError:\n        print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n\nif __name__ == \'__main__\':\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n    run()\n```\n\nThis script follows the requirements:\n\n1. It includes necessary imports.\n2. It contains code to reproduce the issue.\n3. It prints specific messages depending on the outcome: "Issue reproduced", "Issue resolved", or "Other issues".\n\nBy running this script, you can check if the DPI doubling issue is present on your system.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef test_dpi_doubling_issue():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    def dump_load_get_dpi(fig):\n        with open(\'sinus.pickle\', \'wb\') as file:\n            pickle.dump(fig, file)\n\n        with open(\'sinus.pickle\', \'rb\') as blob:\n            fig2 = pickle.load(blob)\n        return fig2, fig2.dpi\n\n    def run():\n        fig = plt.figure()\n        x = np.linspace(0, 2 * np.pi)\n        y = np.sin(x)\n\n        overflow_error_occurred = False\n\n        for i in range(32):\n            try:\n                print(f\'{i}: {fig.dpi}\')\n                fig, dpi = dump_load_get_dpi(fig)\n            except OverflowError:\n                overflow_error_occurred = True\n                break\n\n        if overflow_error_occurred:\n            print("Issue reproduced")\n        elif fig.dpi == 200:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n    run()\n\ntest_dpi_doubling_issue()\n```\n\nThis script sets up a test to verify the issue described in the provided issue text. It:\n1. Imports necessary modules.\n2. Defines the function `test_dpi_doubling_issue` to encapsulate the test logic.\n3. Prints relevant system and library information.\n4. Defines `dump_load_get_dpi` to pickle and unpickle a Matplotlib figure.\n5. Defines `run` to create a plot, repeatedly pickle and unpickle it, and check for dpi doubling or an OverflowError.\n6. Runs the test and prints whether the issue is reproduced, resolved, or if other issues are present.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run_test():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    issue_reproduced = False\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    try:\n        for i in range(32):\n            print(f\'{i}: {fig.dpi}\')\n            fig, dpi = dump_load_get_dpi(fig)\n            if dpi != 200.0 * (2 ** i):\n                print("Other issues")\n                return\n        issue_reproduced = True\n    except OverflowError:\n        issue_reproduced = True\n\n    if issue_reproduced:\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n\nif __name__ == \'__main__\':\n    run_test()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\',\'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0,2*np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n\n    return fig.dpi\n\ndef test_dpi_issue_on_mac():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    try:\n        final_dpi = run()\n        if final_dpi == 200.0:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except OverflowError:\n        print("Issue reproduced")\n    except Exception:\n        print("Other issues")\n\ntest_dpi_issue_on_mac()\n```\n\n### Explanation:\n\n1. **Necessary Imports**: Included `numpy`, `matplotlib`, `pickle`, and `platform`.\n2. **Function `dump_load_get_dpi`**: Handles pickling and unpickling of the figure and returns the new figure and its dpi.\n3. **Function `run`**: Creates a figure, runs a loop to pickle and unpickle it multiple times, and prints the dpi each time.\n4. **Test Function `test_dpi_issue_on_mac`**: \n    - Prints the relevant system and library information.\n    - Calls the `run` function to execute the process.\n    - Checks the final dpi to determine if the issue persists.\n    - Catches `OverflowError` to indicate the issue has been reproduced.\n    - Catches other exceptions to indicate other issues.\n5. **Output Messages**: Prints "Issue resolved" if the final dpi is as expected (200.0), "Issue reproduced" if the dpi doubles incorrectly or an `OverflowError` occurs, and "Other issues" for any other exceptions.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\',\'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    try:\n        for i in range(32):\n            print(f\'{i}: {fig.dpi}\')\n            fig, dpi = dump_load_get_dpi(fig)\n        \n        if fig.dpi == 200.0:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except OverflowError as e:\n        print("Issue reproduced")\n    except Exception as e:\n        print("Other issues", e)\n\n\nif __name__ == \'__main__\':\n    run()\n```\n\nThis script will:\n1. Print the necessary system details.\n2. Create a Matplotlib figure and repeatedly pickle and unpickle it, printing the DPI each time.\n3. Check if the DPI remains constant at 200.0, which would indicate the issue is resolved.\n4. Handle specific exceptions to identify if the original issue is reproduced or if other issues are present. \n\nTo use this script, simply run it on an M1 MacBook with the specified environment to see if the issue is reproduced or resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\',\'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0,2*np.pi)\n    y = np.sin(x)\n\n    for i in range(32):\n        print(f\'{i}: {fig.dpi}\')\n        fig, dpi = dump_load_get_dpi(fig)\n\n    return fig.dpi\n\ndef test_dpi_issue():\n    print(matplotlib.get_backend())\n    print(\'Matplotlib ver:\', matplotlib.__version__)\n    print(\'Platform:\', platform.platform())\n    print(\'System:\', platform.system())\n    print(\'Release:\', platform.release())\n    print(\'Python ver:\', platform.python_version())\n\n    try:\n        final_dpi = run()\n        \n        if final_dpi == 200.0:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except OverflowError:\n        print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n\ntest_dpi_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef test_dpi_doubling_issue():\n    print("Matplotlib backend:", matplotlib.get_backend())\n    print("Matplotlib version:", matplotlib.__version__)\n    print("Platform:", platform.platform())\n    print("System:", platform.system())\n    print("Release:", platform.release())\n    print("Python version:", platform.python_version())\n\n    def dump_load_get_dpi(fig):\n        with open(\'sinus.pickle\', \'wb\') as file:\n            pickle.dump(fig, file)\n\n        with open(\'sinus.pickle\', \'rb\') as blob:\n            fig2 = pickle.load(blob)\n        return fig2, fig2.dpi\n\n    def run():\n        fig = plt.figure()\n        x = np.linspace(0, 2 * np.pi)\n        y = np.sin(x)\n\n        for i in range(32):\n            print(f\'{i}: {fig.dpi}\')\n            fig, dpi = dump_load_get_dpi(fig)\n            if dpi != 200.0:\n                print("Issue reproduced")\n                return\n\n        print("Issue resolved")\n        return\n\n    try:\n        run()\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\ntest_dpi_doubling_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='```python\nimport numpy as np\nimport matplotlib\nimport matplotlib.pyplot as plt\nimport pickle\nimport platform\n\ndef dump_load_get_dpi(fig):\n    with open(\'sinus.pickle\', \'wb\') as file:\n        pickle.dump(fig, file)\n\n    with open(\'sinus.pickle\', \'rb\') as blob:\n        fig2 = pickle.load(blob)\n    return fig2, fig2.dpi\n\ndef run():\n    fig = plt.figure()\n    x = np.linspace(0, 2 * np.pi)\n    y = np.sin(x)\n\n    outcome = "Issue resolved"\n    for i in range(32):\n        if fig.dpi != 200.0:\n            outcome = "Issue reproduced"\n            break\n        fig, dpi = dump_load_get_dpi(fig)\n    else:\n        if fig.dpi != 200.0:\n            outcome = "Issue reproduced"\n\n    print(outcome)\n\nif __name__ == \'__main__\':\n    try:\n        backend = matplotlib.get_backend()\n        matplotlib_version = matplotlib.__version__\n        system_info = platform.platform()\n        system = platform.system()\n        release = platform.release()\n        python_version = platform.python_version()\n\n        print(f\'Backend: {backend}\')\n        print(f\'Matplotlib ver: {matplotlib_version}\')\n        print(f\'Platform: {system_info}\')\n        print(f\'System: {system}\')\n        print(f\'Release: {release}\')\n        print(f\'Python ver: {python_version}\')\n\n        run()\n\n    except Exception as e:\n        print("Other issues", str(e))\n```\n\nThis test script follows the structure provided in the issue text and checks if the DPI doubling problem occurs on an M1 Mac. It prints "Issue reproduced" if the DPI value changes from the initial value of 200.0, "Issue resolved" if the DPI remains constant at 200.0, and "Other issues" if an unexpected exception occurs. The script also prints system and environment details which help in diagnosing the issue.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299678, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=13781, prompt_tokens=1450, total_tokens=15231, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:16:14,052 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+
+    return fig.dpi
+
+def test_dpi_issue():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    try:
+        final_dpi = run()
+        if final_dpi == 200.0:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+test_dpi_issue()
+```
+
+This test script will:
+1. Import the necessary modules.
+2. Define the function `dump_load_get_dpi` to pickle and unpickle the figure.
+3. Define the function `run` to create a figure, modify it in a loop, and check the DPI.
+4. Define the test function `test_dpi_issue` to print system information, run the test, and print the appropriate message based on the outcome.
+5. Call `test_dpi_issue` to execute the test.
+2025-05-03 14:16:14,052 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run_test():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    issue_reproduced = False
+    for i in range(32):
+        if fig.dpi > 200.0:
+            issue_reproduced = True
+            break
+        fig, dpi = dump_load_get_dpi(fig)
+
+    if issue_reproduced:
+        print("Issue reproduced")
+    elif fig.dpi == 200.0:
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+if __name__ == '__main__':
+    run_test()
+```
+2025-05-03 14:16:14,053 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    try:
+        with open('sinus.pickle', 'wb') as file:
+            pickle.dump(fig, file)
+
+        with open('sinus.pickle', 'rb') as blob:
+            fig2 = pickle.load(blob)
+        return fig2, fig2.dpi
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return None, None
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    try:
+        initial_dpi = fig.dpi
+        for i in range(32):
+            fig, dpi = dump_load_get_dpi(fig)
+            if fig is None:
+                return
+            print(f'{i}: {dpi}')
+            if dpi != initial_dpi:
+                print("Issue reproduced")
+                return
+        print("Issue resolved")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+if __name__ == '__main__':
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    run()
+```
+
+This test will:
+1. Import necessary modules.
+2. Define a function `dump_load_get_dpi` to serialize and deserialize a Matplotlib figure.
+3. Define a `run` function to create a figure, perform multiple dump-load cycles, and check for the DPI doubling issue.
+4. Print detailed system and library version information.
+5. Print "Issue reproduced" if the DPI doubling issue is observed.
+6. Print "Issue resolved" if the DPI remains consistent as expected.
+7. Print "Other issues" if any other exceptions are encountered.
+2025-05-03 14:16:14,053 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def test_dpi_doubling_issue():
+    try:
+        print(matplotlib.get_backend())
+        print('Matplotlib ver:', matplotlib.__version__)
+        print('Platform:', platform.platform())
+        print('System:', platform.system())
+        print('Release:', platform.release())
+        print('Python ver:', platform.python_version())
+
+        def dump_load_get_dpi(fig):
+            with open('sinus.pickle', 'wb') as file:
+                pickle.dump(fig, file)
+
+            with open('sinus.pickle', 'rb') as blob:
+                fig2 = pickle.load(blob)
+            return fig2, fig2.dpi
+
+        def run():
+            fig = plt.figure()
+            x = np.linspace(0, 2 * np.pi)
+            y = np.sin(x)
+
+            for i in range(32):
+                print(f'{i}: {fig.dpi}')
+                fig, dpi = dump_load_get_dpi(fig)
+
+        run()
+        print("Other issues")
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_dpi_doubling_issue()
+```
+
+- This test script will print details about the environment, and then attempt to reproduce the issue.
+- If the `OverflowError` is raised, it will print "Issue reproduced".
+- If any other exception occurs, it will print "Other issues" along with the exception message.
+- If no exceptions occur (which is not expected in this case), it will print "Other issues".
+2025-05-03 14:16:14,053 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+
+    print("Issue reproduced")
+
+def test_dpi_issue():
+    try:
+        print(matplotlib.get_backend())
+        print('Matplotlib ver:', matplotlib.__version__)
+        print('Platform:', platform.platform())
+        print('System:', platform.system())
+        print('Release:', platform.release())
+        print('Python ver:', platform.python_version())
+
+        run()
+        
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception as e:
+        print(f"Other issues: {e}")
+    else:
+        print("Issue resolved")
+
+test_dpi_issue()
+```
+
+This test script performs the following tasks:
+1. Imports the necessary modules.
+2. Defines a function `dump_load_get_dpi` that pickles and unpickles a Matplotlib figure.
+3. Defines a function `run` that creates a figure, repeatedly pickles and unpickles it, and prints its DPI, aiming to reproduce the issue.
+4. Defines a test function `test_dpi_issue` that prints the system and environment details and then runs the `run` function.
+5. Catches specific exceptions to determine whether the issue is reproduced, resolved, or if there are other issues.
+6. Runs the `test_dpi_issue` function.
+
+By running this script, you should be able to reproduce the issue if it still exists, or verify that the issue has been fixed.
+2025-05-03 14:16:14,053 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle','wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run_test():
+    try:
+        print(matplotlib.get_backend())
+        print('Matplotlib ver:', matplotlib.__version__)
+        print('Platform:', platform.platform())
+        print('System:', platform.system())
+        print('Release:', platform.release())
+        print('Python ver:', platform.python_version())
+
+        fig = plt.figure()
+        x = np.linspace(0, 2 * np.pi)
+        y = np.sin(x)
+
+        for i in range(32):
+            dpi_before = fig.dpi
+            fig, dpi_after = dump_load_get_dpi(fig)
+            if dpi_after != 200.0:
+                print(f'Issue reproduced: dpi incremented from {dpi_before} to {dpi_after}')
+                return
+        
+        print("Issue resolved")
+    except OverflowError as e:
+        print("Issue reproduced: OverflowError occurred")
+    except Exception as e:
+        print("Other issues:", e)
+
+run_test()
+```
+2025-05-03 14:16:14,054 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+    
+    # Check if the issue is reproduced
+    if fig.dpi != 200.0:
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+
+def test_dpi_unpickling():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+    
+    try:
+        run()
+    except OverflowError as e:
+        print(f"OverflowError encountered: {e}")
+        print("Issue reproduced")
+    except Exception as e:
+        print(f"Unexpected error encountered: {e}")
+        print("Other issues")
+
+test_dpi_unpickling()
+```
+2025-05-03 14:16:14,054 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    try:
+        for i in range(32):
+            fig, dpi = dump_load_get_dpi(fig)
+            if dpi != 200.0:
+                print(f"Issue reproduced at iteration {i}: DPI is {dpi}")
+                return
+        print("Issue resolved")
+    except OverflowError as e:
+        print(f"OverflowError: {e}")
+        print("Other issues")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        print("Other issues")
+
+if __name__ == '__main__':
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+    run()
+```
+
+Explanation:
+1. **Necessary Imports:** The script imports the necessary libraries, numpy for numerical operations, matplotlib for plotting, and pickle for serialization.
+2. **Code to Reproduce the Issue:** The `dump_load_get_dpi` function handles the pickling and unpickling of the figure, while the `run` function creates a figure and repeatedly dumps and loads it to check for the DPI issue.
+3. **Outcome Handling:** The script handles three possible outcomes:
+   - If DPI values change and the issue is reproduced, it prints "Issue reproduced" with the iteration number and the incorrect DPI value.
+   - If an `OverflowError` is encountered, it prints the error and "Other issues."
+   - If the loop completes without DPI changes or errors, it prints "Issue resolved."
+4. **System Information:** The script prints relevant system information for debugging and verification purposes before running the test.
+
+You can run this script to check if the issue described is reproducible or if it has been resolved.
+2025-05-03 14:16:14,054 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def test_dpi_doubling_issue():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    def dump_load_get_dpi(fig):
+        with open('sinus.pickle', 'wb') as file:
+            pickle.dump(fig, file)
+
+        with open('sinus.pickle', 'rb') as blob:
+            fig2 = pickle.load(blob)
+        return fig2, fig2.dpi
+
+    def run():
+        fig = plt.figure()
+        x = np.linspace(0, 2 * np.pi)
+        y = np.sin(x)
+
+        for i in range(32):
+            if fig.dpi > 200.0:
+                print("Issue reproduced")
+                return
+            fig, dpi = dump_load_get_dpi(fig)
+        
+        print("Issue resolved")
+
+    try:
+        run()
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception:
+        print("Other issues")
+
+test_dpi_doubling_issue()
+```
+2025-05-03 14:16:14,054 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run_test():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    issue_reproduced = False
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+        if dpi != 200.0:
+            issue_reproduced = True
+            break
+
+    if issue_reproduced:
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+
+try:
+    run_test()
+except OverflowError as e:
+    print(f"Issue reproduced: {e}")
+except Exception as e:
+    print(f"Other issues: {e}")
+```
+2025-05-03 14:16:14,054 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run_test():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    try:
+        for i in range(32):
+            print(f'{i}: {fig.dpi}')
+            fig, dpi = dump_load_get_dpi(fig)
+            if fig.dpi == 200.0:
+                continue
+            elif fig.dpi > 200.0:
+                print("Issue reproduced")
+                return
+        print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+        print(str(e))
+
+if __name__ == '__main__':
+    run_test()
+```
+
+This script should be used to reproduce the issue described in the provided issue text. It tests the DPI value of a figure after it has been unpickled on an M1 Mac and will print "Issue reproduced" if the issue is observed, "Issue resolved" if the issue does not occur, and "Other issues" if any unexpected errors are encountered.
+2025-05-03 14:16:14,054 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run_test():
+    print("Testing DPI doubling issue on M1 Mac")
+    print(f"Matplotlib backend: {matplotlib.get_backend()}")
+    print(f"Matplotlib version: {matplotlib.__version__}")
+    print(f"Platform: {platform.platform()}")
+    print(f"System: {platform.system()}")
+    print(f"Release: {platform.release()}")
+    print(f"Python version: {platform.python_version()}")
+
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    issue_reproduced = False
+    other_issue = False
+
+    try:
+        for i in range(32):
+            print(f'{i}: {fig.dpi}')
+            fig, dpi = dump_load_get_dpi(fig)
+            if i > 0 and fig.dpi != 200.0:
+                issue_reproduced = True
+                break
+        if issue_reproduced:
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+if __name__ == '__main__':
+    run_test()
+```
+2025-05-03 14:16:14,054 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    initial_dpi = fig.dpi
+    try:
+        for i in range(32):
+            print(f'{i}: {fig.dpi}')
+            fig, dpi = dump_load_get_dpi(fig)
+            if i > 0 and dpi != initial_dpi:
+                print("Issue reproduced")
+                return
+        print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+        return
+
+
+if __name__ == '__main__':
+    print(f'Backend: {matplotlib.get_backend()}')
+    print(f'Matplotlib ver: {matplotlib.__version__}')
+    print(f'Platform: {platform.platform()}')
+    print(f'System: {platform.system()}')
+    print(f'Release: {platform.release()}')
+    print(f'Python ver: {platform.python_version()}')
+    run()
+```
+
+This test includes:
+1. The necessary imports
+2. The code to reproduce the issue described in the issue text
+3. It prints "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. It prints "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. It prints "Other issues" if the outcome indicates there are other issues with the source code
+
+Run this script on an M1 MacBook to verify the behavior of the DPI doubling issue.
+2025-05-03 14:16:14,054 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle','wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+
+    return fig.dpi
+
+def test_dpi_issue():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    try:
+        final_dpi = run()
+        if final_dpi == 200.0:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+if __name__ == '__main__':
+    test_dpi_issue()
+```
+2025-05-03 14:16:14,054 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+        if dpi != 200.0:
+            print("Issue reproduced")
+            return
+
+    print("Issue resolved")
+
+if __name__ == '__main__':
+    try:
+        print(matplotlib.get_backend())
+        print('Matplotlib ver:', matplotlib.__version__)
+        print('Platform:', platform.platform())
+        print('System:', platform.system())
+        print('Release:', platform.release())
+        print('Python ver:', platform.python_version())
+
+        run()
+    except Exception as e:
+        print("Other issues")
+        print(e)
+```
+
+This test script contains:
+1. Necessary imports (`numpy`, `matplotlib`, `pickle`, `platform`).
+2. Code to reproduce the described issue: creation of a figure, dumping and loading it using `pickle`, and checking if the `dpi` value is doubled.
+3. Print statements to indicate the status:
+    - `"Issue reproduced"` if the `dpi` value doubles as described.
+    - `"Issue resolved"` if the `dpi` remains constant.
+    - `"Other issues"` if there are any exceptions or other types of issues.
+
+You can run this script to reproduce the issue and verify if it has been fixed.
+2025-05-03 14:16:14,054 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def test_dpi_doubling_issue():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    def dump_load_get_dpi(fig):
+        with open('sinus.pickle', 'wb') as file:
+            pickle.dump(fig, file)
+
+        with open('sinus.pickle', 'rb') as blob:
+            fig2 = pickle.load(blob)
+        return fig2, fig2.dpi
+
+    def run():
+        fig = plt.figure()
+        x = np.linspace(0, 2 * np.pi)
+        y = np.sin(x)
+
+        try:
+            for i in range(32):
+                print(f'{i}: {fig.dpi}')
+                fig, dpi = dump_load_get_dpi(fig)
+            
+            # If the loop completes without OverflowError, check if DPI doubled
+            if fig.dpi == 200.0:
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+
+        except OverflowError:
+            print("Issue reproduced")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+    run()
+
+test_dpi_doubling_issue()
+```
+
+### Explanation:
+
+1. **Necessary Imports**: Imported `numpy`, `matplotlib`, `matplotlib.pyplot`, `pickle`, and `platform` as required.
+2. **Code to Reproduce the Issue**: Implemented the provided code to create a figure, pickle it, unpickle it, and check if the DPI value doubles or maintains its original value.
+3. **Print Statements**:
+   - "Issue reproduced" if the DPI doubles or if an `OverflowError` occurs.
+   - "Issue resolved" if the DPI remains consistent.
+   - "Other issues" if any other unexpected exceptions occur.
+
+This script will help in verifying whether the issue has been resolved or still persists.
+2025-05-03 14:16:14,054 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle','wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+
+    return fig.dpi
+
+def test_dpi_doubling_issue():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    try:
+        final_dpi = run()
+    except OverflowError:
+        print("Issue reproduced")
+        return
+
+    if final_dpi == 200.0:
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+test_dpi_doubling_issue()
+```
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        if fig.dpi > 2000000000:  # Arbitrary large value to detect overflow before the system crashes
+            print("Other issues")
+            return
+
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+
+    if fig.dpi == 200.0:
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+if __name__ == '__main__':
+    try:
+        print(matplotlib.get_backend())
+        print('Matplotlib ver:', matplotlib.__version__)
+        print('Platform:', platform.platform())
+        print('System:', platform.system())
+        print('Release:', platform.release())
+        print('Python ver:', platform.python_version())
+
+        run()
+    except Exception as e:
+        print("Other issues")
+        print(e)
+```
+
+This script includes:
+1. Necessary imports to run the test.
+2. Code to reproduce the issue described in the issue text.
+3. Prints "Issue reproduced" if the `dpi` value doubles each time.
+4. Prints "Issue resolved" if the `dpi` value remains constant at 200.0.
+5. Prints "Other issues" if any other problems occur, such as an `OverflowError` or unexpected exceptions.
+
+Make sure to run this script on an M1 Mac to reproduce the issue, as it’s specifically mentioned to occur on that platform.
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run_test():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    try:
+        for i in range(32):
+            print(f'{i}: {fig.dpi}')
+            fig, dpi = dump_load_get_dpi(fig)
+
+        # If we reach here, it means the loop has completed without an OverflowError
+        if fig.dpi == 200.0:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception as e:
+        print("Other issues:", str(e))
+
+if __name__ == '__main__':
+    run_test()
+```
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    try:
+        with open('sinus.pickle', 'wb') as file:
+            pickle.dump(fig, file)
+
+        with open('sinus.pickle', 'rb') as blob:
+            fig2 = pickle.load(blob)
+        return fig2, fig2.dpi
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return fig, fig.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2*np.pi)
+    y = np.sin(x)
+    issue_reproduced = False
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+        if fig.dpi > 200.0:
+            issue_reproduced = True
+            break
+
+    if issue_reproduced:
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+
+if __name__ == '__main__':
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    run()
+```
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle','wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+    return fig.dpi
+
+def test_dpi_issue():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    try:
+        final_dpi = run()
+        if final_dpi == 200.0:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except OverflowError as e:
+        print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+
+test_dpi_issue()
+```
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def test_dpi_doubling_issue():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    fig = plt.figure()
+    initial_dpi = fig.dpi
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        fig, dpi = dump_load_get_dpi(fig)
+        print(f'{i}: {dpi}')
+        if dpi != initial_dpi:
+            print("Issue reproduced")
+            return
+    print("Issue resolved")
+
+if __name__ == '__main__':
+    try:
+        test_dpi_doubling_issue()
+    except Exception as e:
+        print("Other issues")
+        print(str(e))
+```
+
+This code will:
+1. Import the necessary modules.
+2. Define a function to pickle and unpickle the figure and return the new figure and its DPI.
+3. Define a test function that checks for the DPI doubling issue.
+4. Print diagnostic information about the environment.
+5. Create a figure and check if its DPI doubles upon successive pickle/unpickle operations.
+6. Print "Issue reproduced" if the DPI doubles, "Issue resolved" if it remains consistent, or "Other issues" if there's any other exception.
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+
+    return fig.dpi
+
+def test_dpi_issue():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    try:
+        final_dpi = run()
+        if final_dpi == 200.0:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+
+test_dpi_issue()
+```
+
+This test script:
+1. Contains the necessary imports for numpy, matplotlib, pickle, and platform.
+2. Defines `dump_load_get_dpi` function to dump and load the figure, returning the new figure and its DPI.
+3. Defines `run` function to create a figure, loop 32 times to pickle and unpickle the figure while printing its DPI, and return the final DPI.
+4. Defines `test_dpi_issue` function to print system and matplotlib version information, run the `run` function, and compare the final DPI to determine whether the issue is resolved or reproduced. It also handles an OverflowError to indicate if the issue is reproduced and any other exceptions that might indicate other issues.
+5. Calls `test_dpi_issue` to execute the test.
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run_test():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    outcome = "Issue resolved"
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+        if i > 0 and dpi != 200.0:
+            outcome = "Issue reproduced"
+            break
+
+    print(outcome)
+
+
+if __name__ == '__main__':
+    try:
+        run_test()
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception as e:
+        print("Other issues:", str(e))
+```
+
+This test will:
+1. Print the relevant environment information.
+2. Attempt to reproduce the issue by continuously unpickling a figure and checking its DPI.
+3. Print "Issue resolved" if the DPI remains constant as expected.
+4. Print "Issue reproduced" if the DPI doubles as described in the issue.
+5. Print "Other issues" if any other exception occurs.
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def test_dpi_doubling_issue():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    def dump_load_get_dpi(fig):
+        with open('sinus.pickle','wb') as file:
+            pickle.dump(fig, file)
+
+        with open('sinus.pickle', 'rb') as blob:
+            fig2 = pickle.load(blob)
+        return fig2, fig2.dpi
+
+    def run():
+        fig = plt.figure()
+        x = np.linspace(0,2*np.pi)
+        y = np.sin(x)
+
+        for i in range(32):
+            print(f'{i}: {fig.dpi}')
+            fig, dpi = dump_load_get_dpi(fig)
+
+    initial_fig_dpi = 200.0
+    try:
+        run()
+        print("Other issues")
+    except OverflowError as e:
+        # Check if the issue is specifically related to the doubling described in the issue
+        if str(e).startswith("signed integer is greater than maximum"):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+    # Check if the issue has been fixed
+    fig = plt.figure(dpi=initial_fig_dpi)
+    fig, dpi = dump_load_get_dpi(fig)
+    if dpi == initial_fig_dpi:
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+test_dpi_doubling_issue()
+```
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run_test():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    initial_dpi = fig.dpi
+    issue_reproduced = False
+    other_issues = False
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+        if dpi == initial_dpi:
+            continue
+        elif dpi == initial_dpi * (2 ** (i+1)):
+            issue_reproduced = True
+            break
+        else:
+            other_issues = True
+            break
+
+    if other_issues:
+        print("Other issues")
+    elif issue_reproduced:
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+
+run_test()
+```
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle','wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    fig = plt.figure()
+    x = np.linspace(0,2*np.pi)
+    y = np.sin(x)
+
+    initial_dpi = fig.dpi
+
+    try:
+        for i in range(32):
+            print(f'{i}: {fig.dpi}')
+            fig, dpi = dump_load_get_dpi(fig)
+
+        if fig.dpi == initial_dpi:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+        print(f"Exception: {e}")
+
+if __name__ == '__main__':
+    run()
+```
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def test_dpi_doubling_issue():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    def dump_load_get_dpi(fig):
+        with open('sinus.pickle', 'wb') as file:
+            pickle.dump(fig, file)
+
+        with open('sinus.pickle', 'rb') as blob:
+            fig2 = pickle.load(blob)
+        return fig2, fig2.dpi
+
+    def run():
+        fig = plt.figure()
+        x = np.linspace(0, 2 * np.pi)
+        y = np.sin(x)
+
+        initial_dpi = fig.dpi
+        try:
+            for i in range(32):
+                fig, dpi = dump_load_get_dpi(fig)
+                if dpi != initial_dpi:
+                    print(f'Issue reproduced at iteration {i}')
+                    return
+            print("Issue resolved")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+    run()
+
+test_dpi_doubling_issue()
+```
+
+### Explanation:
+
+1. **Imports**:  All the necessary imports are included at the beginning.
+2. **Printing Environment Details**:  The test prints the backend, Matplotlib version, platform, system, release, and Python version to provide context for the issue.
+3. **Function Definitions**:
+    - `dump_load_get_dpi(fig)`: This function handles the pickling and unpickling of the figure and returns the new figure and its DPI.
+    - `run()`: This function creates a figure and runs the loop to pickle and unpickle the figure 32 times, checking if the DPI has doubled.
+4. **Issue Checking**:
+    - The initial DPI of the figure is saved.
+    - A loop runs 32 times, and after each pickling/unpickling, it checks if the DPI has changed.
+    - If the DPI has changed from the initial value, it prints "Issue reproduced" and exits.
+    - If the loop completes without any DPI change, it prints "Issue resolved".
+    - Any other exceptions encountered during execution cause "Other issues" to be printed.
+
+This script can be used to both reproduce the issue as described and to verify if the issue has been fixed.
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+
+    return fig.dpi
+
+if __name__ == '__main__':
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    final_dpi = run()
+
+    if final_dpi == 200.0:
+        print("Issue resolved")
+    elif final_dpi > 200.0:
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+```
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        if fig.dpi > 100_000_000:  # Arbitrary large number to catch the overflow before it happens
+            print("Other issues")
+            return
+        
+        fig, dpi = dump_load_get_dpi(fig)
+
+    if fig.dpi == 200.0:
+        print("Issue resolved")
+    else:
+        print("Issue reproduced")
+
+if __name__ == '__main__':
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+    run()
+```
+
+Explanation:
+1. Necessary imports: The script imports `numpy`, `matplotlib`, `pickle`, and `platform` to replicate the issue.
+2. Function `dump_load_get_dpi`: This function saves a `matplotlib` figure object to a pickle file and then loads it back, returning the figure and its DPI.
+3. Function `run`: This function creates a figure and runs a loop 32 times. If the DPI becomes excessively large (e.g., over 100,000,000), it prints "Other issues" and exits. Otherwise, it continues, checking if the DPI equals 200.0 after all iterations.
+4. If the DPI has been modified unexpectedly, it prints "Issue reproduced"; otherwise, "Issue resolved."
+5. The script starts by printing information about the environment and then calls the `run` function to execute the test.
+
+This test correctly reflects the described issue and can be used to verify both the issue's presence and its resolution.
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        fig, dpi = dump_load_get_dpi(fig)
+
+        if dpi > 200 and i > 0:
+            print("Issue reproduced")
+            return
+        else:
+            print(f'{i}: {dpi}')
+
+    print("Issue resolved")
+
+if __name__ == '__main__':
+    try:
+        print(f"Matplotlib ver: {matplotlib.__version__}")
+        print(f"Platform: {platform.platform()}")
+        print(f"System: {platform.system()}")
+        print(f"Release: {platform.release()}")
+        print(f"Python ver: {platform.python_version()}")
+
+        run()
+    except Exception as e:
+        print("Other issues")
+        print(f"Error: {e}")
+```
+
+This complete test script contains the necessary imports, reproduction of the issue, and checks for the expected outcome. It prints "Issue reproduced" if the DPI value doubles as described, "Issue resolved" if the DPI remains constant, and "Other issues" if any other exceptions occur.
+2025-05-03 14:16:14,055 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle','wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0,2*np.pi)
+    y = np.sin(x)
+
+    issue_reproduced = False
+    initial_dpi = fig.dpi
+
+    try:
+        for i in range(32):
+            fig, dpi = dump_load_get_dpi(fig)
+            if dpi != initial_dpi:
+                print(f'{i}: {fig.dpi}')
+                initial_dpi = dpi
+                issue_reproduced = True
+
+        if issue_reproduced:
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        if 'OverflowError' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+            print(f"Error details: {e}")
+
+if __name__ == '__main__':
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+    run()
+```
+
+This script will:
+1. Print the necessary environment details.
+2. Attempt to reproduce the issue described in the bug report.
+3. Print "Issue reproduced" if the DPI of the figure doubles after each unpickling or if an `OverflowError` is encountered.
+4. Print "Issue resolved" if the DPI remains constant throughout.
+5. Print "Other issues" if any unexpected errors occur.
+2025-05-03 14:16:14,056 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    initial_dpi = fig.dpi
+    try:
+        for i in range(32):
+            fig, dpi = dump_load_get_dpi(fig)
+            if dpi != initial_dpi:
+                if dpi == initial_dpi * (2 ** (i + 1)):
+                    print("Issue reproduced")
+                    return
+                else:
+                    print("Other issues")
+                    return
+        print("Issue resolved")
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+
+if __name__ == '__main__':
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+    run()
+```
+
+This script follows the requirements:
+
+1. It includes necessary imports.
+2. It contains code to reproduce the issue.
+3. It prints specific messages depending on the outcome: "Issue reproduced", "Issue resolved", or "Other issues".
+
+By running this script, you can check if the DPI doubling issue is present on your system.
+2025-05-03 14:16:14,056 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def test_dpi_doubling_issue():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    def dump_load_get_dpi(fig):
+        with open('sinus.pickle', 'wb') as file:
+            pickle.dump(fig, file)
+
+        with open('sinus.pickle', 'rb') as blob:
+            fig2 = pickle.load(blob)
+        return fig2, fig2.dpi
+
+    def run():
+        fig = plt.figure()
+        x = np.linspace(0, 2 * np.pi)
+        y = np.sin(x)
+
+        overflow_error_occurred = False
+
+        for i in range(32):
+            try:
+                print(f'{i}: {fig.dpi}')
+                fig, dpi = dump_load_get_dpi(fig)
+            except OverflowError:
+                overflow_error_occurred = True
+                break
+
+        if overflow_error_occurred:
+            print("Issue reproduced")
+        elif fig.dpi == 200:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+    run()
+
+test_dpi_doubling_issue()
+```
+
+This script sets up a test to verify the issue described in the provided issue text. It:
+1. Imports necessary modules.
+2. Defines the function `test_dpi_doubling_issue` to encapsulate the test logic.
+3. Prints relevant system and library information.
+4. Defines `dump_load_get_dpi` to pickle and unpickle a Matplotlib figure.
+5. Defines `run` to create a plot, repeatedly pickle and unpickle it, and check for dpi doubling or an OverflowError.
+6. Runs the test and prints whether the issue is reproduced, resolved, or if other issues are present.
+2025-05-03 14:16:14,056 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run_test():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    issue_reproduced = False
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    try:
+        for i in range(32):
+            print(f'{i}: {fig.dpi}')
+            fig, dpi = dump_load_get_dpi(fig)
+            if dpi != 200.0 * (2 ** i):
+                print("Other issues")
+                return
+        issue_reproduced = True
+    except OverflowError:
+        issue_reproduced = True
+
+    if issue_reproduced:
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+
+if __name__ == '__main__':
+    run_test()
+```
+2025-05-03 14:16:14,056 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle','wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0,2*np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+
+    return fig.dpi
+
+def test_dpi_issue_on_mac():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    try:
+        final_dpi = run()
+        if final_dpi == 200.0:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception:
+        print("Other issues")
+
+test_dpi_issue_on_mac()
+```
+
+### Explanation:
+
+1. **Necessary Imports**: Included `numpy`, `matplotlib`, `pickle`, and `platform`.
+2. **Function `dump_load_get_dpi`**: Handles pickling and unpickling of the figure and returns the new figure and its dpi.
+3. **Function `run`**: Creates a figure, runs a loop to pickle and unpickle it multiple times, and prints the dpi each time.
+4. **Test Function `test_dpi_issue_on_mac`**: 
+    - Prints the relevant system and library information.
+    - Calls the `run` function to execute the process.
+    - Checks the final dpi to determine if the issue persists.
+    - Catches `OverflowError` to indicate the issue has been reproduced.
+    - Catches other exceptions to indicate other issues.
+5. **Output Messages**: Prints "Issue resolved" if the final dpi is as expected (200.0), "Issue reproduced" if the dpi doubles incorrectly or an `OverflowError` occurs, and "Other issues" for any other exceptions.
+2025-05-03 14:16:14,056 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle','wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    try:
+        for i in range(32):
+            print(f'{i}: {fig.dpi}')
+            fig, dpi = dump_load_get_dpi(fig)
+        
+        if fig.dpi == 200.0:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except OverflowError as e:
+        print("Issue reproduced")
+    except Exception as e:
+        print("Other issues", e)
+
+
+if __name__ == '__main__':
+    run()
+```
+
+This script will:
+1. Print the necessary system details.
+2. Create a Matplotlib figure and repeatedly pickle and unpickle it, printing the DPI each time.
+3. Check if the DPI remains constant at 200.0, which would indicate the issue is resolved.
+4. Handle specific exceptions to identify if the original issue is reproduced or if other issues are present. 
+
+To use this script, simply run it on an M1 MacBook with the specified environment to see if the issue is reproduced or resolved.
+2025-05-03 14:16:14,056 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle','wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0,2*np.pi)
+    y = np.sin(x)
+
+    for i in range(32):
+        print(f'{i}: {fig.dpi}')
+        fig, dpi = dump_load_get_dpi(fig)
+
+    return fig.dpi
+
+def test_dpi_issue():
+    print(matplotlib.get_backend())
+    print('Matplotlib ver:', matplotlib.__version__)
+    print('Platform:', platform.platform())
+    print('System:', platform.system())
+    print('Release:', platform.release())
+    print('Python ver:', platform.python_version())
+
+    try:
+        final_dpi = run()
+        
+        if final_dpi == 200.0:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except OverflowError:
+        print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+
+test_dpi_issue()
+```
+2025-05-03 14:16:14,056 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def test_dpi_doubling_issue():
+    print("Matplotlib backend:", matplotlib.get_backend())
+    print("Matplotlib version:", matplotlib.__version__)
+    print("Platform:", platform.platform())
+    print("System:", platform.system())
+    print("Release:", platform.release())
+    print("Python version:", platform.python_version())
+
+    def dump_load_get_dpi(fig):
+        with open('sinus.pickle', 'wb') as file:
+            pickle.dump(fig, file)
+
+        with open('sinus.pickle', 'rb') as blob:
+            fig2 = pickle.load(blob)
+        return fig2, fig2.dpi
+
+    def run():
+        fig = plt.figure()
+        x = np.linspace(0, 2 * np.pi)
+        y = np.sin(x)
+
+        for i in range(32):
+            print(f'{i}: {fig.dpi}')
+            fig, dpi = dump_load_get_dpi(fig)
+            if dpi != 200.0:
+                print("Issue reproduced")
+                return
+
+        print("Issue resolved")
+        return
+
+    try:
+        run()
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+test_dpi_doubling_issue()
+```
+2025-05-03 14:16:14,056 - INFO - raw output:
+```python
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pickle
+import platform
+
+def dump_load_get_dpi(fig):
+    with open('sinus.pickle', 'wb') as file:
+        pickle.dump(fig, file)
+
+    with open('sinus.pickle', 'rb') as blob:
+        fig2 = pickle.load(blob)
+    return fig2, fig2.dpi
+
+def run():
+    fig = plt.figure()
+    x = np.linspace(0, 2 * np.pi)
+    y = np.sin(x)
+
+    outcome = "Issue resolved"
+    for i in range(32):
+        if fig.dpi != 200.0:
+            outcome = "Issue reproduced"
+            break
+        fig, dpi = dump_load_get_dpi(fig)
+    else:
+        if fig.dpi != 200.0:
+            outcome = "Issue reproduced"
+
+    print(outcome)
+
+if __name__ == '__main__':
+    try:
+        backend = matplotlib.get_backend()
+        matplotlib_version = matplotlib.__version__
+        system_info = platform.platform()
+        system = platform.system()
+        release = platform.release()
+        python_version = platform.python_version()
+
+        print(f'Backend: {backend}')
+        print(f'Matplotlib ver: {matplotlib_version}')
+        print(f'Platform: {system_info}')
+        print(f'System: {system}')
+        print(f'Release: {release}')
+        print(f'Python ver: {python_version}')
+
+        run()
+
+    except Exception as e:
+        print("Other issues", str(e))
+```
+
+This test script follows the structure provided in the issue text and checks if the DPI doubling problem occurs on an M1 Mac. It prints "Issue reproduced" if the DPI value changes from the initial value of 200.0, "Issue resolved" if the DPI remains constant at 200.0, and "Other issues" if an unexpected exception occurs. The script also prints system and environment details which help in diagnosing the issue.

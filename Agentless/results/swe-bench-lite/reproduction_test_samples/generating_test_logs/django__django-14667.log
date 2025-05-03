@@ -1,0 +1,2374 @@
+2025-05-02 17:20:54,960 - INFO - ================ generating test for django__django-14667 ================
+2025-05-02 17:20:55,121 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+QuerySet.defer() doesn't clear deferred field when chaining with only().
+Description
+	
+Considering a simple Company model with four fields: id, name, trade_number and country. If we evaluate a queryset containing a .defer() following a .only(), the generated sql query selects unexpected fields. For example: 
+Company.objects.only("name").defer("name")
+loads all the fields with the following query:
+SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"
+and 
+Company.objects.only("name").defer("name").defer("country")
+also loads all the fields with the same query:
+SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"
+In those two cases, i would expect the sql query to be:
+SELECT "company"."id" FROM "company"
+In the following example, we get the expected behavior:
+Company.objects.only("name", "country").defer("name")
+only loads "id" and "country" fields with the following query:
+SELECT "company"."id", "company"."country" FROM "company"
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:55,126 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:06:32,410 - INFO - ================ generating test for django__django-14667 ================
+2025-05-03 14:06:32,427 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+QuerySet.defer() doesn't clear deferred field when chaining with only().
+Description
+	
+Considering a simple Company model with four fields: id, name, trade_number and country. If we evaluate a queryset containing a .defer() following a .only(), the generated sql query selects unexpected fields. For example: 
+Company.objects.only("name").defer("name")
+loads all the fields with the following query:
+SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"
+and 
+Company.objects.only("name").defer("name").defer("country")
+also loads all the fields with the same query:
+SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"
+In those two cases, i would expect the sql query to be:
+SELECT "company"."id" FROM "company"
+In the following example, we get the expected behavior:
+Company.objects.only("name", "country").defer("name")
+only loads "id" and "country" fields with the following query:
+SELECT "company"."id", "company"."country" FROM "company"
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 14:06:32,428 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:06:32,435 - INFO - Creating API request
+2025-05-03 14:06:40,185 - INFO - API response ChatCompletion(id='chatcmpl-BTCTw3lV5ZQd07EYSXOAR1BBHUlWA', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\nclass QuerySetDeferOnlyTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Create a sample Company instance\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_defer_only_issue(self):\n        # Test case 1: only("name").defer("name")\n        qs1 = Company.objects.only("name").defer("name")\n        sql1 = str(qs1.query)\n        expected_sql1 = \'SELECT "company"."id" FROM "company"\'\n        \n        # Test case 2: only("name").defer("name").defer("country")\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n        sql2 = str(qs2.query)\n        expected_sql2 = \'SELECT "company"."id" FROM "company"\'\n        \n        # Test case 3: only("name", "country").defer("name")\n        qs3 = Company.objects.only("name", "country").defer("name")\n        sql3 = str(qs3.query)\n        expected_sql3 = \'SELECT "company"."id", "company"."country" FROM "company"\'\n        \n        try:\n            assert sql1 == expected_sql1\n            assert sql2 == expected_sql2\n            assert sql3 == expected_sql3\n            print("Issue resolved")\n        except AssertionError:\n            if sql1 != expected_sql1 or sql2 != expected_sql2:\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n# Run the test\nif __name__ == "__main__":\n    import django\n    import sys\n    from django.conf import settings\n\n    settings.configure(\n        DATABASES={\n            \'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }\n        },\n        INSTALLED_APPS=[\n            __name__,\n        ],\n    )\n    django.setup()\n    TestCase.run = lambda self, *args, **kwargs: self._pre_setup() or self.setUp() or self.test_defer_only_issue() or self.tearDown() or self._post_teardown()\n    QuerySetDeferOnlyTest().run()\n```\n\nThis test script sets up a Django test case to reproduce the issue described. It creates a `Company` model, sets up test data, and then runs three test cases to check the SQL queries generated by the `only()` and `defer()` methods. The script prints "Issue resolved" if the queries match the expected SQL, "Issue reproduced" if they do not, and "Other issues" if there are other problems.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299192, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=616, prompt_tokens=598, total_tokens=1214, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:06:40,186 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:06:40,193 - INFO - Creating API request
+2025-05-03 14:09:10,834 - INFO - API response ChatCompletion(id='chatcmpl-BTCU4WwaQQ8PSBhyrJuBjhGhudLr4', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\n# Define the test case to reproduce the issue\nclass QuerySetDeferOnlyTest(TestCase):\n    def setUp(self):\n        Company.objects.create(name="Test Company", trade_number="123456", country="US")\n\n    def test_defer_only_issue(self):\n        # Case 1: Company.objects.only("name").defer("name")\n        qs = Company.objects.only("name").defer("name")\n        sql = str(qs.query)\n        \n        expected_fields = ["id"]\n        if all(field in sql for field in expected_fields) and not any(field in sql for field in ["trade_number", "country"]):\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n        \n        # Case 2: Company.objects.only("name").defer("name").defer("country")\n        qs = Company.objects.only("name").defer("name").defer("country")\n        sql = str(qs.query)\n        \n        if all(field in sql for field in expected_fields) and not any(field in sql for field in ["trade_number", "country"]):\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n\n        # Additional check to ensure other query combinations work as expected\n        qs = Company.objects.only("name", "country").defer("name")\n        sql = str(qs.query)\n        \n        expected_fields = ["id", "country"]\n        if all(field in sql for field in expected_fields) and "name" not in sql:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n# Running the test case directly\nif __name__ == "__main__":\n    import django\n    from django.conf import settings\n\n    settings.configure(\n        DATABASES={\n            \'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }\n        },\n        INSTALLED_APPS=[\n            __name__,\n        ]\n    )\n    django.setup()\n    TestCase.run = lambda self, *args, **kwargs: self._pre_setup() or type(self).__dict__["test_defer_only_issue"](self) or self._post_teardown()\n    QuerySetDeferOnlyTest().run()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the Company model to match the issue description\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\n# Create the test case to reproduce the issue\nclass QuerySetDeferOnlyTestCase(TestCase):\n\n    def setUp(self):\n        # Create a Company instance for testing\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_defer_only_issue(self):\n        # First test case: only("name").defer("name")\n        queryset1 = Company.objects.only("name").defer("name")\n        sql_query1 = str(queryset1.query)\n        expected_query1 = \'SELECT "company"."id" FROM "company"\'\n        \n        # Second test case: only("name").defer("name").defer("country")\n        queryset2 = Company.objects.only("name").defer("name").defer("country")\n        sql_query2 = str(queryset2.query)\n        expected_query2 = \'SELECT "company"."id" FROM "company"\'\n        \n        try:\n            assert sql_query1 == expected_query1, f"Unexpected query: {sql_query1}"\n            assert sql_query2 == expected_query2, f"Unexpected query: {sql_query2}"\n            print("Issue resolved")\n        except AssertionError as e:\n            print("Issue reproduced")\n            print(e)\n            return\n        \n        print("Other issues")\n\n# Run the test case\nif __name__ == "__main__":\n    import django\n    from django.conf import settings\n\n    # Minimal Django settings necessary to run the test\n    settings.configure(\n        DATABASES={\n            \'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }\n        },\n        INSTALLED_APPS=[\n            __name__,  # The current script/module\n        ],\n    )\n    django.setup()\n    TestCase.run(QuerySetDeferOnlyTestCase(\'test_defer_only_issue\'))\n```\n\nThis test case follows the issue description and includes the steps to verify if the issue is reproduced or resolved. It uses Django\'s ORM to set up a test database schema in memory, insert test data, and then check the generated SQL queries against the expected queries. If the generated queries do not match the expected queries, the test will print "Issue reproduced". If they match, it will print "Issue resolved". If any other unexpected issue arises, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define a simple Company model for testing\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\nclass QuerySetDeferOnlyTest(TestCase):\n\n    def setUp(self):\n        # Create a sample Company instance\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_defer_only_issue(self):\n        # Query with only() followed by defer()\n        qs1 = Company.objects.only("name").defer("name")\n        sql1 = str(qs1.query)\n\n        # Query with only() followed by defer("name") and defer("country")\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n        sql2 = str(qs2.query)\n\n        # Expected SQL queries\n        expected_sql = \'SELECT "company"."id" FROM "company"\'\n\n        try:\n            # Check if the SQL queries are as expected\n            if expected_sql not in sql1 or expected_sql not in sql2:\n                print("Issue reproduced")\n            else:\n                print("Issue resolved")\n        except Exception as e:\n            print("Other issues", e)\n\nif __name__ == "__main__":\n    # Ensure Django settings are configured before running tests\n    import os\n    os.environ[\'DJANGO_SETTINGS_MODULE\'] = \'your_project.settings\'\n    django.setup()\n    # Running the test\n    TestCase.run(QuerySetDeferOnlyTest(\'test_defer_only_issue\'))\n```\n\nPlease replace `\'your_project.settings\'` with the actual path to your Django project\'s settings module. This code sets up a unit test to recreate the issue described, checks the generated SQL queries, and prints the appropriate message based on whether the issue is reproduced, resolved, or if other issues are detected.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\nclass QuerySetDeferOnlyIssueTest(TestCase):\n    def setUp(self):\n        Company.objects.create(name="Test Company 1", trade_number="TN123", country="Country1")\n        Company.objects.create(name="Test Company 2", trade_number="TN456", country="Country2")\n    \n    def test_only_defer_combination(self):\n        # Case 1: only("name").defer("name")\n        qs1 = Company.objects.only("name").defer("name")\n        sql1 = str(qs1.query)\n\n        # Check if all fields are being selected\n        if \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"\' in sql1:\n            print("Issue reproduced")\n        else:\n            if \'SELECT "company"."id"\' in sql1:\n                print("Issue resolved")\n            else:\n                print("Other issues")\n        \n        # Case 2: only("name").defer("name").defer("country")\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n        sql2 = str(qs2.query)\n        \n        # Check if all fields are being selected\n        if \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"\' in sql2:\n            print("Issue reproduced")\n        else:\n            if \'SELECT "company"."id"\' in sql2:\n                print("Issue resolved")\n            else:\n                print("Other issues")\n                \n        # Case 3: only("name", "country").defer("name")\n        qs3 = Company.objects.only("name", "country").defer("name")\n        sql3 = str(qs3.query)\n        \n        # Check if only id and country fields are being selected\n        if \'SELECT "company"."id", "company"."country"\' in sql3:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n# Run the test\nQuerySetDeferOnlyIssueTest().test_only_defer_combination()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom myapp.models import Company\n\nclass CompanyQuerySetTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        Company.objects.create(name="Test Company", trade_number="123", country="Test Country")\n\n    def test_only_defer_combination(self):\n        try:\n            # Clear deferred field when chaining .only() and .defer()\n            queryset = Company.objects.only("name").defer("name")\n            sql_query = str(queryset.query)\n            expected_query = \'SELECT "company"."id" FROM "company"\'\n            if expected_query in sql_query:\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n                return\n            \n            # Add another defer to the combination\n            queryset = Company.objects.only("name").defer("name").defer("country")\n            sql_query = str(queryset.query)\n            if expected_query in sql_query:\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n                return\n            \n            # Ensure the combination works as expected\n            queryset = Company.objects.only("name", "country").defer("name")\n            sql_query = str(queryset.query)\n            expected_query = \'SELECT "company"."id", "company"."country" FROM "company"\'\n            if expected_query in sql_query:\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n                return\n\n        except Exception as e:\n            print("Other issues")\n            return\n\nCompanyQuerySetTest().test_only_defer_combination()\n```\n\nIn this script:\n1. We import the necessary components from Django.\n2. We define a test case class `CompanyQuerySetTest` that inherits from `TestCase`.\n3. We set up test data using `setUpTestData`.\n4. We define a test method `test_only_defer_combination` that runs the tests described in the issue.\n5. We print "Issue resolved" if the SQL query matches the expected output, "Issue reproduced" if it does not, and "Other issues" if an exception occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\n# The test case to reproduce the issue\nclass CompanyTestCase(TestCase):\n    def setUp(self):\n        # Create some test data\n        Company.objects.create(name="Company A", trade_number="TN123", country="USA")\n        Company.objects.create(name="Company B", trade_number="TN456", country="CAN")\n\n    def test_defer_with_only(self):\n        try:\n            # Fetch using only and defer\n            qs = Company.objects.only("name").defer("name")\n            sql = str(qs.query)\n            expected_query = \'SELECT "company"."id" FROM "company"\'\n            if sql == expected_query:\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n        except Exception as e:\n            print("Other issues", e)\n\n        try:\n            # Fetch using only, defer, and defer another field\n            qs = Company.objects.only("name").defer("name").defer("country")\n            sql = str(qs.query)\n            expected_query = \'SELECT "company"."id" FROM "company"\'\n            if sql == expected_query:\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n        except Exception as e:\n            print("Other issues", e)\n\n        try:\n            # Fetch using only and defer a different field\n            qs = Company.objects.only("name", "country").defer("name")\n            sql = str(qs.query)\n            expected_query = \'SELECT "company"."id", "company"."country" FROM "company"\'\n            if sql == expected_query:\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n        except Exception as e:\n            print("Other issues", e)\n\n# Running the test case\nif __name__ == "__main__":\n    CompanyTestCase().test_defer_with_only()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the Company model as described in the issue\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\n# Define the test case to reproduce the issue\nclass CompanyQuerySetTest(TestCase):\n\n    @classmethod\n    def setUpTestData(cls):\n        # Create some sample data\n        Company.objects.create(name="Company A", trade_number="123", country="USA")\n\n    def test_defer_with_only_issue(self):\n        # Scenario 1: Company.objects.only("name").defer("name")\n        qs_1 = Company.objects.only("name").defer("name")\n        sql_1 = str(qs_1.query)\n\n        # Scenario 2: Company.objects.only("name").defer("name").defer("country")\n        qs_2 = Company.objects.only("name").defer("name").defer("country")\n        sql_2 = str(qs_2.query)\n\n        # Scenario 3: Company.objects.only("name", "country").defer("name")\n        qs_3 = Company.objects.only("name", "country").defer("name")\n        sql_3 = str(qs_3.query)\n\n        # Expected SQL query\n        expected_sql_1 = \'SELECT "company"."id" FROM "company"\'\n\n        # Check if the issue is reproduced\n        if \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"\' in sql_1:\n            print("Issue reproduced")\n        elif \'SELECT "company"."id" FROM "company"\' in sql_1 and sql_2 and sql_3:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n# Running the test\nif __name__ == "__main__":\n    django.setup()\n    CompanyQuerySetTest().test_defer_with_only_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the Company model as described in the issue\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\nclass QuerySetTest(TestCase):\n    def setUp(self):\n        # Create a test company instance\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_defer_only_interaction(self):\n        # Case 1: .only("name").defer("name")\n        qs1 = Company.objects.only("name").defer("name")\n        sql1 = str(qs1.query)\n        \n        # Case 2: .only("name").defer("name").defer("country")\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n        sql2 = str(qs2.query)\n        \n        # Case 3: .only("name", "country").defer("name")\n        qs3 = Company.objects.only("name", "country").defer("name")\n        sql3 = str(qs3.query)\n\n        if "company\\".\\"trade_number" in sql1 or "company\\".\\"country" in sql1:\n            print("Issue reproduced")\n        elif "company\\".\\"trade_number" in sql2 or "company\\".\\"country" in sql2:\n            print("Issue reproduced")\n        elif "company\\".\\"trade_number" not in sql3 and "company\\".\\"country" in sql3:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\ntest_case = QuerySetTest()\ntest_case.setUp()\ntest_case.test_defer_only_interaction()\n```\n\nThis test case does the following:\n1. Sets up the necessary imports and defines a `Company` model according to the issue description.\n2. Creates a test company instance in the `setUp` method.\n3. Tests the behavior of `.only()` and `.defer()` interactions by creating three different querysets and capturing their generated SQL queries.\n4. Checks the SQL queries to determine if the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define a simple Company model with four fields\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\nclass QuerysetDeferOnlyTest(TestCase):\n    def setUp(self):\n        # Create a sample Company object\n        self.company = Company.objects.create(\n            name="Test Company",\n            trade_number="12345",\n            country="Test Country"\n        )\n\n    def test_defer_only_issue(self):\n        # Case 1: only("name").defer("name")\n        qs1 = Company.objects.only("name").defer("name")\n        sql1 = str(qs1.query)\n        expected_sql1 = \'SELECT "company"."id" FROM "company"\'\n        \n        # Case 2: only("name").defer("name").defer("country")\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n        sql2 = str(qs2.query)\n        expected_sql2 = \'SELECT "company"."id" FROM "company"\'\n        \n        # Case 3: only("name", "country").defer("name")\n        qs3 = Company.objects.only("name", "country").defer("name")\n        sql3 = str(qs3.query)\n        expected_sql3 = \'SELECT "company"."id", "company"."country" FROM "company"\'\n        \n        # Check the results and determine the issue status\n        if sql1 == expected_sql1 and sql2 == expected_sql2 and sql3 == expected_sql3:\n            print("Issue resolved")\n        elif sql1 != expected_sql1 or sql2 != expected_sql2:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n# Trigger the test\nif __name__ == "__main__":\n    import django\n    import os\n\n    os.environ[\'DJANGO_SETTINGS_MODULE\'] = \'your_project.settings\'\n    django.setup()\n    \n    # Run the test\n    test_case = QuerysetDeferOnlyTest()\n    test_case.setUp()\n    test_case.test_defer_only_issue()\n```\n\nNote: \n1. Replace `\'your_project.settings\'` with the actual settings module for your Django project.\n2. This script assumes you\'re running it in an environment where Django is properly configured and set up with necessary database configurations.\n3. The `QuerysetDeferOnlyTest` class can be put in your Django project\'s test suite and run using Django\'s test runner for more integrated testing.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model as described in the issue\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\nclass QuerySetDeferOnlyTestCase(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Create a sample Company instance\n        cls.company = Company.objects.create(\n            name=\'Test Company\', trade_number=\'12345\', country=\'Test Country\'\n        )\n\n    def test_defer_only_issue(self):\n        try:\n            # Reproduce the issue\n            qs1 = Company.objects.only("name").defer("name")\n            qs2 = Company.objects.only("name").defer("name").defer("country")\n            qs3 = Company.objects.only("name", "country").defer("name")\n\n            # Get the SQL query generated\n            sql1 = str(qs1.query)\n            sql2 = str(qs2.query)\n            sql3 = str(qs3.query)\n\n            # Check if the SQL queries match the expected problematic query\n            expected_sql = (\n                \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"\'\n            )\n            expected_sql_correct = (\n                \'SELECT "company"."id", "company"."country" FROM "company"\'\n            )\n\n            if (\n                sql1 == expected_sql\n                and sql2 == expected_sql\n                and sql3 == expected_sql_correct\n            ):\n                print("Issue reproduced")\n            elif (\n                sql1 == expected_sql_correct\n                and sql2 == expected_sql_correct\n                and sql3 == expected_sql_correct\n            ):\n                print("Issue resolved")\n            else:\n                print("Other issues")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n# Run the test\nif __name__ == "__main__":\n    QuerySetDeferOnlyTestCase().test_defer_only_issue()\n```\n\nThis test script sets up a Django test case with a Company model and attempts to reproduce the issue described in the issue text. It prints "Issue reproduced" if the issue is reproduced, "Issue resolved" if the issue has been fixed, and "Other issues" if other issues are encountered. This should help verify both the presence and resolution of the issue.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the Company model as described\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\n# Ensure the Django settings are configured\nif not django.conf.settings.configured:\n    django.conf.settings.configure(\n        DEBUG=True,\n        INSTALLED_APPS=[\n            \'django.contrib.contenttypes\',\n            \'django.contrib.auth\',\n            \'your_app_name\',  # Replace with your actual app name\n        ],\n        DATABASES={\n            \'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }\n        },\n        USE_TZ=True,\n    )\n    django.setup()\n\nclass QuerySetDeferOnlyTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        Company.objects.create(name="Test Company", trade_number="1234", country="USA")\n\n    def test_queryset_defer_only_issue(self):\n        from django.db import connection\n\n        # Test case 1\n        query = Company.objects.only("name").defer("name")\n        sql = str(query.query)\n        if \'SELECT "company"."id" FROM "company"\' in sql:\n            print("Issue resolved")\n        elif \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"\' in sql:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n        # Test case 2\n        query = Company.objects.only("name").defer("name").defer("country")\n        sql = str(query.query)\n        if \'SELECT "company"."id" FROM "company"\' in sql:\n            print("Issue resolved")\n        elif \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"\' in sql:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n        # Test case 3 (expected behavior)\n        query = Company.objects.only("name", "country").defer("name")\n        sql = str(query.query)\n        if \'SELECT "company"."id", "company"."country" FROM "company"\' in sql:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n# Execute the test\nQuerySetDeferOnlyTest().test_queryset_defer_only_issue()\n```\n\nIn this test:\n- We ensure the necessary imports are present.\n- We configure an in-memory SQLite database for testing.\n- We define a `Company` model as described in the issue.\n- We create test data in the `setUpTestData` method.\n- We implement the `test_queryset_defer_only_issue` method to check the SQL generated by the different querysets and print the appropriate message based on whether the issue is reproduced or resolved.\n\nMake sure to replace `\'your_app_name\'` with the actual name of your Django app to ensure the model is recognized.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\nclass CompanyQuerySetTests(TestCase):\n    def setUp(self):\n        Company.objects.create(name="Test Company", trade_number="12345", country="USA")\n        \n    def test_defer_and_only_combination(self):\n        qs = Company.objects.only("name").defer("name")\n        sql_query = str(qs.query)\n        expected_sql = \'SELECT "company"."id" FROM "company"\'\n        \n        if expected_sql in sql_query:\n            print("Issue resolved")\n        elif \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"\' in sql_query:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n        qs = Company.objects.only("name").defer("name").defer("country")\n        sql_query = str(qs.query)\n        \n        if expected_sql in sql_query:\n            print("Issue resolved")\n        elif \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"\' in sql_query:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\nCompanyQuerySetTests().test_defer_and_only_combination()\n```\n\nThis test case does the following:\n1. Sets up a `Company` model with the necessary fields.\n2. Creates a test case class `CompanyQuerySetTests` that inherits from `TestCase`.\n3. Adds a single `Company` instance for testing within the `setUp` method.\n4. Defines a method `test_defer_and_only_combination` to test the problematic query combinations.\n5. Prints "Issue resolved" if the SQL query matches the expected outcome.\n6. Prints "Issue reproduced" if the SQL query matches the problematic outcome described in the issue.\n7. Prints "Other issues" if the SQL query does not match either the expected or problematic outcomes.\n\nThis test can be used both to reproduce the issue and to verify if it has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the Company model as specified\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\nclass QuerySetDeferTest(TestCase):\n\n    def setUp(self):\n        # Create some sample data to test with\n        Company.objects.create(name="Company A", trade_number="12345", country="USA")\n        Company.objects.create(name="Company B", trade_number="67890", country="Canada")\n\n    def test_defer_only_interaction(self):\n        # Case 1: only("name").defer("name")\n        queryset1 = Company.objects.only("name").defer("name")\n        sql1 = str(queryset1.query)\n        expected_sql1 = \'SELECT "company"."id" FROM "company"\'\n        \n        # Case 2: only("name").defer("name").defer("country")\n        queryset2 = Company.objects.only("name").defer("name").defer("country")\n        sql2 = str(queryset2.query)\n        expected_sql2 = \'SELECT "company"."id" FROM "company"\'\n        \n        # Case 3: only("name", "country").defer("name")\n        queryset3 = Company.objects.only("name", "country").defer("name")\n        sql3 = str(queryset3.query)\n        expected_sql3 = \'SELECT "company"."id", "company"."country" FROM "company"\'\n        \n        try:\n            # Check if the SQL queries match the expected outcome\n            if sql1 == expected_sql1 and sql2 == expected_sql2 and sql3 == expected_sql3:\n                print("Issue resolved")\n            elif sql1 != expected_sql1 or sql2 != expected_sql2:\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n        except Exception as e:\n            print("Other issues", str(e))\n\n# Run the test case\nif __name__ == \'__main__\':\n    TestCase.main()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define a simple Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=50)\n    country = models.CharField(max_length=255)\n\n# Ensure the test is running inside a Django environment\ndjango.setup()\n\nclass QuerySetIssueTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Create a sample Company object\n        Company.objects.create(name="Test Company", trade_number="123456", country="Test Country")\n    \n    def test_defer_only_issue(self):\n        try:\n            # Test Case 1: Company.objects.only("name").defer("name")\n            queryset_1 = Company.objects.only("name").defer("name")\n            sql_1 = str(queryset_1.query)\n            \n            # Expected SQL for the first case\n            expected_sql_1 = \'SELECT "company"."id" FROM "company"\'\n\n            # Test Case 2: Company.objects.only("name").defer("name").defer("country")\n            queryset_2 = Company.objects.only("name").defer("name").defer("country")\n            sql_2 = str(queryset_2.query)\n            \n            # Expected SQL for the second case\n            expected_sql_2 = \'SELECT "company"."id" FROM "company"\'\n\n            # Test Case 3: Company.objects.only("name", "country").defer("name")\n            queryset_3 = Company.objects.only("name", "country").defer("name")\n            sql_3 = str(queryset_3.query)\n            \n            # Expected SQL for the third case\n            expected_sql_3 = \'SELECT "company"."id", "company"."country" FROM "company"\'\n            \n            try:\n                assert sql_1.strip() == expected_sql_1\n                assert sql_2.strip() == expected_sql_2\n                assert sql_3.strip() == expected_sql_3\n                print("Issue resolved")\n            except AssertionError:\n                print("Issue reproduced")\n                return\n                \n        except Exception as e:\n            print(f"Other issues: {e}")\n            return\n\n# Run the test\nif __name__ == "__main__":\n    QuerySetIssueTest().test_defer_only_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\nclass DeferOnlyTestCase(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Create a sample Company instance\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_defer_only_issue(self):\n        # Case 1: only("name").defer("name")\n        queryset1 = Company.objects.only("name").defer("name")\n        sql1 = str(queryset1.query)\n        expected_sql1 = \'SELECT "company"."id" FROM "company"\'\n        \n        # Case 2: only("name").defer("name").defer("country")\n        queryset2 = Company.objects.only("name").defer("name").defer("country")\n        sql2 = str(queryset2.query)\n        expected_sql2 = \'SELECT "company"."id" FROM "company"\'\n\n        # Case 3: only("name", "country").defer("name")\n        queryset3 = Company.objects.only("name", "country").defer("name")\n        sql3 = str(queryset3.query)\n        expected_sql3 = \'SELECT "company"."id", "company"."country" FROM "company"\'\n\n        try:\n            assert sql1 == expected_sql1, f"SQL1: {sql1}"\n            assert sql2 == expected_sql2, f"SQL2: {sql2}"\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n            return\n\n        if sql3 == expected_sql3:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\nDeferOnlyTestCase().test_defer_only_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model as described in the issue text\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\nclass QuerySetDeferOnlyTest(TestCase):\n    def setUp(self):\n        # Create a sample Company instance for testing\n        Company.objects.create(name="Test Company", trade_number="123456", country="Test Country")\n    \n    def test_defer_only_interaction(self):\n        # Generate the queryset as described in the issue\n        qs = Company.objects.only("name").defer("name")\n        \n        # Get the generated SQL query\n        sql_query = str(qs.query)\n        \n        # Check if the issue is reproduced\n        if "company\\".\\"id" in sql_query and "company\\".\\"name" in sql_query and "company\\".\\"trade_number" in sql_query and "company\\".\\"country" in sql_query:\n            print("Issue reproduced")\n        elif "company\\".\\"id" in sql_query and "company\\".\\"name" not in sql_query and "company\\".\\"trade_number" not in sql_query and "company\\".\\"country" not in sql_query:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n# Run the test\ntest_case = QuerySetDeferOnlyTest()\ntest_case.setUp()\ntest_case.test_defer_only_interaction()\n```\n\nThis test case replicates the issue described by performing the operations on the `Company` model and then generating the SQL query to inspect which fields are being selected. The output will indicate whether the issue has been reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the Company model as described in the issue text\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\nclass CompanyModelTest(TestCase):\n\n    @classmethod\n    def setUpTestData(cls):\n        # Create a sample Company instance for testing\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_queryset_defer_only_issue(self):\n        import logging\n        from django.db import connection\n\n        # Enable SQL query logging\n        logger = logging.getLogger(\'django.db.backends\')\n        logger.setLevel(logging.DEBUG)\n        logger.addHandler(logging.StreamHandler())\n\n        # Capture the SQL queries executed during the test\n        queries = []\n\n        # Define a function to capture executed queries\n        def capture_queries(query):\n            queries.append(query[\'sql\'])\n\n        # Connect the capture function to the logger\n        connection.queries_log.append((\'add_query\', capture_queries))\n\n        # Test case 1: Company.objects.only("name").defer("name")\n        Company.objects.only("name").defer("name").first()\n        query1 = queries[-1]\n\n        # Test case 2: Company.objects.only("name").defer("name").defer("country")\n        Company.objects.only("name").defer("name").defer("country").first()\n        query2 = queries[-1]\n\n        # Expected query\n        expected_query = \'SELECT "company"."id" FROM "company"\'\n\n        # Check if the executed queries match the expected query\n        try:\n            assert expected_query in query1\n            assert expected_query in query2\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n        finally:\n            # Disconnect the capture function from the logger\n            connection.queries_log.remove((\'add_query\', capture_queries))\n\n        # Check for any other issues\n        other_issues = False\n        if len(queries) != 2:\n            other_issues = True\n\n        if other_issues:\n            print("Other issues")\n\n# Run the test case\nif __name__ == "__main__":\n    CompanyModelTest().test_queryset_defer_only_issue()\n```\n\nThis test case defines the necessary model and test method to reproduce the issue described. It includes logging of SQL queries to check if the generated SQL matches the expected result. It prints appropriate messages based on whether the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='```python\n# Necessary imports\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\n# Define the test case\nclass CompanyQuerySetTest(TestCase):\n\n    def setUp(self):\n        # Create some test data\n        Company.objects.create(name="Test Company A", trade_number="1234", country="Country A")\n        Company.objects.create(name="Test Company B", trade_number="5678", country="Country B")\n\n    def test_defer_only_issue(self):\n        from django.db import connection\n\n        # Clear any previous queries\n        connection.queries_log.clear()\n\n        # Query that reproduces the issue\n        qs = Company.objects.only("name").defer("name")\n        list(qs)  # Force evaluation to trigger the query\n\n        # Fetch the executed SQL query\n        executed_sql = connection.queries_log[-1][\'sql\']\n\n        # Check if the executed SQL query matches the expected query\n        if "SELECT \\"company\\".\\"id\\" FROM \\"company\\"" in executed_sql:\n            print("Issue resolved")\n        elif "SELECT \\"company\\".\\"id\\", \\"company\\".\\"name\\", \\"company\\".\\"trade_number\\", \\"company\\".\\"country\\" FROM \\"company\\"" in executed_sql:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n# Run the test manually\nCompanyQuerySetTest().test_defer_only_issue()\n```\n\nThis test setup involves creating a `Company` model and a `TestCase` to test the issue described. It includes:\n\n1. Importing necessary modules and classes.\n2. Creating a `Company` model with `name`, `trade_number`, and `country` fields.\n3. Setting up test data within the `setUp` method.\n4. Defining a test method `test_defer_only_issue` to reproduce the issue.\n5. Forcing the evaluation of the queryset to trigger the SQL execution.\n6. Fetching and inspecting the executed SQL query to determine if the issue is reproduced or resolved.\n\nRunning this test will print "Issue reproduced" if the issue persists, "Issue resolved" if the issue is fixed, or "Other issues" if there are other unexpected results.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\n# Test case to reproduce the issue\nclass QuerySetDeferOnlyTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Create test data\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_defer_only_issue(self):\n        # Case 1: .only("name").defer("name")\n        qs1 = Company.objects.only("name").defer("name")\n        sql1 = str(qs1.query)\n        \n        # Case 2: .only("name").defer("name").defer("country")\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n        sql2 = str(qs2.query)\n        \n        # Case 3: .only("name", "country").defer("name")\n        qs3 = Company.objects.only("name", "country").defer("name")\n        sql3 = str(qs3.query)\n        \n        try:\n            # Check if the first two cases are loading all fields\n            if (\n                "SELECT \\"company\\".\\"id\\", \\"company\\".\\"name\\", \\"company\\".\\"trade_number\\", \\"company\\".\\"country\\" FROM \\"company\\"" in sql1 and\n                "SELECT \\"company\\".\\"id\\", \\"company\\".\\"name\\", \\"company\\".\\"trade_number\\", \\"company\\".\\"country\\" FROM \\"company\\"" in sql2\n            ):\n                print("Issue reproduced")\n            # Check if the third case is working as expected\n            elif (\n                "SELECT \\"company\\".\\"id\\", \\"company\\".\\"country\\" FROM \\"company\\"" in sql3\n            ):\n                print("Issue resolved")\n            else:\n                print("Other issues")\n        except Exception as e:\n            print("Other issues")\n            print(e)\n\n# Run the test\nif __name__ == "__main__":\n    QuerySetDeferOnlyTest().test_defer_only_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the model as described in the issue\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\nclass TestCompanyQuerySet(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        Company.objects.create(name="Test Company", trade_number="123456", country="USA")\n\n    def test_defer_only_issue(self):\n        # Query to reproduce the issue\n        qs1 = Company.objects.only("name").defer("name")\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n\n        # Get the SQL query as string for evaluation\n        sql1 = str(qs1.query)\n        sql2 = str(qs2.query)\n\n        # Check if the issue is reproduced\n        if \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"\' in sql1 and \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"\' in sql2:\n            print("Issue reproduced")\n        elif \'SELECT "company"."id"\' in sql1 and \'SELECT "company"."id"\' in sql2:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n# Run the test\nif __name__ == "__main__":\n    import django\n    from django.conf import settings\n\n    settings.configure(\n        DATABASES={\n            \'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }\n        },\n        INSTALLED_APPS=[\n            \'your_app_name\',  # Replace with the actual app name where Company model is defined\n        ]\n    )\n    django.setup()\n    TestCompanyQuerySet().test_defer_only_issue()\n```\n\nMake sure to replace `\'your_app_name\'` with the actual name of the app where the `Company` model is defined in your Django project.\n\nThis script will create a simple model, execute the described queries, and print "Issue reproduced" if the issue is still present, "Issue resolved" if the issue has been fixed, and "Other issues" if there are other issues with the source code.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models\nfrom django.test import TestCase\nfrom django.conf import settings\n\n# Configure Django settings\nsettings.configure(\n    DEBUG=True,\n    DATABASES={\n        \'default\': {\n            \'ENGINE\': \'django.db.backends.sqlite3\',\n            \'NAME\': \':memory:\',\n        }\n    },\n    INSTALLED_APPS=(\n        __name__,\n    )\n)\ndjango.setup()\n\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\nclass CompanyQuerySetTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        Company.objects.create(name="TestCompany", trade_number="12345", country="USA")\n\n    def test_defer_and_only_combination(self):\n        # Query 1\n        queryset1 = Company.objects.only("name").defer("name")\n        sql_query1 = str(queryset1.query)\n        expected_query1 = \'SELECT "company"."id" FROM "company"\'\n        \n        # Query 2\n        queryset2 = Company.objects.only("name").defer("name").defer("country")\n        sql_query2 = str(queryset2.query)\n        expected_query2 = \'SELECT "company"."id" FROM "company"\'\n        \n        # Query 3\n        queryset3 = Company.objects.only("name", "country").defer("name")\n        sql_query3 = str(queryset3.query)\n        expected_query3 = \'SELECT "company"."id", "company"."country" FROM "company"\'\n\n        try:\n            assert sql_query1 == expected_query1\n            assert sql_query2 == expected_query2\n            assert sql_query3 == expected_query3\n            print("Issue resolved")\n        except AssertionError:\n            if sql_query1 != expected_query1 or sql_query2 != expected_query2:\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n# Running the test manually\nif __name__ == "__main__":\n    CompanyQuerySetTest().test_defer_and_only_combination()\n```\n\nThis script sets up a minimal Django environment in memory, defines the Company model, and provides a test case to reproduce the issue described. The test case generates SQL queries using `only()` and `defer()` methods and checks if the generated SQL matches the expected output, printing appropriate messages based on the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the model\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=50)\n    country = models.CharField(max_length=100)\n\nclass CompanyQuerySetTests(TestCase):\n\n    @classmethod\n    def setUpTestData(cls):\n        # Set up data for the whole TestCase\n        Company.objects.create(name="Company A", trade_number="12345", country="USA")\n        Company.objects.create(name="Company B", trade_number="67890", country="UK")\n\n    def test_queryset_defer_only_issue(self):\n        try:\n            # Query that should reproduce the issue\n            queryset1 = Company.objects.only("name").defer("name")\n            sql1 = str(queryset1.query)\n\n            queryset2 = Company.objects.only("name").defer("name").defer("country")\n            sql2 = str(queryset2.query)\n\n            # Expected SQL queries\n            expected_sql = \'SELECT "company"."id" FROM "company"\'\n\n            if sql1 == expected_sql and sql2 == expected_sql:\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n\n        except Exception as e:\n            print("Other issues")\n            print(str(e))\n\n# Run the test\nif __name__ == "__main__":\n    CompanyQuerySetTests().test_queryset_defer_only_issue()\n```\n\nThis test case checks whether the SQL queries generated by chaining `.only()` and `.defer()` methods on the `Company` model match the expected SQL. If the issue is still present, it will print "Issue reproduced". If the issue has been resolved, it will print "Issue resolved". If any other issues are encountered during the test execution, it prints "Other issues" and the exception message.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the Company model as described in the issue\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\nclass QuerySetDeferOnlyTestCase(TestCase):\n    def setUp(self):\n        # Create a sample company object to query against\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_defer_only_issue(self):\n        # QuerySet to reproduce the described issue\n        qs1 = Company.objects.only("name").defer("name")\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n\n        # Check the actual SQL generated to see if it matches the expected behavior\n        sql1 = str(qs1.query)\n        sql2 = str(qs2.query)\n\n        # Expected SQL should only select the "id" field\n        expected_sql = \'SELECT "company"."id" FROM "company"\'\n\n        # Evaluate the outcome based on the generated SQL\n        try:\n            if sql1 == expected_sql and sql2 == expected_sql:\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n                print(f"Generated SQL 1: {sql1}")\n                print(f"Generated SQL 2: {sql2}")\n        except Exception as e:\n            print("Other issues")\n            print(str(e))\n\n# Run the test\nif __name__ == "__main__":\n    QuerySetDeferOnlyTestCase().test_defer_only_issue()\n```\n\nExplanation:\n1. **Necessary Imports**: Imported necessary modules for Django models and testing.\n2. **Code to Reproduce the Issue**: Defined a `Company` model and a test case class `QuerySetDeferOnlyTestCase` containing a method `test_defer_only_issue` to reproduce the issue.\n3. **Evaluation and Printing Outcome**: The SQL generated from the queryset is compared to the expected SQL to determine if the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\nfrom django.db import connection\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=50)\n    country = models.CharField(max_length=100)\n\n# Define the test case to reproduce the issue\nclass CompanyQuerySetTest(TestCase):\n    def setUp(self):\n        # Create some test data\n        Company.objects.create(name="Company A", trade_number="12345", country="USA")\n    \n    def test_defer_only_issue(self):\n        # Clear the query log\n        with connection.execute_wrapper(lambda execute, sql, params, many, context: execute(sql, params, many, context)):\n            # Perform the queryset operation that reproduces the issue\n            list(Company.objects.only("name").defer("name"))\n            sql = connection.queries[-1][\'sql\']\n            if "SELECT \\"company\\".\\"id\\", \\"company\\".\\"name\\", \\"company\\".\\"trade_number\\", \\"company\\".\\"country\\" FROM \\"company\\"" in sql:\n                print("Issue reproduced")\n                return\n                \n            list(Company.objects.only("name").defer("name").defer("country"))\n            sql = connection.queries[-1][\'sql\']\n            if "SELECT \\"company\\".\\"id\\", \\"company\\".\\"name\\", \\"company\\".\\"trade_number\\", \\"company\\".\\"country\\" FROM \\"company\\"" in sql:\n                print("Issue reproduced")\n                return\n            \n            # Check for the expected behavior\n            list(Company.objects.only("name", "country").defer("name"))\n            sql = connection.queries[-1][\'sql\']\n            if "SELECT \\"company\\".\\"id\\", \\"company\\".\\"country\\" FROM \\"company\\"" in sql:\n                print("Issue resolved")\n                return\n            \n            print("Other issues")\n\n# Execute the test case\nif __name__ == "__main__":\n    CompanyQuerySetTest().test_defer_only_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\n# Define a test case to reproduce the issue\nclass QuerySetDeferOnlyTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Set up initial data for the test\n        Company.objects.create(name=\'Test Company\', trade_number=\'12345\', country=\'USA\')\n\n    def test_defer_and_only_behavior(self):\n        # Test the first case with only("name").defer("name")\n        qs1 = Company.objects.only("name").defer("name")\n        sql1 = str(qs1.query)\n        expected_sql1 = \'SELECT "company"."id" FROM "company"\'\n        \n        # Test the second case with only("name").defer("name").defer("country")\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n        sql2 = str(qs2.query)\n        expected_sql2 = \'SELECT "company"."id" FROM "company"\'\n\n        # Test the third case with only("name", "country").defer("name")\n        qs3 = Company.objects.only("name", "country").defer("name")\n        sql3 = str(qs3.query)\n        expected_sql3 = \'SELECT "company"."id", "company"."country" FROM "company"\'\n\n        try:\n            # Check if the SQL queries match the expected outcomes\n            if sql1 != expected_sql1:\n                print("Issue reproduced")\n                return\n\n            if sql2 != expected_sql2:\n                print("Issue reproduced")\n                return\n\n            if sql3 == expected_sql3:\n                print("Issue resolved")\n                return\n            else:\n                print("Other issues")\n        except Exception as e:\n            print("Other issues")\n            return\n\n# Run the test\nif __name__ == "__main__":\n    QuerySetDeferOnlyTest().test_defer_and_only_behavior()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model as described in the issue\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\nclass QuerySetDeferOnlyTest(TestCase):\n\n    @classmethod\n    def setUpTestData(cls):\n        # Create some test data\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_queryset_defer_only_issue(self):\n        import re\n        from django.db import connection\n\n        # Clear previous queries\n        connection.queries_log.clear()\n\n        # Query to reproduce the issue\n        qs = Company.objects.only("name").defer("name")\n        list(qs)  # Force evaluation of the queryset\n\n        # Check the executed SQL query\n        sql_query = connection.queries_log[-1][\'sql\']\n        \n        if re.search(r\'SELECT\\s+"company"\\."id",\\s+"company"\\."name",\\s+"company"\\."trade_number",\\s+"company"\\."country"\\s+FROM\\s+"company"\', sql_query):\n            print("Issue reproduced")\n        elif re.search(r\'SELECT\\s+"company"\\."id"\\s+FROM\\s+"company"\', sql_query):\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n        # Clear previous queries\n        connection.queries_log.clear()\n\n        # Query to reproduce the issue with additional defer\n        qs = Company.objects.only("name").defer("name").defer("country")\n        list(qs)  # Force evaluation of the queryset\n\n        # Check the executed SQL query again\n        sql_query = connection.queries_log[-1][\'sql\']\n\n        if re.search(r\'SELECT\\s+"company"\\."id",\\s+"company"\\."name",\\s+"company"\\."trade_number",\\s+"company"\\."country"\\s+FROM\\s+"company"\', sql_query):\n            print("Issue reproduced")\n        elif re.search(r\'SELECT\\s+"company"\\."id"\\s+FROM\\s+"company"\', sql_query):\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n# Run the test\nif __name__ == "__main__":\n    import django\n    import os\n\n    os.environ[\'DJANGO_SETTINGS_MODULE\'] = \'test_settings\'  # Assuming test_settings is the name of your Django settings for testing\n    django.setup()\n    TestCase.run(QuerySetDeferOnlyTest(\'test_queryset_defer_only_issue\'))\n```\n\n**Explanation:**\n1. **Imports and Model Definition:** Necessary imports and the `Company` model as described.\n2. **Test Case Setup:** The `setUpTestData` method creates a test data entry to query against.\n3. **Test Logic:**\n   - **Query Execution:** Executes the queryset `.only("name").defer("name")` and forces evaluation to log the query.\n   - **SQL Analysis:** Analyzes the last executed SQL query from the connection log to check if it matches the unexpected behavior or the expected corrected behavior.\n   - **Print Statements:** Prints "Issue reproduced" if the SQL matches the issue description, "Issue resolved" if it matches the expected corrected SQL, and "Other issues" for any other discrepancies.\n4. **Clearing Queries:** Clears the query log before re-running the test with an additional `.defer("country")` condition.\n\n**Note:** Ensure to set up a `test_settings.py` for Django settings to use during testing. Adjust the environment variable accordingly.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\nclass QuerySetDeferOnlyTest(TestCase):\n    def setUp(self):\n        # Set up test data\n        Company.objects.create(name="Company A", trade_number="12345", country="Country A")\n        Company.objects.create(name="Company B", trade_number="67890", country="Country B")\n\n    def test_defer_only_issue(self):\n        # Case 1: only("name").defer("name")\n        queryset = Company.objects.only("name").defer("name")\n        sql = str(queryset.query)\n        expected_sql = (\n            \'SELECT "company"."id" FROM "company"\'\n        )\n        if expected_sql not in sql:\n            print("Issue reproduced")\n            return\n\n        # Case 2: only("name").defer("name").defer("country")\n        queryset = Company.objects.only("name").defer("name").defer("country")\n        sql = str(queryset.query)\n        if expected_sql not in sql:\n            print("Issue reproduced")\n            return\n\n        # Case 3: only("name", "country").defer("name")\n        queryset = Company.objects.only("name", "country").defer("name")\n        sql = str(queryset.query)\n        expected_sql_case_3 = (\n            \'SELECT "company"."id", "company"."country" FROM "company"\'\n        )\n        if expected_sql_case_3 in sql:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n        \n        return\n\n# Run the test\nQuerySetDeferOnlyTest().test_defer_only_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\nfrom django.db import connection\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\n# Define the test case to reproduce the issue\nclass DeferOnlyTestCase(TestCase):\n    def setUp(self):\n        # Set up initial data\n        Company.objects.create(name="Company A", trade_number="1234", country="USA")\n        Company.objects.create(name="Company B", trade_number="5678", country="Canada")\n\n    def test_defer_only_issue(self):\n        # Test case example from the issue\n        queryset = Company.objects.only("name").defer("name")\n\n        # Capture the SQL generated by the queryset\n        sql = str(queryset.query)\n        expected_sql = (\n            \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"\'\n        )\n\n        if expected_sql in sql:\n            print("Issue reproduced")\n        else:\n            expected_fixed_sql = \'SELECT "company"."id" FROM "company"\'\n            if expected_fixed_sql in sql:\n                print("Issue resolved")\n            else:\n                print("Other issues")\n        return\n\n# Run the test\nif __name__ == "__main__":\n    test_case = DeferOnlyTestCase()\n    test_case.setUp()\n    test_case.test_defer_only_issue()\n```\n\nThis test case sets up the `Company` model and tests the specific scenario described in the issue. It captures the generated SQL query and compares it with the expected SQL to determine if the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\n# Create a test case to reproduce the issue\nclass QuerySetDeferOnlyTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Create a sample Company instance\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_defer_and_only_combination(self):\n        # Query with only().defer() combination\n        qs1 = Company.objects.only("name").defer("name")\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n        \n        # Get the SQL query for both querysets\n        sql1 = str(qs1.query)\n        sql2 = str(qs2.query)\n        \n        # Expected SQL query\n        expected_sql = \'SELECT "company"."id" FROM "company"\'\n        \n        try:\n            # Check if the queries match the expected SQL\n            assert sql1 == expected_sql\n            assert sql2 == expected_sql\n            print("Issue resolved")\n        except AssertionError:\n            print("Issue reproduced")\n        except Exception as e:\n            print("Other issues")\n            print(str(e))\n\n# Run the test\nQuerySetDeferOnlyTest().test_defer_and_only_combination()\n```\n\nThis test case is designed to reproduce the issue and verify if it has been resolved. It will print "Issue reproduced" if the behavior matches the issue described (i.e., if the SQL query includes unexpected fields), "Issue resolved" if the issue has been fixed (produces the expected SQL query), and "Other issues" if any other exceptions or errors occur.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Defining the model\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\n# Test case to reproduce the issue\nclass QuerySetDeferOnlyTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Creating a sample company\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_defer_only_issue(self):\n        # Clear print statements for easy debugging\n        def print_issue_state(state):\n            print(state)\n            return\n        \n        try:\n            # Scenario 1\n            qs = Company.objects.only("name").defer("name")\n            sql_query_1 = str(qs.query)\n            expected_query_1 = \'SELECT "company"."id" FROM "company"\'\n\n            # Scenario 2\n            qs = Company.objects.only("name").defer("name").defer("country")\n            sql_query_2 = str(qs.query)\n            expected_query_2 = \'SELECT "company"."id" FROM "company"\'\n            \n            # Scenario 3\n            qs = Company.objects.only("name", "country").defer("name")\n            sql_query_3 = str(qs.query)\n            expected_query_3 = \'SELECT "company"."id", "company"."country" FROM "company"\'\n\n            # Check for unexpected behavior or issue reproduction\n            if sql_query_1 != expected_query_1 or sql_query_2 != expected_query_2:\n                print_issue_state("Issue reproduced")\n            elif sql_query_3 == expected_query_3:\n                print_issue_state("Issue resolved")\n            else:\n                print_issue_state("Other issues")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n# Running the test\nif __name__ == "__main__":\n    QuerySetDeferOnlyTest().test_defer_only_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\n# Define a test case to reproduce the issue\nclass CompanyModelTest(TestCase):\n\n    @classmethod\n    def setUpTestData(cls):\n        # Create a sample Company instance\n        Company.objects.create(name="Test Company", trade_number="12345", country="US")\n\n    def test_queryset_defer_only_issue(self):\n        # Get the queryset that should reproduce the issue\n        queryset = Company.objects.only("name").defer("name")\n        sql_query = str(queryset.query)\n\n        # Check the SQL query to see if it includes all fields\n        if "SELECT" in sql_query and "company" in sql_query and \'"company"."id"\' in sql_query and \'"company"."name"\' in sql_query and \'"company"."trade_number"\' in sql_query and \'"company"."country"\' in sql_query:\n            print("Issue reproduced")\n        elif "SELECT" in sql_query and \'"company"."id"\' in sql_query and \'"company"."name"\' not in sql_query and \'"company"."trade_number"\' not in sql_query and \'"company"."country"\' not in sql_query:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n# Execute the test case\nif __name__ == "__main__":\n    import django\n    import os\n    os.environ.setdefault(\'DJANGO_SETTINGS_MODULE\', \'test_settings\')\n    django.setup()\n    CompanyModelTest().test_queryset_defer_only_issue()\n```\n\nExplanation:\n1. **Necessary Imports**: Imported necessary modules from `django`.\n2. **Code to Reproduce the Issue**: Created a `Company` model and set up test data.\n3. **Print Statements**:\n   - **"Issue reproduced"**: Printed if the SQL query includes all fields when it shouldn\'t.\n   - **"Issue resolved"**: Printed if the SQL query only includes the `id` field as expected.\n   - **"Other issues"**: Printed for any other unexpected results.\n4. **Execution Block**: Ensured the test can be run directly. Adjusted environment settings for Django.\n\nThis test will help to identify if the `defer` and `only` methods on the queryset are producing the expected SQL query, thereby reproducing or resolving the issue as described.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\n# Test case to reproduce and verify the issue\nclass CompanyQuerySetTest(TestCase):\n\n    @classmethod\n    def setUpTestData(cls):\n        # Create a company instance to work with\n        Company.objects.create(name="Test Company", trade_number="12345", country="Testland")\n\n    def test_defer_with_only(self):\n        # Reproduce issue: defer() following only()\n        qs1 = Company.objects.only("name").defer("name")\n        qs1_sql = str(qs1.query)\n        # Expected SQL: SELECT "company"."id" FROM "company"\n        if \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"\' in qs1_sql:\n            print("Issue reproduced")\n        elif \'SELECT "company"."id" FROM "company"\' in qs1_sql:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n        # Reproduce issue: defer() following only(), multiple defers\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n        qs2_sql = str(qs2.query)\n        # Expected SQL: SELECT "company"."id" FROM "company"\n        if \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"\' in qs2_sql:\n            print("Issue reproduced")\n        elif \'SELECT "company"."id" FROM "company"\' in qs2_sql:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n        # Check for expected behavior\n        qs3 = Company.objects.only("name", "country").defer("name")\n        qs3_sql = str(qs3.query)\n        # Expected SQL: SELECT "company"."id", "company"."country" FROM "company"\n        if \'SELECT "company"."id", "company"."country" FROM "company"\' in qs3_sql:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n# Running the test\nif __name__ == \'__main__\':\n    CompanyQuerySetTest().test_defer_with_only()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define a simple Company model for testing\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\nclass QuerySetDeferOnlyTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Create a sample Company instance for querying\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_only_and_defer(self):\n        # Reproduce the issue with only() and defer()\n        queryset = Company.objects.only("name").defer("name")\n        sql = str(queryset.query)\n\n        # Expected SQL: "SELECT "company"."id" FROM "company"" but actually loads all fields\n        expected_sql = \'SELECT "company"."id" FROM "company"\'\n\n        if sql == expected_sql:\n            print("Issue resolved")\n        elif \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"\' in sql:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n        # Additional case as per the issue description\n        queryset = Company.objects.only("name").defer("name").defer("country")\n        sql = str(queryset.query)\n\n        if sql == expected_sql:\n            print("Issue resolved")\n        elif \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"\' in sql:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n# Run the test\nQuerySetDeferOnlyTest().test_only_and_defer()\n```\n\nThis test case sets up a `Company` model and a test class `QuerySetDeferOnlyTest` to reproduce the issue. It verifies if the SQL query generated matches the expected result and prints the appropriate message based on the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\n# Test case to reproduce the issue\nclass QuerySetDeferOnlyTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Create a company instance for testing\n        Company.objects.create(name=\'Test Company\', trade_number=\'12345\', country=\'Test Country\')\n\n    def test_defer_only_issue(self):\n        # QuerySet with only() followed by defer() on the same field\n        qs = Company.objects.only("name").defer("name")\n        sql = str(qs.query)\n\n        expected_sql = \'SELECT "company"."id" FROM "company"\'\n        if expected_sql in sql:\n            print("Issue resolved")\n        elif "\'company\'.\'id\', \'company\'.\'name\', \'company\'.\'trade_number\', \'company\'.\'country\'" in sql:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n    def test_defer_only_with_additional_defer(self):\n        # QuerySet with only() followed by defer() on multiple fields\n        qs = Company.objects.only("name").defer("name").defer("country")\n        sql = str(qs.query)\n\n        expected_sql = \'SELECT "company"."id" FROM "company"\'\n        if expected_sql in sql:\n            print("Issue resolved")\n        elif "\'company\'.\'id\', \'company\'.\'name\', \'company\'.\'trade_number\', \'company\'.\'country\'" in sql:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n# Run the tests\nif __name__ == "__main__":\n    import django\n    import sys\n    from django.conf import settings\n\n    settings.configure(\n        DATABASES={\n            \'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }\n        },\n        INSTALLED_APPS=[\n            __name__,\n        ],\n    )\n    django.setup()\n    TestCase.run = lambda self: TestCase.defaultTestResult().startTest(self).stopTest(self)\n    tests = QuerySetDeferOnlyTest()\n    tests.setUpClass()\n    tests.setUp()\n    tests.test_defer_only_issue()\n    tests.test_defer_only_with_additional_defer()\n```\n\nThis test case is designed to reproduce the issue described in the provided issue text. It includes two tests:\n\n1. `test_defer_only_issue` verifies the behavior when `only("name")` is followed by `defer("name")`.\n2. `test_defer_only_with_additional_defer` verifies the behavior when `only("name")` is followed by `defer("name")` and `defer("country")`.\n\nDepending on the SQL generated by the queryset, it prints "Issue resolved" if the expected SQL is generated, "Issue reproduced" if the issue is reproduced, or "Other issues" if there are unexpected behaviors.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define the Company model as described in the issue\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\nclass QuerySetDeferOnlyTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Create a sample Company instance\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_defer_only_interaction(self):\n        # Test case for reproducing the issue with defer() and only()\n        qs = Company.objects.only("name").defer("name")\n        sql_query = str(qs.query)\n        \n        if \'SELECT "company"."id" FROM\' in sql_query:\n            print("Issue resolved")\n        elif \'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM\' in sql_query:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n# Running the test\nif __name__ == "__main__":\n    import django\n    from django.conf import settings\n\n    settings.configure(\n        DATABASES={\n            \'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }\n        },\n        INSTALLED_APPS=[\'__main__\'],\n    )\n    django.setup()\n    import unittest\n    unittest.main()\n```\n\nThis script does the following:\n1. Defines the necessary imports and the `Company` model.\n2. Sets up a test case to reproduce the issue.\n3. Generates a queryset that should expose the behavior described.\n4. Compares the generated SQL query to expected results and prints "Issue resolved", "Issue reproduced", or "Other issues" based on the comparison. \n\nThis test can be used to check if the issue described in the issue text is reproducible or has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model for the test\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\nclass QuerySetDeferOnlyTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Create a sample Company instance\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_defer_only_issue(self):\n        # Test case 1: .only("name").defer("name")\n        qs1 = Company.objects.only("name").defer("name")\n        sql_query1 = str(qs1.query)\n        expected_query1 = \'SELECT "company"."id" FROM "company"\'\n        if sql_query1 == expected_query1:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n            return\n\n        # Test case 2: .only("name").defer("name").defer("country")\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n        sql_query2 = str(qs2.query)\n        expected_query2 = \'SELECT "company"."id" FROM "company"\'\n        if sql_query2 == expected_query2:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n            return\n\n        # Additional test case for expected behavior\n        qs3 = Company.objects.only("name", "country").defer("name")\n        sql_query3 = str(qs3.query)\n        expected_query3 = \'SELECT "company"."id", "company"."country" FROM "company"\'\n        if sql_query3 == expected_query3:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n            return\n\n        print("All tests passed")\n\n# Run the test\nif __name__ == \'__main__\':\n    QuerySetDeferOnlyTest().test_defer_only_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom django.db import models\n\n# Define the Company model\nclass Company(models.Model):\n    name = models.CharField(max_length=100)\n    trade_number = models.CharField(max_length=100)\n    country = models.CharField(max_length=100)\n\n# Define the test case\nclass QuerySetDeferOnlyTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        # Create a Company instance for testing\n        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")\n\n    def test_defer_only_issue(self):\n        # Import connection and reset queries to capture SQL statements\n        from django.db import connection\n        connection.queries_log.clear()\n\n        # Test case 1: only("name").defer("name")\n        queryset = Company.objects.only("name").defer("name")\n        list(queryset)  # Evaluate the queryset\n\n        # Check generated SQL for test case 1\n        sql = connection.queries[-1][\'sql\']\n        if "SELECT "company"."id" FROM "company"" in sql:\n            print("Issue resolved")\n        elif "SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"" in sql:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n        # Clear queries log for next test\n        connection.queries_log.clear()\n\n        # Test case 2: only("name").defer("name").defer("country")\n        queryset = Company.objects.only("name").defer("name").defer("country")\n        list(queryset)  # Evaluate the queryset\n\n        # Check generated SQL for test case 2\n        sql = connection.queries[-1][\'sql\']\n        if "SELECT "company"."id" FROM "company"" in sql:\n            print("Issue resolved")\n        elif "SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"" in sql:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n# Run the test\nif __name__ == "__main__":\n    import django\n    import sys\n    from django.conf import settings\n\n    settings.configure(\n        DATABASES={\'default\': {\'ENGINE\': \'django.db.backends.sqlite3\', \'NAME\': \':memory:\'}},\n        INSTALLED_APPS=[\'__main__\'],\n    )\n    django.setup()\n    from django.test.utils import get_runner\n\n    TestRunner = get_runner(settings)\n    test_runner = TestRunner()\n    failures = test_runner.run_tests([\'__main__\'])\n    sys.exit(bool(failures))\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.test import TestCase\n\n# Define a simple Company model as described in the issue\nclass Company(models.Model):\n    name = models.CharField(max_length=255)\n    trade_number = models.CharField(max_length=255)\n    country = models.CharField(max_length=255)\n\nclass QuerySetDeferOnlyTest(TestCase):\n    @classmethod\n    def setUpTestData(cls):\n        Company.objects.create(name="Acme Corp", trade_number="12345", country="US")\n\n    def test_defer_only_issue(self):\n        # Case 1: .only("name").defer("name")\n        qs1 = Company.objects.only("name").defer("name")\n        sql1 = str(qs1.query)\n\n        # Case 2: .only("name").defer("name").defer("country")\n        qs2 = Company.objects.only("name").defer("name").defer("country")\n        sql2 = str(qs2.query)\n\n        # Case 3: .only("name", "country").defer("name")\n        qs3 = Company.objects.only("name", "country").defer("name")\n        sql3 = str(qs3.query)\n\n        # Expected SQL queries\n        expected_sql1 = \'SELECT "company"."id" FROM "company"\'\n        expected_sql2 = \'SELECT "company"."id" FROM "company"\'\n        expected_sql3 = \'SELECT "company"."id", "company"."country" FROM "company"\'\n\n        # Check if the issue is reproduced\n        try:\n            assert sql1 == expected_sql1\n            assert sql2 == expected_sql2\n            assert sql3 == expected_sql3\n            print("Issue resolved")\n        except AssertionError:\n            if sql1 != expected_sql1 or sql2 != expected_sql2:\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n\n# Run the test\nif __name__ == "__main__":\n    QuerySetDeferOnlyTest().test_defer_only_issue()\n```\n\nThis script:\n1. Defines a simple `Company` model according to the issue description.\n2. Sets up test data.\n3. Contains a test case that checks the SQL queries generated for the three scenarios described in the issue.\n4. Prints "Issue reproduced" if the issue is reproduced, "Issue resolved" if the expected behavior is observed, and "Other issues" if there are other discrepancies.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.test import TestCase\nfrom .models import Company\n\nclass CompanyQuerySetTest(TestCase):\n    def setUp(self):\n        # Create a sample company instance\n        Company.objects.create(name="Test Company", trade_number="123456", country="Country")\n\n    def test_defer_and_only_chaining(self):\n        # Test case 1: only("name").defer("name")\n        queryset = Company.objects.only("name").defer("name")\n        sql = str(queryset.query)\n        if "SELECT "company"."id" FROM "company"" in sql:\n            print("Issue resolved")\n        elif "SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"" in sql:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n        # Test case 2: only("name").defer("name").defer("country")\n        queryset = Company.objects.only("name").defer("name").defer("country")\n        sql = str(queryset.query)\n        if "SELECT "company"."id" FROM "company"" in sql:\n            print("Issue resolved")\n        elif "SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"" in sql:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n        # Test case 3: only("name", "country").defer("name")\n        queryset = Company.objects.only("name", "country").defer("name")\n        sql = str(queryset.query)\n        if "SELECT "company"."id", "company"."country" FROM "company"" in sql:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n# Run the test\nCompanyQuerySetTest().test_defer_and_only_chaining()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299200, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=18560, prompt_tokens=598, total_tokens=19158, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:09:10,835 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+class QuerySetDeferOnlyTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create a sample Company instance
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_defer_only_issue(self):
+        # Test case 1: only("name").defer("name")
+        qs1 = Company.objects.only("name").defer("name")
+        sql1 = str(qs1.query)
+        expected_sql1 = 'SELECT "company"."id" FROM "company"'
+        
+        # Test case 2: only("name").defer("name").defer("country")
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+        sql2 = str(qs2.query)
+        expected_sql2 = 'SELECT "company"."id" FROM "company"'
+        
+        # Test case 3: only("name", "country").defer("name")
+        qs3 = Company.objects.only("name", "country").defer("name")
+        sql3 = str(qs3.query)
+        expected_sql3 = 'SELECT "company"."id", "company"."country" FROM "company"'
+        
+        try:
+            assert sql1 == expected_sql1
+            assert sql2 == expected_sql2
+            assert sql3 == expected_sql3
+            print("Issue resolved")
+        except AssertionError:
+            if sql1 != expected_sql1 or sql2 != expected_sql2:
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+# Run the test
+if __name__ == "__main__":
+    import django
+    import sys
+    from django.conf import settings
+
+    settings.configure(
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        INSTALLED_APPS=[
+            __name__,
+        ],
+    )
+    django.setup()
+    TestCase.run = lambda self, *args, **kwargs: self._pre_setup() or self.setUp() or self.test_defer_only_issue() or self.tearDown() or self._post_teardown()
+    QuerySetDeferOnlyTest().run()
+```
+
+This test script sets up a Django test case to reproduce the issue described. It creates a `Company` model, sets up test data, and then runs three test cases to check the SQL queries generated by the `only()` and `defer()` methods. The script prints "Issue resolved" if the queries match the expected SQL, "Issue reproduced" if they do not, and "Other issues" if there are other problems.
+2025-05-03 14:09:10,836 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+# Define the test case to reproduce the issue
+class QuerySetDeferOnlyTest(TestCase):
+    def setUp(self):
+        Company.objects.create(name="Test Company", trade_number="123456", country="US")
+
+    def test_defer_only_issue(self):
+        # Case 1: Company.objects.only("name").defer("name")
+        qs = Company.objects.only("name").defer("name")
+        sql = str(qs.query)
+        
+        expected_fields = ["id"]
+        if all(field in sql for field in expected_fields) and not any(field in sql for field in ["trade_number", "country"]):
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+        
+        # Case 2: Company.objects.only("name").defer("name").defer("country")
+        qs = Company.objects.only("name").defer("name").defer("country")
+        sql = str(qs.query)
+        
+        if all(field in sql for field in expected_fields) and not any(field in sql for field in ["trade_number", "country"]):
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+
+        # Additional check to ensure other query combinations work as expected
+        qs = Company.objects.only("name", "country").defer("name")
+        sql = str(qs.query)
+        
+        expected_fields = ["id", "country"]
+        if all(field in sql for field in expected_fields) and "name" not in sql:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+# Running the test case directly
+if __name__ == "__main__":
+    import django
+    from django.conf import settings
+
+    settings.configure(
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        INSTALLED_APPS=[
+            __name__,
+        ]
+    )
+    django.setup()
+    TestCase.run = lambda self, *args, **kwargs: self._pre_setup() or type(self).__dict__["test_defer_only_issue"](self) or self._post_teardown()
+    QuerySetDeferOnlyTest().run()
+```
+2025-05-03 14:09:10,836 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define the Company model to match the issue description
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+# Create the test case to reproduce the issue
+class QuerySetDeferOnlyTestCase(TestCase):
+
+    def setUp(self):
+        # Create a Company instance for testing
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_defer_only_issue(self):
+        # First test case: only("name").defer("name")
+        queryset1 = Company.objects.only("name").defer("name")
+        sql_query1 = str(queryset1.query)
+        expected_query1 = 'SELECT "company"."id" FROM "company"'
+        
+        # Second test case: only("name").defer("name").defer("country")
+        queryset2 = Company.objects.only("name").defer("name").defer("country")
+        sql_query2 = str(queryset2.query)
+        expected_query2 = 'SELECT "company"."id" FROM "company"'
+        
+        try:
+            assert sql_query1 == expected_query1, f"Unexpected query: {sql_query1}"
+            assert sql_query2 == expected_query2, f"Unexpected query: {sql_query2}"
+            print("Issue resolved")
+        except AssertionError as e:
+            print("Issue reproduced")
+            print(e)
+            return
+        
+        print("Other issues")
+
+# Run the test case
+if __name__ == "__main__":
+    import django
+    from django.conf import settings
+
+    # Minimal Django settings necessary to run the test
+    settings.configure(
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        INSTALLED_APPS=[
+            __name__,  # The current script/module
+        ],
+    )
+    django.setup()
+    TestCase.run(QuerySetDeferOnlyTestCase('test_defer_only_issue'))
+```
+
+This test case follows the issue description and includes the steps to verify if the issue is reproduced or resolved. It uses Django's ORM to set up a test database schema in memory, insert test data, and then check the generated SQL queries against the expected queries. If the generated queries do not match the expected queries, the test will print "Issue reproduced". If they match, it will print "Issue resolved". If any other unexpected issue arises, it will print "Other issues".
+2025-05-03 14:09:10,836 - INFO - raw output:
+```python
+import django
+from django.test import TestCase
+from django.db import models
+
+# Define a simple Company model for testing
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+class QuerySetDeferOnlyTest(TestCase):
+
+    def setUp(self):
+        # Create a sample Company instance
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_defer_only_issue(self):
+        # Query with only() followed by defer()
+        qs1 = Company.objects.only("name").defer("name")
+        sql1 = str(qs1.query)
+
+        # Query with only() followed by defer("name") and defer("country")
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+        sql2 = str(qs2.query)
+
+        # Expected SQL queries
+        expected_sql = 'SELECT "company"."id" FROM "company"'
+
+        try:
+            # Check if the SQL queries are as expected
+            if expected_sql not in sql1 or expected_sql not in sql2:
+                print("Issue reproduced")
+            else:
+                print("Issue resolved")
+        except Exception as e:
+            print("Other issues", e)
+
+if __name__ == "__main__":
+    # Ensure Django settings are configured before running tests
+    import os
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'your_project.settings'
+    django.setup()
+    # Running the test
+    TestCase.run(QuerySetDeferOnlyTest('test_defer_only_issue'))
+```
+
+Please replace `'your_project.settings'` with the actual path to your Django project's settings module. This code sets up a unit test to recreate the issue described, checks the generated SQL queries, and prints the appropriate message based on whether the issue is reproduced, resolved, or if other issues are detected.
+2025-05-03 14:09:10,836 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+class QuerySetDeferOnlyIssueTest(TestCase):
+    def setUp(self):
+        Company.objects.create(name="Test Company 1", trade_number="TN123", country="Country1")
+        Company.objects.create(name="Test Company 2", trade_number="TN456", country="Country2")
+    
+    def test_only_defer_combination(self):
+        # Case 1: only("name").defer("name")
+        qs1 = Company.objects.only("name").defer("name")
+        sql1 = str(qs1.query)
+
+        # Check if all fields are being selected
+        if 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"' in sql1:
+            print("Issue reproduced")
+        else:
+            if 'SELECT "company"."id"' in sql1:
+                print("Issue resolved")
+            else:
+                print("Other issues")
+        
+        # Case 2: only("name").defer("name").defer("country")
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+        sql2 = str(qs2.query)
+        
+        # Check if all fields are being selected
+        if 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"' in sql2:
+            print("Issue reproduced")
+        else:
+            if 'SELECT "company"."id"' in sql2:
+                print("Issue resolved")
+            else:
+                print("Other issues")
+                
+        # Case 3: only("name", "country").defer("name")
+        qs3 = Company.objects.only("name", "country").defer("name")
+        sql3 = str(qs3.query)
+        
+        # Check if only id and country fields are being selected
+        if 'SELECT "company"."id", "company"."country"' in sql3:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+# Run the test
+QuerySetDeferOnlyIssueTest().test_only_defer_combination()
+```
+2025-05-03 14:09:10,836 - INFO - raw output:
+```python
+from django.test import TestCase
+from myapp.models import Company
+
+class CompanyQuerySetTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        Company.objects.create(name="Test Company", trade_number="123", country="Test Country")
+
+    def test_only_defer_combination(self):
+        try:
+            # Clear deferred field when chaining .only() and .defer()
+            queryset = Company.objects.only("name").defer("name")
+            sql_query = str(queryset.query)
+            expected_query = 'SELECT "company"."id" FROM "company"'
+            if expected_query in sql_query:
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+                return
+            
+            # Add another defer to the combination
+            queryset = Company.objects.only("name").defer("name").defer("country")
+            sql_query = str(queryset.query)
+            if expected_query in sql_query:
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+                return
+            
+            # Ensure the combination works as expected
+            queryset = Company.objects.only("name", "country").defer("name")
+            sql_query = str(queryset.query)
+            expected_query = 'SELECT "company"."id", "company"."country" FROM "company"'
+            if expected_query in sql_query:
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+                return
+
+        except Exception as e:
+            print("Other issues")
+            return
+
+CompanyQuerySetTest().test_only_defer_combination()
+```
+
+In this script:
+1. We import the necessary components from Django.
+2. We define a test case class `CompanyQuerySetTest` that inherits from `TestCase`.
+3. We set up test data using `setUpTestData`.
+4. We define a test method `test_only_defer_combination` that runs the tests described in the issue.
+5. We print "Issue resolved" if the SQL query matches the expected output, "Issue reproduced" if it does not, and "Other issues" if an exception occurs.
+2025-05-03 14:09:10,836 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+# The test case to reproduce the issue
+class CompanyTestCase(TestCase):
+    def setUp(self):
+        # Create some test data
+        Company.objects.create(name="Company A", trade_number="TN123", country="USA")
+        Company.objects.create(name="Company B", trade_number="TN456", country="CAN")
+
+    def test_defer_with_only(self):
+        try:
+            # Fetch using only and defer
+            qs = Company.objects.only("name").defer("name")
+            sql = str(qs.query)
+            expected_query = 'SELECT "company"."id" FROM "company"'
+            if sql == expected_query:
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+        except Exception as e:
+            print("Other issues", e)
+
+        try:
+            # Fetch using only, defer, and defer another field
+            qs = Company.objects.only("name").defer("name").defer("country")
+            sql = str(qs.query)
+            expected_query = 'SELECT "company"."id" FROM "company"'
+            if sql == expected_query:
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+        except Exception as e:
+            print("Other issues", e)
+
+        try:
+            # Fetch using only and defer a different field
+            qs = Company.objects.only("name", "country").defer("name")
+            sql = str(qs.query)
+            expected_query = 'SELECT "company"."id", "company"."country" FROM "company"'
+            if sql == expected_query:
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+        except Exception as e:
+            print("Other issues", e)
+
+# Running the test case
+if __name__ == "__main__":
+    CompanyTestCase().test_defer_with_only()
+```
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+import django
+from django.db import models
+from django.test import TestCase
+
+# Define the Company model as described in the issue
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+# Define the test case to reproduce the issue
+class CompanyQuerySetTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        # Create some sample data
+        Company.objects.create(name="Company A", trade_number="123", country="USA")
+
+    def test_defer_with_only_issue(self):
+        # Scenario 1: Company.objects.only("name").defer("name")
+        qs_1 = Company.objects.only("name").defer("name")
+        sql_1 = str(qs_1.query)
+
+        # Scenario 2: Company.objects.only("name").defer("name").defer("country")
+        qs_2 = Company.objects.only("name").defer("name").defer("country")
+        sql_2 = str(qs_2.query)
+
+        # Scenario 3: Company.objects.only("name", "country").defer("name")
+        qs_3 = Company.objects.only("name", "country").defer("name")
+        sql_3 = str(qs_3.query)
+
+        # Expected SQL query
+        expected_sql_1 = 'SELECT "company"."id" FROM "company"'
+
+        # Check if the issue is reproduced
+        if 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"' in sql_1:
+            print("Issue reproduced")
+        elif 'SELECT "company"."id" FROM "company"' in sql_1 and sql_2 and sql_3:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+# Running the test
+if __name__ == "__main__":
+    django.setup()
+    CompanyQuerySetTest().test_defer_with_only_issue()
+```
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define the Company model as described in the issue
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+class QuerySetTest(TestCase):
+    def setUp(self):
+        # Create a test company instance
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_defer_only_interaction(self):
+        # Case 1: .only("name").defer("name")
+        qs1 = Company.objects.only("name").defer("name")
+        sql1 = str(qs1.query)
+        
+        # Case 2: .only("name").defer("name").defer("country")
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+        sql2 = str(qs2.query)
+        
+        # Case 3: .only("name", "country").defer("name")
+        qs3 = Company.objects.only("name", "country").defer("name")
+        sql3 = str(qs3.query)
+
+        if "company\".\"trade_number" in sql1 or "company\".\"country" in sql1:
+            print("Issue reproduced")
+        elif "company\".\"trade_number" in sql2 or "company\".\"country" in sql2:
+            print("Issue reproduced")
+        elif "company\".\"trade_number" not in sql3 and "company\".\"country" in sql3:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+test_case = QuerySetTest()
+test_case.setUp()
+test_case.test_defer_only_interaction()
+```
+
+This test case does the following:
+1. Sets up the necessary imports and defines a `Company` model according to the issue description.
+2. Creates a test company instance in the `setUp` method.
+3. Tests the behavior of `.only()` and `.defer()` interactions by creating three different querysets and capturing their generated SQL queries.
+4. Checks the SQL queries to determine if the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define a simple Company model with four fields
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+class QuerysetDeferOnlyTest(TestCase):
+    def setUp(self):
+        # Create a sample Company object
+        self.company = Company.objects.create(
+            name="Test Company",
+            trade_number="12345",
+            country="Test Country"
+        )
+
+    def test_defer_only_issue(self):
+        # Case 1: only("name").defer("name")
+        qs1 = Company.objects.only("name").defer("name")
+        sql1 = str(qs1.query)
+        expected_sql1 = 'SELECT "company"."id" FROM "company"'
+        
+        # Case 2: only("name").defer("name").defer("country")
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+        sql2 = str(qs2.query)
+        expected_sql2 = 'SELECT "company"."id" FROM "company"'
+        
+        # Case 3: only("name", "country").defer("name")
+        qs3 = Company.objects.only("name", "country").defer("name")
+        sql3 = str(qs3.query)
+        expected_sql3 = 'SELECT "company"."id", "company"."country" FROM "company"'
+        
+        # Check the results and determine the issue status
+        if sql1 == expected_sql1 and sql2 == expected_sql2 and sql3 == expected_sql3:
+            print("Issue resolved")
+        elif sql1 != expected_sql1 or sql2 != expected_sql2:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+# Trigger the test
+if __name__ == "__main__":
+    import django
+    import os
+
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'your_project.settings'
+    django.setup()
+    
+    # Run the test
+    test_case = QuerysetDeferOnlyTest()
+    test_case.setUp()
+    test_case.test_defer_only_issue()
+```
+
+Note: 
+1. Replace `'your_project.settings'` with the actual settings module for your Django project.
+2. This script assumes you're running it in an environment where Django is properly configured and set up with necessary database configurations.
+3. The `QuerysetDeferOnlyTest` class can be put in your Django project's test suite and run using Django's test runner for more integrated testing.
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model as described in the issue
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+class QuerySetDeferOnlyTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create a sample Company instance
+        cls.company = Company.objects.create(
+            name='Test Company', trade_number='12345', country='Test Country'
+        )
+
+    def test_defer_only_issue(self):
+        try:
+            # Reproduce the issue
+            qs1 = Company.objects.only("name").defer("name")
+            qs2 = Company.objects.only("name").defer("name").defer("country")
+            qs3 = Company.objects.only("name", "country").defer("name")
+
+            # Get the SQL query generated
+            sql1 = str(qs1.query)
+            sql2 = str(qs2.query)
+            sql3 = str(qs3.query)
+
+            # Check if the SQL queries match the expected problematic query
+            expected_sql = (
+                'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"'
+            )
+            expected_sql_correct = (
+                'SELECT "company"."id", "company"."country" FROM "company"'
+            )
+
+            if (
+                sql1 == expected_sql
+                and sql2 == expected_sql
+                and sql3 == expected_sql_correct
+            ):
+                print("Issue reproduced")
+            elif (
+                sql1 == expected_sql_correct
+                and sql2 == expected_sql_correct
+                and sql3 == expected_sql_correct
+            ):
+                print("Issue resolved")
+            else:
+                print("Other issues")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+# Run the test
+if __name__ == "__main__":
+    QuerySetDeferOnlyTestCase().test_defer_only_issue()
+```
+
+This test script sets up a Django test case with a Company model and attempts to reproduce the issue described in the issue text. It prints "Issue reproduced" if the issue is reproduced, "Issue resolved" if the issue has been fixed, and "Other issues" if other issues are encountered. This should help verify both the presence and resolution of the issue.
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+import django
+from django.db import models
+from django.test import TestCase
+
+# Define the Company model as described
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+# Ensure the Django settings are configured
+if not django.conf.settings.configured:
+    django.conf.settings.configure(
+        DEBUG=True,
+        INSTALLED_APPS=[
+            'django.contrib.contenttypes',
+            'django.contrib.auth',
+            'your_app_name',  # Replace with your actual app name
+        ],
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        USE_TZ=True,
+    )
+    django.setup()
+
+class QuerySetDeferOnlyTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        Company.objects.create(name="Test Company", trade_number="1234", country="USA")
+
+    def test_queryset_defer_only_issue(self):
+        from django.db import connection
+
+        # Test case 1
+        query = Company.objects.only("name").defer("name")
+        sql = str(query.query)
+        if 'SELECT "company"."id" FROM "company"' in sql:
+            print("Issue resolved")
+        elif 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"' in sql:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+        # Test case 2
+        query = Company.objects.only("name").defer("name").defer("country")
+        sql = str(query.query)
+        if 'SELECT "company"."id" FROM "company"' in sql:
+            print("Issue resolved")
+        elif 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"' in sql:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+        # Test case 3 (expected behavior)
+        query = Company.objects.only("name", "country").defer("name")
+        sql = str(query.query)
+        if 'SELECT "company"."id", "company"."country" FROM "company"' in sql:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+# Execute the test
+QuerySetDeferOnlyTest().test_queryset_defer_only_issue()
+```
+
+In this test:
+- We ensure the necessary imports are present.
+- We configure an in-memory SQLite database for testing.
+- We define a `Company` model as described in the issue.
+- We create test data in the `setUpTestData` method.
+- We implement the `test_queryset_defer_only_issue` method to check the SQL generated by the different querysets and print the appropriate message based on whether the issue is reproduced or resolved.
+
+Make sure to replace `'your_app_name'` with the actual name of your Django app to ensure the model is recognized.
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+class CompanyQuerySetTests(TestCase):
+    def setUp(self):
+        Company.objects.create(name="Test Company", trade_number="12345", country="USA")
+        
+    def test_defer_and_only_combination(self):
+        qs = Company.objects.only("name").defer("name")
+        sql_query = str(qs.query)
+        expected_sql = 'SELECT "company"."id" FROM "company"'
+        
+        if expected_sql in sql_query:
+            print("Issue resolved")
+        elif 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"' in sql_query:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+        qs = Company.objects.only("name").defer("name").defer("country")
+        sql_query = str(qs.query)
+        
+        if expected_sql in sql_query:
+            print("Issue resolved")
+        elif 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"' in sql_query:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+CompanyQuerySetTests().test_defer_and_only_combination()
+```
+
+This test case does the following:
+1. Sets up a `Company` model with the necessary fields.
+2. Creates a test case class `CompanyQuerySetTests` that inherits from `TestCase`.
+3. Adds a single `Company` instance for testing within the `setUp` method.
+4. Defines a method `test_defer_and_only_combination` to test the problematic query combinations.
+5. Prints "Issue resolved" if the SQL query matches the expected outcome.
+6. Prints "Issue reproduced" if the SQL query matches the problematic outcome described in the issue.
+7. Prints "Other issues" if the SQL query does not match either the expected or problematic outcomes.
+
+This test can be used both to reproduce the issue and to verify if it has been resolved.
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define the Company model as specified
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+class QuerySetDeferTest(TestCase):
+
+    def setUp(self):
+        # Create some sample data to test with
+        Company.objects.create(name="Company A", trade_number="12345", country="USA")
+        Company.objects.create(name="Company B", trade_number="67890", country="Canada")
+
+    def test_defer_only_interaction(self):
+        # Case 1: only("name").defer("name")
+        queryset1 = Company.objects.only("name").defer("name")
+        sql1 = str(queryset1.query)
+        expected_sql1 = 'SELECT "company"."id" FROM "company"'
+        
+        # Case 2: only("name").defer("name").defer("country")
+        queryset2 = Company.objects.only("name").defer("name").defer("country")
+        sql2 = str(queryset2.query)
+        expected_sql2 = 'SELECT "company"."id" FROM "company"'
+        
+        # Case 3: only("name", "country").defer("name")
+        queryset3 = Company.objects.only("name", "country").defer("name")
+        sql3 = str(queryset3.query)
+        expected_sql3 = 'SELECT "company"."id", "company"."country" FROM "company"'
+        
+        try:
+            # Check if the SQL queries match the expected outcome
+            if sql1 == expected_sql1 and sql2 == expected_sql2 and sql3 == expected_sql3:
+                print("Issue resolved")
+            elif sql1 != expected_sql1 or sql2 != expected_sql2:
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+        except Exception as e:
+            print("Other issues", str(e))
+
+# Run the test case
+if __name__ == '__main__':
+    TestCase.main()
+```
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+import django
+from django.test import TestCase
+from django.db import models
+
+# Define a simple Company model
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=50)
+    country = models.CharField(max_length=255)
+
+# Ensure the test is running inside a Django environment
+django.setup()
+
+class QuerySetIssueTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create a sample Company object
+        Company.objects.create(name="Test Company", trade_number="123456", country="Test Country")
+    
+    def test_defer_only_issue(self):
+        try:
+            # Test Case 1: Company.objects.only("name").defer("name")
+            queryset_1 = Company.objects.only("name").defer("name")
+            sql_1 = str(queryset_1.query)
+            
+            # Expected SQL for the first case
+            expected_sql_1 = 'SELECT "company"."id" FROM "company"'
+
+            # Test Case 2: Company.objects.only("name").defer("name").defer("country")
+            queryset_2 = Company.objects.only("name").defer("name").defer("country")
+            sql_2 = str(queryset_2.query)
+            
+            # Expected SQL for the second case
+            expected_sql_2 = 'SELECT "company"."id" FROM "company"'
+
+            # Test Case 3: Company.objects.only("name", "country").defer("name")
+            queryset_3 = Company.objects.only("name", "country").defer("name")
+            sql_3 = str(queryset_3.query)
+            
+            # Expected SQL for the third case
+            expected_sql_3 = 'SELECT "company"."id", "company"."country" FROM "company"'
+            
+            try:
+                assert sql_1.strip() == expected_sql_1
+                assert sql_2.strip() == expected_sql_2
+                assert sql_3.strip() == expected_sql_3
+                print("Issue resolved")
+            except AssertionError:
+                print("Issue reproduced")
+                return
+                
+        except Exception as e:
+            print(f"Other issues: {e}")
+            return
+
+# Run the test
+if __name__ == "__main__":
+    QuerySetIssueTest().test_defer_only_issue()
+```
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+class DeferOnlyTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create a sample Company instance
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_defer_only_issue(self):
+        # Case 1: only("name").defer("name")
+        queryset1 = Company.objects.only("name").defer("name")
+        sql1 = str(queryset1.query)
+        expected_sql1 = 'SELECT "company"."id" FROM "company"'
+        
+        # Case 2: only("name").defer("name").defer("country")
+        queryset2 = Company.objects.only("name").defer("name").defer("country")
+        sql2 = str(queryset2.query)
+        expected_sql2 = 'SELECT "company"."id" FROM "company"'
+
+        # Case 3: only("name", "country").defer("name")
+        queryset3 = Company.objects.only("name", "country").defer("name")
+        sql3 = str(queryset3.query)
+        expected_sql3 = 'SELECT "company"."id", "company"."country" FROM "company"'
+
+        try:
+            assert sql1 == expected_sql1, f"SQL1: {sql1}"
+            assert sql2 == expected_sql2, f"SQL2: {sql2}"
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+            return
+
+        if sql3 == expected_sql3:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+DeferOnlyTestCase().test_defer_only_issue()
+```
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model as described in the issue text
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+class QuerySetDeferOnlyTest(TestCase):
+    def setUp(self):
+        # Create a sample Company instance for testing
+        Company.objects.create(name="Test Company", trade_number="123456", country="Test Country")
+    
+    def test_defer_only_interaction(self):
+        # Generate the queryset as described in the issue
+        qs = Company.objects.only("name").defer("name")
+        
+        # Get the generated SQL query
+        sql_query = str(qs.query)
+        
+        # Check if the issue is reproduced
+        if "company\".\"id" in sql_query and "company\".\"name" in sql_query and "company\".\"trade_number" in sql_query and "company\".\"country" in sql_query:
+            print("Issue reproduced")
+        elif "company\".\"id" in sql_query and "company\".\"name" not in sql_query and "company\".\"trade_number" not in sql_query and "company\".\"country" not in sql_query:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+# Run the test
+test_case = QuerySetDeferOnlyTest()
+test_case.setUp()
+test_case.test_defer_only_interaction()
+```
+
+This test case replicates the issue described by performing the operations on the `Company` model and then generating the SQL query to inspect which fields are being selected. The output will indicate whether the issue has been reproduced, resolved, or if there are other issues.
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define the Company model as described in the issue text
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+class CompanyModelTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        # Create a sample Company instance for testing
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_queryset_defer_only_issue(self):
+        import logging
+        from django.db import connection
+
+        # Enable SQL query logging
+        logger = logging.getLogger('django.db.backends')
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(logging.StreamHandler())
+
+        # Capture the SQL queries executed during the test
+        queries = []
+
+        # Define a function to capture executed queries
+        def capture_queries(query):
+            queries.append(query['sql'])
+
+        # Connect the capture function to the logger
+        connection.queries_log.append(('add_query', capture_queries))
+
+        # Test case 1: Company.objects.only("name").defer("name")
+        Company.objects.only("name").defer("name").first()
+        query1 = queries[-1]
+
+        # Test case 2: Company.objects.only("name").defer("name").defer("country")
+        Company.objects.only("name").defer("name").defer("country").first()
+        query2 = queries[-1]
+
+        # Expected query
+        expected_query = 'SELECT "company"."id" FROM "company"'
+
+        # Check if the executed queries match the expected query
+        try:
+            assert expected_query in query1
+            assert expected_query in query2
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+        finally:
+            # Disconnect the capture function from the logger
+            connection.queries_log.remove(('add_query', capture_queries))
+
+        # Check for any other issues
+        other_issues = False
+        if len(queries) != 2:
+            other_issues = True
+
+        if other_issues:
+            print("Other issues")
+
+# Run the test case
+if __name__ == "__main__":
+    CompanyModelTest().test_queryset_defer_only_issue()
+```
+
+This test case defines the necessary model and test method to reproduce the issue described. It includes logging of SQL queries to check if the generated SQL matches the expected result. It prints appropriate messages based on whether the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+# Necessary imports
+from django.db import models
+from django.test import TestCase
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+# Define the test case
+class CompanyQuerySetTest(TestCase):
+
+    def setUp(self):
+        # Create some test data
+        Company.objects.create(name="Test Company A", trade_number="1234", country="Country A")
+        Company.objects.create(name="Test Company B", trade_number="5678", country="Country B")
+
+    def test_defer_only_issue(self):
+        from django.db import connection
+
+        # Clear any previous queries
+        connection.queries_log.clear()
+
+        # Query that reproduces the issue
+        qs = Company.objects.only("name").defer("name")
+        list(qs)  # Force evaluation to trigger the query
+
+        # Fetch the executed SQL query
+        executed_sql = connection.queries_log[-1]['sql']
+
+        # Check if the executed SQL query matches the expected query
+        if "SELECT \"company\".\"id\" FROM \"company\"" in executed_sql:
+            print("Issue resolved")
+        elif "SELECT \"company\".\"id\", \"company\".\"name\", \"company\".\"trade_number\", \"company\".\"country\" FROM \"company\"" in executed_sql:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+# Run the test manually
+CompanyQuerySetTest().test_defer_only_issue()
+```
+
+This test setup involves creating a `Company` model and a `TestCase` to test the issue described. It includes:
+
+1. Importing necessary modules and classes.
+2. Creating a `Company` model with `name`, `trade_number`, and `country` fields.
+3. Setting up test data within the `setUp` method.
+4. Defining a test method `test_defer_only_issue` to reproduce the issue.
+5. Forcing the evaluation of the queryset to trigger the SQL execution.
+6. Fetching and inspecting the executed SQL query to determine if the issue is reproduced or resolved.
+
+Running this test will print "Issue reproduced" if the issue persists, "Issue resolved" if the issue is fixed, or "Other issues" if there are other unexpected results.
+2025-05-03 14:09:10,837 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+# Test case to reproduce the issue
+class QuerySetDeferOnlyTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create test data
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_defer_only_issue(self):
+        # Case 1: .only("name").defer("name")
+        qs1 = Company.objects.only("name").defer("name")
+        sql1 = str(qs1.query)
+        
+        # Case 2: .only("name").defer("name").defer("country")
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+        sql2 = str(qs2.query)
+        
+        # Case 3: .only("name", "country").defer("name")
+        qs3 = Company.objects.only("name", "country").defer("name")
+        sql3 = str(qs3.query)
+        
+        try:
+            # Check if the first two cases are loading all fields
+            if (
+                "SELECT \"company\".\"id\", \"company\".\"name\", \"company\".\"trade_number\", \"company\".\"country\" FROM \"company\"" in sql1 and
+                "SELECT \"company\".\"id\", \"company\".\"name\", \"company\".\"trade_number\", \"company\".\"country\" FROM \"company\"" in sql2
+            ):
+                print("Issue reproduced")
+            # Check if the third case is working as expected
+            elif (
+                "SELECT \"company\".\"id\", \"company\".\"country\" FROM \"company\"" in sql3
+            ):
+                print("Issue resolved")
+            else:
+                print("Other issues")
+        except Exception as e:
+            print("Other issues")
+            print(e)
+
+# Run the test
+if __name__ == "__main__":
+    QuerySetDeferOnlyTest().test_defer_only_issue()
+```
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define the model as described in the issue
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+class TestCompanyQuerySet(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        Company.objects.create(name="Test Company", trade_number="123456", country="USA")
+
+    def test_defer_only_issue(self):
+        # Query to reproduce the issue
+        qs1 = Company.objects.only("name").defer("name")
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+
+        # Get the SQL query as string for evaluation
+        sql1 = str(qs1.query)
+        sql2 = str(qs2.query)
+
+        # Check if the issue is reproduced
+        if 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"' in sql1 and 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"' in sql2:
+            print("Issue reproduced")
+        elif 'SELECT "company"."id"' in sql1 and 'SELECT "company"."id"' in sql2:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+# Run the test
+if __name__ == "__main__":
+    import django
+    from django.conf import settings
+
+    settings.configure(
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        INSTALLED_APPS=[
+            'your_app_name',  # Replace with the actual app name where Company model is defined
+        ]
+    )
+    django.setup()
+    TestCompanyQuerySet().test_defer_only_issue()
+```
+
+Make sure to replace `'your_app_name'` with the actual name of the app where the `Company` model is defined in your Django project.
+
+This script will create a simple model, execute the described queries, and print "Issue reproduced" if the issue is still present, "Issue resolved" if the issue has been fixed, and "Other issues" if there are other issues with the source code.
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+import django
+from django.db import models
+from django.test import TestCase
+from django.conf import settings
+
+# Configure Django settings
+settings.configure(
+    DEBUG=True,
+    DATABASES={
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    },
+    INSTALLED_APPS=(
+        __name__,
+    )
+)
+django.setup()
+
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+class CompanyQuerySetTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        Company.objects.create(name="TestCompany", trade_number="12345", country="USA")
+
+    def test_defer_and_only_combination(self):
+        # Query 1
+        queryset1 = Company.objects.only("name").defer("name")
+        sql_query1 = str(queryset1.query)
+        expected_query1 = 'SELECT "company"."id" FROM "company"'
+        
+        # Query 2
+        queryset2 = Company.objects.only("name").defer("name").defer("country")
+        sql_query2 = str(queryset2.query)
+        expected_query2 = 'SELECT "company"."id" FROM "company"'
+        
+        # Query 3
+        queryset3 = Company.objects.only("name", "country").defer("name")
+        sql_query3 = str(queryset3.query)
+        expected_query3 = 'SELECT "company"."id", "company"."country" FROM "company"'
+
+        try:
+            assert sql_query1 == expected_query1
+            assert sql_query2 == expected_query2
+            assert sql_query3 == expected_query3
+            print("Issue resolved")
+        except AssertionError:
+            if sql_query1 != expected_query1 or sql_query2 != expected_query2:
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+# Running the test manually
+if __name__ == "__main__":
+    CompanyQuerySetTest().test_defer_and_only_combination()
+```
+
+This script sets up a minimal Django environment in memory, defines the Company model, and provides a test case to reproduce the issue described. The test case generates SQL queries using `only()` and `defer()` methods and checks if the generated SQL matches the expected output, printing appropriate messages based on the outcome.
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define the model
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=50)
+    country = models.CharField(max_length=100)
+
+class CompanyQuerySetTests(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        # Set up data for the whole TestCase
+        Company.objects.create(name="Company A", trade_number="12345", country="USA")
+        Company.objects.create(name="Company B", trade_number="67890", country="UK")
+
+    def test_queryset_defer_only_issue(self):
+        try:
+            # Query that should reproduce the issue
+            queryset1 = Company.objects.only("name").defer("name")
+            sql1 = str(queryset1.query)
+
+            queryset2 = Company.objects.only("name").defer("name").defer("country")
+            sql2 = str(queryset2.query)
+
+            # Expected SQL queries
+            expected_sql = 'SELECT "company"."id" FROM "company"'
+
+            if sql1 == expected_sql and sql2 == expected_sql:
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+
+        except Exception as e:
+            print("Other issues")
+            print(str(e))
+
+# Run the test
+if __name__ == "__main__":
+    CompanyQuerySetTests().test_queryset_defer_only_issue()
+```
+
+This test case checks whether the SQL queries generated by chaining `.only()` and `.defer()` methods on the `Company` model match the expected SQL. If the issue is still present, it will print "Issue reproduced". If the issue has been resolved, it will print "Issue resolved". If any other issues are encountered during the test execution, it prints "Other issues" and the exception message.
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define the Company model as described in the issue
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+class QuerySetDeferOnlyTestCase(TestCase):
+    def setUp(self):
+        # Create a sample company object to query against
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_defer_only_issue(self):
+        # QuerySet to reproduce the described issue
+        qs1 = Company.objects.only("name").defer("name")
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+
+        # Check the actual SQL generated to see if it matches the expected behavior
+        sql1 = str(qs1.query)
+        sql2 = str(qs2.query)
+
+        # Expected SQL should only select the "id" field
+        expected_sql = 'SELECT "company"."id" FROM "company"'
+
+        # Evaluate the outcome based on the generated SQL
+        try:
+            if sql1 == expected_sql and sql2 == expected_sql:
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+                print(f"Generated SQL 1: {sql1}")
+                print(f"Generated SQL 2: {sql2}")
+        except Exception as e:
+            print("Other issues")
+            print(str(e))
+
+# Run the test
+if __name__ == "__main__":
+    QuerySetDeferOnlyTestCase().test_defer_only_issue()
+```
+
+Explanation:
+1. **Necessary Imports**: Imported necessary modules for Django models and testing.
+2. **Code to Reproduce the Issue**: Defined a `Company` model and a test case class `QuerySetDeferOnlyTestCase` containing a method `test_defer_only_issue` to reproduce the issue.
+3. **Evaluation and Printing Outcome**: The SQL generated from the queryset is compared to the expected SQL to determine if the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+from django.db import connection
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=50)
+    country = models.CharField(max_length=100)
+
+# Define the test case to reproduce the issue
+class CompanyQuerySetTest(TestCase):
+    def setUp(self):
+        # Create some test data
+        Company.objects.create(name="Company A", trade_number="12345", country="USA")
+    
+    def test_defer_only_issue(self):
+        # Clear the query log
+        with connection.execute_wrapper(lambda execute, sql, params, many, context: execute(sql, params, many, context)):
+            # Perform the queryset operation that reproduces the issue
+            list(Company.objects.only("name").defer("name"))
+            sql = connection.queries[-1]['sql']
+            if "SELECT \"company\".\"id\", \"company\".\"name\", \"company\".\"trade_number\", \"company\".\"country\" FROM \"company\"" in sql:
+                print("Issue reproduced")
+                return
+                
+            list(Company.objects.only("name").defer("name").defer("country"))
+            sql = connection.queries[-1]['sql']
+            if "SELECT \"company\".\"id\", \"company\".\"name\", \"company\".\"trade_number\", \"company\".\"country\" FROM \"company\"" in sql:
+                print("Issue reproduced")
+                return
+            
+            # Check for the expected behavior
+            list(Company.objects.only("name", "country").defer("name"))
+            sql = connection.queries[-1]['sql']
+            if "SELECT \"company\".\"id\", \"company\".\"country\" FROM \"company\"" in sql:
+                print("Issue resolved")
+                return
+            
+            print("Other issues")
+
+# Execute the test case
+if __name__ == "__main__":
+    CompanyQuerySetTest().test_defer_only_issue()
+```
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+# Define a test case to reproduce the issue
+class QuerySetDeferOnlyTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Set up initial data for the test
+        Company.objects.create(name='Test Company', trade_number='12345', country='USA')
+
+    def test_defer_and_only_behavior(self):
+        # Test the first case with only("name").defer("name")
+        qs1 = Company.objects.only("name").defer("name")
+        sql1 = str(qs1.query)
+        expected_sql1 = 'SELECT "company"."id" FROM "company"'
+        
+        # Test the second case with only("name").defer("name").defer("country")
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+        sql2 = str(qs2.query)
+        expected_sql2 = 'SELECT "company"."id" FROM "company"'
+
+        # Test the third case with only("name", "country").defer("name")
+        qs3 = Company.objects.only("name", "country").defer("name")
+        sql3 = str(qs3.query)
+        expected_sql3 = 'SELECT "company"."id", "company"."country" FROM "company"'
+
+        try:
+            # Check if the SQL queries match the expected outcomes
+            if sql1 != expected_sql1:
+                print("Issue reproduced")
+                return
+
+            if sql2 != expected_sql2:
+                print("Issue reproduced")
+                return
+
+            if sql3 == expected_sql3:
+                print("Issue resolved")
+                return
+            else:
+                print("Other issues")
+        except Exception as e:
+            print("Other issues")
+            return
+
+# Run the test
+if __name__ == "__main__":
+    QuerySetDeferOnlyTest().test_defer_and_only_behavior()
+```
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model as described in the issue
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+class QuerySetDeferOnlyTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        # Create some test data
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_queryset_defer_only_issue(self):
+        import re
+        from django.db import connection
+
+        # Clear previous queries
+        connection.queries_log.clear()
+
+        # Query to reproduce the issue
+        qs = Company.objects.only("name").defer("name")
+        list(qs)  # Force evaluation of the queryset
+
+        # Check the executed SQL query
+        sql_query = connection.queries_log[-1]['sql']
+        
+        if re.search(r'SELECT\s+"company"\."id",\s+"company"\."name",\s+"company"\."trade_number",\s+"company"\."country"\s+FROM\s+"company"', sql_query):
+            print("Issue reproduced")
+        elif re.search(r'SELECT\s+"company"\."id"\s+FROM\s+"company"', sql_query):
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+        # Clear previous queries
+        connection.queries_log.clear()
+
+        # Query to reproduce the issue with additional defer
+        qs = Company.objects.only("name").defer("name").defer("country")
+        list(qs)  # Force evaluation of the queryset
+
+        # Check the executed SQL query again
+        sql_query = connection.queries_log[-1]['sql']
+
+        if re.search(r'SELECT\s+"company"\."id",\s+"company"\."name",\s+"company"\."trade_number",\s+"company"\."country"\s+FROM\s+"company"', sql_query):
+            print("Issue reproduced")
+        elif re.search(r'SELECT\s+"company"\."id"\s+FROM\s+"company"', sql_query):
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+# Run the test
+if __name__ == "__main__":
+    import django
+    import os
+
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'test_settings'  # Assuming test_settings is the name of your Django settings for testing
+    django.setup()
+    TestCase.run(QuerySetDeferOnlyTest('test_queryset_defer_only_issue'))
+```
+
+**Explanation:**
+1. **Imports and Model Definition:** Necessary imports and the `Company` model as described.
+2. **Test Case Setup:** The `setUpTestData` method creates a test data entry to query against.
+3. **Test Logic:**
+   - **Query Execution:** Executes the queryset `.only("name").defer("name")` and forces evaluation to log the query.
+   - **SQL Analysis:** Analyzes the last executed SQL query from the connection log to check if it matches the unexpected behavior or the expected corrected behavior.
+   - **Print Statements:** Prints "Issue reproduced" if the SQL matches the issue description, "Issue resolved" if it matches the expected corrected SQL, and "Other issues" for any other discrepancies.
+4. **Clearing Queries:** Clears the query log before re-running the test with an additional `.defer("country")` condition.
+
+**Note:** Ensure to set up a `test_settings.py` for Django settings to use during testing. Adjust the environment variable accordingly.
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+class QuerySetDeferOnlyTest(TestCase):
+    def setUp(self):
+        # Set up test data
+        Company.objects.create(name="Company A", trade_number="12345", country="Country A")
+        Company.objects.create(name="Company B", trade_number="67890", country="Country B")
+
+    def test_defer_only_issue(self):
+        # Case 1: only("name").defer("name")
+        queryset = Company.objects.only("name").defer("name")
+        sql = str(queryset.query)
+        expected_sql = (
+            'SELECT "company"."id" FROM "company"'
+        )
+        if expected_sql not in sql:
+            print("Issue reproduced")
+            return
+
+        # Case 2: only("name").defer("name").defer("country")
+        queryset = Company.objects.only("name").defer("name").defer("country")
+        sql = str(queryset.query)
+        if expected_sql not in sql:
+            print("Issue reproduced")
+            return
+
+        # Case 3: only("name", "country").defer("name")
+        queryset = Company.objects.only("name", "country").defer("name")
+        sql = str(queryset.query)
+        expected_sql_case_3 = (
+            'SELECT "company"."id", "company"."country" FROM "company"'
+        )
+        if expected_sql_case_3 in sql:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+        
+        return
+
+# Run the test
+QuerySetDeferOnlyTest().test_defer_only_issue()
+```
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+from django.db import connection
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+# Define the test case to reproduce the issue
+class DeferOnlyTestCase(TestCase):
+    def setUp(self):
+        # Set up initial data
+        Company.objects.create(name="Company A", trade_number="1234", country="USA")
+        Company.objects.create(name="Company B", trade_number="5678", country="Canada")
+
+    def test_defer_only_issue(self):
+        # Test case example from the issue
+        queryset = Company.objects.only("name").defer("name")
+
+        # Capture the SQL generated by the queryset
+        sql = str(queryset.query)
+        expected_sql = (
+            'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"'
+        )
+
+        if expected_sql in sql:
+            print("Issue reproduced")
+        else:
+            expected_fixed_sql = 'SELECT "company"."id" FROM "company"'
+            if expected_fixed_sql in sql:
+                print("Issue resolved")
+            else:
+                print("Other issues")
+        return
+
+# Run the test
+if __name__ == "__main__":
+    test_case = DeferOnlyTestCase()
+    test_case.setUp()
+    test_case.test_defer_only_issue()
+```
+
+This test case sets up the `Company` model and tests the specific scenario described in the issue. It captures the generated SQL query and compares it with the expected SQL to determine if the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+# Create a test case to reproduce the issue
+class QuerySetDeferOnlyTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create a sample Company instance
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_defer_and_only_combination(self):
+        # Query with only().defer() combination
+        qs1 = Company.objects.only("name").defer("name")
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+        
+        # Get the SQL query for both querysets
+        sql1 = str(qs1.query)
+        sql2 = str(qs2.query)
+        
+        # Expected SQL query
+        expected_sql = 'SELECT "company"."id" FROM "company"'
+        
+        try:
+            # Check if the queries match the expected SQL
+            assert sql1 == expected_sql
+            assert sql2 == expected_sql
+            print("Issue resolved")
+        except AssertionError:
+            print("Issue reproduced")
+        except Exception as e:
+            print("Other issues")
+            print(str(e))
+
+# Run the test
+QuerySetDeferOnlyTest().test_defer_and_only_combination()
+```
+
+This test case is designed to reproduce the issue and verify if it has been resolved. It will print "Issue reproduced" if the behavior matches the issue described (i.e., if the SQL query includes unexpected fields), "Issue resolved" if the issue has been fixed (produces the expected SQL query), and "Other issues" if any other exceptions or errors occur.
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Defining the model
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+# Test case to reproduce the issue
+class QuerySetDeferOnlyTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Creating a sample company
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_defer_only_issue(self):
+        # Clear print statements for easy debugging
+        def print_issue_state(state):
+            print(state)
+            return
+        
+        try:
+            # Scenario 1
+            qs = Company.objects.only("name").defer("name")
+            sql_query_1 = str(qs.query)
+            expected_query_1 = 'SELECT "company"."id" FROM "company"'
+
+            # Scenario 2
+            qs = Company.objects.only("name").defer("name").defer("country")
+            sql_query_2 = str(qs.query)
+            expected_query_2 = 'SELECT "company"."id" FROM "company"'
+            
+            # Scenario 3
+            qs = Company.objects.only("name", "country").defer("name")
+            sql_query_3 = str(qs.query)
+            expected_query_3 = 'SELECT "company"."id", "company"."country" FROM "company"'
+
+            # Check for unexpected behavior or issue reproduction
+            if sql_query_1 != expected_query_1 or sql_query_2 != expected_query_2:
+                print_issue_state("Issue reproduced")
+            elif sql_query_3 == expected_query_3:
+                print_issue_state("Issue resolved")
+            else:
+                print_issue_state("Other issues")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+# Running the test
+if __name__ == "__main__":
+    QuerySetDeferOnlyTest().test_defer_only_issue()
+```
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+# Define a test case to reproduce the issue
+class CompanyModelTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        # Create a sample Company instance
+        Company.objects.create(name="Test Company", trade_number="12345", country="US")
+
+    def test_queryset_defer_only_issue(self):
+        # Get the queryset that should reproduce the issue
+        queryset = Company.objects.only("name").defer("name")
+        sql_query = str(queryset.query)
+
+        # Check the SQL query to see if it includes all fields
+        if "SELECT" in sql_query and "company" in sql_query and '"company"."id"' in sql_query and '"company"."name"' in sql_query and '"company"."trade_number"' in sql_query and '"company"."country"' in sql_query:
+            print("Issue reproduced")
+        elif "SELECT" in sql_query and '"company"."id"' in sql_query and '"company"."name"' not in sql_query and '"company"."trade_number"' not in sql_query and '"company"."country"' not in sql_query:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+# Execute the test case
+if __name__ == "__main__":
+    import django
+    import os
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'test_settings')
+    django.setup()
+    CompanyModelTest().test_queryset_defer_only_issue()
+```
+
+Explanation:
+1. **Necessary Imports**: Imported necessary modules from `django`.
+2. **Code to Reproduce the Issue**: Created a `Company` model and set up test data.
+3. **Print Statements**:
+   - **"Issue reproduced"**: Printed if the SQL query includes all fields when it shouldn't.
+   - **"Issue resolved"**: Printed if the SQL query only includes the `id` field as expected.
+   - **"Other issues"**: Printed for any other unexpected results.
+4. **Execution Block**: Ensured the test can be run directly. Adjusted environment settings for Django.
+
+This test will help to identify if the `defer` and `only` methods on the queryset are producing the expected SQL query, thereby reproducing or resolving the issue as described.
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+# Test case to reproduce and verify the issue
+class CompanyQuerySetTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        # Create a company instance to work with
+        Company.objects.create(name="Test Company", trade_number="12345", country="Testland")
+
+    def test_defer_with_only(self):
+        # Reproduce issue: defer() following only()
+        qs1 = Company.objects.only("name").defer("name")
+        qs1_sql = str(qs1.query)
+        # Expected SQL: SELECT "company"."id" FROM "company"
+        if 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"' in qs1_sql:
+            print("Issue reproduced")
+        elif 'SELECT "company"."id" FROM "company"' in qs1_sql:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+        # Reproduce issue: defer() following only(), multiple defers
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+        qs2_sql = str(qs2.query)
+        # Expected SQL: SELECT "company"."id" FROM "company"
+        if 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"' in qs2_sql:
+            print("Issue reproduced")
+        elif 'SELECT "company"."id" FROM "company"' in qs2_sql:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+        # Check for expected behavior
+        qs3 = Company.objects.only("name", "country").defer("name")
+        qs3_sql = str(qs3.query)
+        # Expected SQL: SELECT "company"."id", "company"."country" FROM "company"
+        if 'SELECT "company"."id", "company"."country" FROM "company"' in qs3_sql:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+# Running the test
+if __name__ == '__main__':
+    CompanyQuerySetTest().test_defer_with_only()
+```
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define a simple Company model for testing
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+class QuerySetDeferOnlyTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create a sample Company instance for querying
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_only_and_defer(self):
+        # Reproduce the issue with only() and defer()
+        queryset = Company.objects.only("name").defer("name")
+        sql = str(queryset.query)
+
+        # Expected SQL: "SELECT "company"."id" FROM "company"" but actually loads all fields
+        expected_sql = 'SELECT "company"."id" FROM "company"'
+
+        if sql == expected_sql:
+            print("Issue resolved")
+        elif 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"' in sql:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+        # Additional case as per the issue description
+        queryset = Company.objects.only("name").defer("name").defer("country")
+        sql = str(queryset.query)
+
+        if sql == expected_sql:
+            print("Issue resolved")
+        elif 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country"' in sql:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+# Run the test
+QuerySetDeferOnlyTest().test_only_and_defer()
+```
+
+This test case sets up a `Company` model and a test class `QuerySetDeferOnlyTest` to reproduce the issue. It verifies if the SQL query generated matches the expected result and prints the appropriate message based on the outcome.
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+# Test case to reproduce the issue
+class QuerySetDeferOnlyTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create a company instance for testing
+        Company.objects.create(name='Test Company', trade_number='12345', country='Test Country')
+
+    def test_defer_only_issue(self):
+        # QuerySet with only() followed by defer() on the same field
+        qs = Company.objects.only("name").defer("name")
+        sql = str(qs.query)
+
+        expected_sql = 'SELECT "company"."id" FROM "company"'
+        if expected_sql in sql:
+            print("Issue resolved")
+        elif "'company'.'id', 'company'.'name', 'company'.'trade_number', 'company'.'country'" in sql:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+    def test_defer_only_with_additional_defer(self):
+        # QuerySet with only() followed by defer() on multiple fields
+        qs = Company.objects.only("name").defer("name").defer("country")
+        sql = str(qs.query)
+
+        expected_sql = 'SELECT "company"."id" FROM "company"'
+        if expected_sql in sql:
+            print("Issue resolved")
+        elif "'company'.'id', 'company'.'name', 'company'.'trade_number', 'company'.'country'" in sql:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+# Run the tests
+if __name__ == "__main__":
+    import django
+    import sys
+    from django.conf import settings
+
+    settings.configure(
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        INSTALLED_APPS=[
+            __name__,
+        ],
+    )
+    django.setup()
+    TestCase.run = lambda self: TestCase.defaultTestResult().startTest(self).stopTest(self)
+    tests = QuerySetDeferOnlyTest()
+    tests.setUpClass()
+    tests.setUp()
+    tests.test_defer_only_issue()
+    tests.test_defer_only_with_additional_defer()
+```
+
+This test case is designed to reproduce the issue described in the provided issue text. It includes two tests:
+
+1. `test_defer_only_issue` verifies the behavior when `only("name")` is followed by `defer("name")`.
+2. `test_defer_only_with_additional_defer` verifies the behavior when `only("name")` is followed by `defer("name")` and `defer("country")`.
+
+Depending on the SQL generated by the queryset, it prints "Issue resolved" if the expected SQL is generated, "Issue reproduced" if the issue is reproduced, or "Other issues" if there are unexpected behaviors.
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define the Company model as described in the issue
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+class QuerySetDeferOnlyTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create a sample Company instance
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_defer_only_interaction(self):
+        # Test case for reproducing the issue with defer() and only()
+        qs = Company.objects.only("name").defer("name")
+        sql_query = str(qs.query)
+        
+        if 'SELECT "company"."id" FROM' in sql_query:
+            print("Issue resolved")
+        elif 'SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM' in sql_query:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+# Running the test
+if __name__ == "__main__":
+    import django
+    from django.conf import settings
+
+    settings.configure(
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        INSTALLED_APPS=['__main__'],
+    )
+    django.setup()
+    import unittest
+    unittest.main()
+```
+
+This script does the following:
+1. Defines the necessary imports and the `Company` model.
+2. Sets up a test case to reproduce the issue.
+3. Generates a queryset that should expose the behavior described.
+4. Compares the generated SQL query to expected results and prints "Issue resolved", "Issue reproduced", or "Other issues" based on the comparison. 
+
+This test can be used to check if the issue described in the issue text is reproducible or has been resolved.
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model for the test
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+class QuerySetDeferOnlyTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create a sample Company instance
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_defer_only_issue(self):
+        # Test case 1: .only("name").defer("name")
+        qs1 = Company.objects.only("name").defer("name")
+        sql_query1 = str(qs1.query)
+        expected_query1 = 'SELECT "company"."id" FROM "company"'
+        if sql_query1 == expected_query1:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+            return
+
+        # Test case 2: .only("name").defer("name").defer("country")
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+        sql_query2 = str(qs2.query)
+        expected_query2 = 'SELECT "company"."id" FROM "company"'
+        if sql_query2 == expected_query2:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+            return
+
+        # Additional test case for expected behavior
+        qs3 = Company.objects.only("name", "country").defer("name")
+        sql_query3 = str(qs3.query)
+        expected_query3 = 'SELECT "company"."id", "company"."country" FROM "company"'
+        if sql_query3 == expected_query3:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+            return
+
+        print("All tests passed")
+
+# Run the test
+if __name__ == '__main__':
+    QuerySetDeferOnlyTest().test_defer_only_issue()
+```
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.test import TestCase
+from django.db import models
+
+# Define the Company model
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    trade_number = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+
+# Define the test case
+class QuerySetDeferOnlyTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create a Company instance for testing
+        Company.objects.create(name="Test Company", trade_number="12345", country="Test Country")
+
+    def test_defer_only_issue(self):
+        # Import connection and reset queries to capture SQL statements
+        from django.db import connection
+        connection.queries_log.clear()
+
+        # Test case 1: only("name").defer("name")
+        queryset = Company.objects.only("name").defer("name")
+        list(queryset)  # Evaluate the queryset
+
+        # Check generated SQL for test case 1
+        sql = connection.queries[-1]['sql']
+        if "SELECT "company"."id" FROM "company"" in sql:
+            print("Issue resolved")
+        elif "SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"" in sql:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+        # Clear queries log for next test
+        connection.queries_log.clear()
+
+        # Test case 2: only("name").defer("name").defer("country")
+        queryset = Company.objects.only("name").defer("name").defer("country")
+        list(queryset)  # Evaluate the queryset
+
+        # Check generated SQL for test case 2
+        sql = connection.queries[-1]['sql']
+        if "SELECT "company"."id" FROM "company"" in sql:
+            print("Issue resolved")
+        elif "SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"" in sql:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+# Run the test
+if __name__ == "__main__":
+    import django
+    import sys
+    from django.conf import settings
+
+    settings.configure(
+        DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memory:'}},
+        INSTALLED_APPS=['__main__'],
+    )
+    django.setup()
+    from django.test.utils import get_runner
+
+    TestRunner = get_runner(settings)
+    test_runner = TestRunner()
+    failures = test_runner.run_tests(['__main__'])
+    sys.exit(bool(failures))
+```
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.db import models
+from django.test import TestCase
+
+# Define a simple Company model as described in the issue
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    trade_number = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+class QuerySetDeferOnlyTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        Company.objects.create(name="Acme Corp", trade_number="12345", country="US")
+
+    def test_defer_only_issue(self):
+        # Case 1: .only("name").defer("name")
+        qs1 = Company.objects.only("name").defer("name")
+        sql1 = str(qs1.query)
+
+        # Case 2: .only("name").defer("name").defer("country")
+        qs2 = Company.objects.only("name").defer("name").defer("country")
+        sql2 = str(qs2.query)
+
+        # Case 3: .only("name", "country").defer("name")
+        qs3 = Company.objects.only("name", "country").defer("name")
+        sql3 = str(qs3.query)
+
+        # Expected SQL queries
+        expected_sql1 = 'SELECT "company"."id" FROM "company"'
+        expected_sql2 = 'SELECT "company"."id" FROM "company"'
+        expected_sql3 = 'SELECT "company"."id", "company"."country" FROM "company"'
+
+        # Check if the issue is reproduced
+        try:
+            assert sql1 == expected_sql1
+            assert sql2 == expected_sql2
+            assert sql3 == expected_sql3
+            print("Issue resolved")
+        except AssertionError:
+            if sql1 != expected_sql1 or sql2 != expected_sql2:
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+
+# Run the test
+if __name__ == "__main__":
+    QuerySetDeferOnlyTest().test_defer_only_issue()
+```
+
+This script:
+1. Defines a simple `Company` model according to the issue description.
+2. Sets up test data.
+3. Contains a test case that checks the SQL queries generated for the three scenarios described in the issue.
+4. Prints "Issue reproduced" if the issue is reproduced, "Issue resolved" if the expected behavior is observed, and "Other issues" if there are other discrepancies.
+2025-05-03 14:09:10,838 - INFO - raw output:
+```python
+from django.test import TestCase
+from .models import Company
+
+class CompanyQuerySetTest(TestCase):
+    def setUp(self):
+        # Create a sample company instance
+        Company.objects.create(name="Test Company", trade_number="123456", country="Country")
+
+    def test_defer_and_only_chaining(self):
+        # Test case 1: only("name").defer("name")
+        queryset = Company.objects.only("name").defer("name")
+        sql = str(queryset.query)
+        if "SELECT "company"."id" FROM "company"" in sql:
+            print("Issue resolved")
+        elif "SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"" in sql:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+        # Test case 2: only("name").defer("name").defer("country")
+        queryset = Company.objects.only("name").defer("name").defer("country")
+        sql = str(queryset.query)
+        if "SELECT "company"."id" FROM "company"" in sql:
+            print("Issue resolved")
+        elif "SELECT "company"."id", "company"."name", "company"."trade_number", "company"."country" FROM "company"" in sql:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+        # Test case 3: only("name", "country").defer("name")
+        queryset = Company.objects.only("name", "country").defer("name")
+        sql = str(queryset.query)
+        if "SELECT "company"."id", "company"."country" FROM "company"" in sql:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+# Run the test
+CompanyQuerySetTest().test_defer_and_only_chaining()
+```

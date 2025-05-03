@@ -1,0 +1,2601 @@
+2025-05-02 17:20:56,076 - INFO - ================ generating test for psf__requests-1963 ================
+2025-05-02 17:20:56,162 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+`Session.resolve_redirects` copies the original request for all subsequent requests, can cause incorrect method selection
+Consider the following redirection chain:
+
+```
+POST /do_something HTTP/1.1
+Host: server.example.com
+...
+
+HTTP/1.1 303 See Other
+Location: /new_thing_1513
+
+GET /new_thing_1513
+Host: server.example.com
+...
+
+HTTP/1.1 307 Temporary Redirect
+Location: //failover.example.com/new_thing_1513
+```
+
+The intermediate 303 See Other has caused the POST to be converted to
+a GET.  The subsequent 307 should preserve the GET.  However, because
+`Session.resolve_redirects` starts each iteration by copying the _original_
+request object, Requests will issue a POST!
+
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:56,169 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:17:34,887 - INFO - ================ generating test for psf__requests-1963 ================
+2025-05-03 14:17:34,903 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+`Session.resolve_redirects` copies the original request for all subsequent requests, can cause incorrect method selection
+Consider the following redirection chain:
+
+```
+POST /do_something HTTP/1.1
+Host: server.example.com
+...
+
+HTTP/1.1 303 See Other
+Location: /new_thing_1513
+
+GET /new_thing_1513
+Host: server.example.com
+...
+
+HTTP/1.1 307 Temporary Redirect
+Location: //failover.example.com/new_thing_1513
+```
+
+The intermediate 303 See Other has caused the POST to be converted to
+a GET.  The subsequent 307 should preserve the GET.  However, because
+`Session.resolve_redirects` starts each iteration by copying the _original_
+request object, Requests will issue a POST!
+
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 14:17:34,903 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:17:34,910 - INFO - Creating API request
+2025-05-03 14:17:38,814 - INFO - API response ChatCompletion(id='chatcmpl-BTCed3U1WO63XquwVySNS6y9kgXmR', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response\nfrom requests.sessions import Session\n\ndef mock_response(url, status_code, headers):\n    response = Response()\n    response.status_code = status_code\n    response.headers = headers\n    response.url = url\n    return response\n\ndef test_session_resolve_redirects_issue():\n    session = Session()\n\n    # Mock the initial POST request\n    initial_request = requests.Request(\'POST\', \'http://server.example.com/do_something\')\n    prepared_initial_request = session.prepare_request(initial_request)\n\n    # Mock the responses for the redirection chain\n    responses = [\n        mock_response(\'http://server.example.com/do_something\', 303, {\'Location\': \'/new_thing_1513\'}),\n        mock_response(\'http://server.example.com/new_thing_1513\', 307, {\'Location\': \'//failover.example.com/new_thing_1513\'}),\n        mock_response(\'http://failover.example.com/new_thing_1513\', 200, {})\n    ]\n\n    def mock_send(request, **kwargs):\n        for response in responses:\n            if request.url == response.url:\n                return response\n        return Response()\n\n    # Patch the session\'s send method to use the mock_send\n    session.send = mock_send\n\n    # Perform the request and follow redirects\n    response = session.send(prepared_initial_request, allow_redirects=True)\n\n    # Check the final request method\n    final_request_method = response.request.method\n\n    if final_request_method == \'POST\':\n        print("Issue reproduced")\n    elif final_request_method == \'GET\':\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\ntest_session_resolve_redirects_issue()\n```\n\nThis test script sets up a mock environment to simulate the redirection chain described in the issue. It checks if the final request method is `POST` (indicating the issue is reproduced) or `GET` (indicating the issue is resolved). If the final request method is neither `POST` nor `GET`, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299855, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=421, prompt_tokens=525, total_tokens=946, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:17:38,814 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:17:38,821 - INFO - Creating API request
+2025-05-03 14:19:31,063 - INFO - API response ChatCompletion(id='chatcmpl-BTCehpHo83IdSGclTYQYYZlMOced2', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response, PreparedRequest\nfrom requests.sessions import Session\n\ndef mock_response(url, method=\'GET\', status_code=200, headers=None):\n    response = Response()\n    response.status_code = status_code\n    response.headers = headers or {}\n    response._content = b\'\'\n    response.url = url\n    response.request = PreparedRequest()\n    response.request.prepare(url=url, method=method)\n    return response\n\ndef test_session_resolve_redirects():\n    session = Session()\n\n    def request_side_effect(request, **kwargs):\n        if request.url == "http://server.example.com/do_something":\n            return mock_response("http://server.example.com/new_thing_1513", \n                                 method=\'POST\', status_code=303, \n                                 headers={\'Location\': \'/new_thing_1513\'})\n        elif request.url == "http://server.example.com/new_thing_1513":\n            return mock_response("http://failover.example.com/new_thing_1513", \n                                 method=\'GET\', status_code=307, \n                                 headers={\'Location\': \'//failover.example.com/new_thing_1513\'})\n        elif request.url == "http://failover.example.com/new_thing_1513":\n            return mock_response("http://failover.example.com/new_thing_1513", \n                                 method=\'GET\', status_code=200)\n\n    session.send = request_side_effect\n\n    initial_request = requests.Request(\'POST\', \'http://server.example.com/do_something\')\n    prepared_request = session.prepare_request(initial_request)\n    settings = session.merge_environment_settings(prepared_request.url, {}, None, None, None)\n\n    try:\n        response = session.send(prepared_request, **settings)\n        while \'location\' in response.headers and response.is_redirect:\n            prepared_request = session.resolve_redirects(response, prepared_request, **settings)\n            response = next(prepared_request)\n    except Exception as e:\n        print("Other issues", e)\n        return\n\n    if response.request.method == \'POST\':\n        print("Issue reproduced")\n    elif response.request.method == \'GET\':\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\ntest_session_resolve_redirects()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests import Session, Request, Response\nfrom requests.models import PreparedRequest\nfrom requests.structures import CaseInsensitiveDict\nfrom io import BytesIO\n\nclass MockAdapter(requests.adapters.HTTPAdapter):\n    def __init__(self, responses):\n        self.responses = responses\n        super().__init__()\n\n    def send(self, request, **kwargs):\n        response = self.responses.pop(0)\n        return response\n\ndef test_session_resolve_redirects_issue():\n    responses = [\n        Response(),\n        Response(),\n        Response()\n    ]\n    \n    responses[0].status_code = 303\n    responses[0].headers[\'Location\'] = \'/new_thing_1513\'\n    responses[0]._content = b\'\'\n\n    responses[1].status_code = 307\n    responses[1].headers[\'Location\'] = \'//failover.example.com/new_thing_1513\'\n    responses[1]._content = b\'\'\n\n    responses[2].status_code = 200\n    responses[2]._content = b\'OK\'\n\n    session = Session()\n    session.mount(\'http://\', MockAdapter(responses))\n\n    def prep_request(method, url):\n        req = Request(method=method, url=url)\n        prepped = session.prepare_request(req)\n        return prepped\n\n    original_request = prep_request(\'POST\', \'http://server.example.com/do_something\')\n\n    try:\n        response = session.send(original_request)\n        final_request = response.history[-1].request\n\n        if final_request.method == \'POST\':\n            print("Issue reproduced")\n        elif final_request.method == \'GET\':\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n        print(f"Exception encountered: {e}")\n\ntest_session_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests import Request, Session\nfrom requests.models import Response\nfrom requests.structures import CaseInsensitiveDict\n\ndef create_mock_response(status_code, location, method, url):\n    response = Response()\n    response.status_code = status_code\n    response.headers = CaseInsensitiveDict({\'Location\': location})\n    response.request = Request(method, url).prepare()\n    return response\n\ndef test_resolve_redirects_issue():\n    session = Session()\n\n    original_request = Request(\'POST\', \'http://server.example.com/do_something\').prepare()\n\n    # Mock responses\n    first_response = create_mock_response(303, \'/new_thing_1513\', \'POST\', \'http://server.example.com/do_something\')\n    second_response = create_mock_response(307, \'//failover.example.com/new_thing_1513\', \'GET\', \'http://server.example.com/new_thing_1513\')\n\n    responses = [first_response, second_response]\n\n    def mock_send(request, **kwargs):\n        if request.url == \'http://server.example.com/do_something\':\n            return responses.pop(0)\n        elif request.url == \'http://server.example.com/new_thing_1513\':\n            return responses.pop(0)\n        elif request.url == \'http://failover.example.com/new_thing_1513\':\n            return Response()  # Mock final response\n        else:\n            raise ValueError("Unexpected URL: {}".format(request.url))\n    \n    session.send = mock_send\n\n    # Resolve redirects\n    prepared = original_request\n    history = []\n    for resp in session.resolve_redirects(first_response, original_request):\n        history.append(resp)\n        prepared = resp.request\n\n    # Check final request method\n    try:\n        final_request_method = prepared.method\n        if final_request_method == \'GET\':\n            print("Issue resolved")\n        elif final_request_method == \'POST\':\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues:", e)\n\ntest_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response\n\n# Mock server responses for the redirection chain\ndef mock_response(url, status_code, headers=None):\n    response = Response()\n    response.status_code = status_code\n    response.headers.update(headers or {})\n    response.url = url\n    return response\n\n# Custom Session class to handle the mocked responses\nclass MockSession(requests.Session):\n    def __init__(self, responses):\n        super().__init__()\n        self.responses = responses\n        self.response_index = 0\n\n    def resolve_redirects(self, resp, req, **kwargs):\n        while \'location\' in resp.headers:\n            # Get the next response in the sequence\n            location = resp.headers[\'location\']\n            if not location.startswith(\'http\'):\n                location = requests.compat.urljoin(resp.url, location)\n            next_url = location\n            \n            self.response_index += 1\n            resp = self.responses[self.response_index]\n            resp.url = next_url\n            \n            yield resp\n\n    def send(self, request, **kwargs):\n        response = self.responses[self.response_index]\n        response.request = request\n        return response\n\n# Test function to reproduce the issue\ndef test_resolve_redirects_issue():\n    try:\n        mock_responses = [\n            mock_response(\'http://server.example.com/do_something\', 303, {\'Location\': \'/new_thing_1513\'}),\n            mock_response(\'http://server.example.com/new_thing_1513\', 307, {\'Location\': \'http://failover.example.com/new_thing_1513\'}),\n            mock_response(\'http://failover.example.com/new_thing_1513\', 200)\n        ]\n\n        session = MockSession(mock_responses)\n        \n        # Initial POST request\n        response = session.post(\'http://server.example.com/do_something\')\n        \n        # Check the method of the final request in the chain\n        if response.request.method == \'POST\':\n            print("Issue reproduced")\n        elif response.request.method == \'GET\':\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response\nfrom unittest.mock import patch\n\ndef mocked_requests_post(url, *args, **kwargs):\n    # Mock the initial POST request\n    if url == "http://server.example.com/do_something":\n        response = Response()\n        response.status_code = 303\n        response.headers[\'Location\'] = "/new_thing_1513"\n        return response\n    return None\n\ndef mocked_requests_get(url, *args, **kwargs):\n    # Mock the intermediate GET request\n    if url == "http://server.example.com/new_thing_1513":\n        response = Response()\n        response.status_code = 307\n        response.headers[\'Location\'] = "//failover.example.com/new_thing_1513"\n        return response\n    \n    # Mock the final GET request\n    if url == "http://failover.example.com/new_thing_1513":\n        response = Response()\n        response.status_code = 200\n        return response\n\n    return None\n\ndef test_issue_reproduction():\n    with patch(\'requests.Session.request\') as mock_request:\n        mock_request.side_effect = lambda method, url, *args, **kwargs: (\n            mocked_requests_post(url, *args, **kwargs)\n            if method == \'POST\' else\n            mocked_requests_get(url, *args, **kwargs)\n        )\n        \n        session = requests.Session()\n        \n        # Initial POST request\n        response = session.post("http://server.example.com/do_something")\n        \n        if response.status_code == 200:\n            print("Issue resolved")\n            return\n\n        elif response.status_code == 307 and response.request.method == \'POST\':\n            print("Issue reproduced")\n            return\n\n        else:\n            print("Other issues")\n            return\n\ntest_issue_reproduction()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response\nfrom requests.sessions import Session\n\nclass MockResponse(Response):\n    def __init__(self, status_code, headers):\n        super().__init__()\n        self.status_code = status_code\n        self.headers = headers\n\ndef mock_send(self, request, **kwargs):\n    if request.url == \'http://server.example.com/do_something\':\n        response = MockResponse(303, {\'Location\': \'http://server.example.com/new_thing_1513\'})\n    elif request.url == \'http://server.example.com/new_thing_1513\':\n        response = MockResponse(307, {\'Location\': \'http://failover.example.com/new_thing_1513\'})\n    elif request.url == \'http://failover.example.com/new_thing_1513\':\n        response = MockResponse(200, {})\n    else:\n        response = MockResponse(404, {})\n    \n    response.request = request\n    return response\n\nSession.send = mock_send\n\ndef test_resolve_redirects_issue():\n    session = Session()\n    url = \'http://server.example.com/do_something\'\n    response = session.post(url)\n\n    if response.history:\n        if response.history[0].status_code == 303 and response.history[1].status_code == 307:\n            if response.request.method == \'POST\':\n                print("Issue reproduced")\n            else:\n                print("Issue resolved")\n        else:\n            print("Other issues")\n    else:\n        print("Other issues")\n\ntest_resolve_redirects_issue()\n```\n\nExplanation:\n1. **Imports:** The necessary imports for the test include the `requests` package and specific classes like `Response` and `Session`.\n2. **Mocking Mechanism:** A `MockResponse` class is created to mimic the behavior of actual HTTP responses.\n3. **Mock Send Function:** The `mock_send` function simulates the redirection chain described in the issue. It sends a 303 See Other response on the first request, a 307 Temporary Redirect on the second, and a final 200 OK for the last request in the chain.\n4. **Monkey Patching:** The `Session.send` method is monkey-patched to use the `mock_send` function.\n5. **Test Function:** The `test_resolve_redirects_issue` function initiates a POST request and checks the redirection history to determine if the issue is reproduced, resolved, or if there are other issues.\n\nThis test should help you verify whether the described issue is present in your codebase.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests import Session\nfrom requests.models import Response\n\n# Mock server to handle various redirects\nclass MockServer:\n    def __init__(self):\n        self.responses = {}\n\n    def add_response(self, url, method, status_code, headers, body):\n        self.responses[(url, method)] = (status_code, headers, body)\n\n    def request(self, method, url, **kwargs):\n        response = Response()\n        status_code, headers, body = self.responses.get((url, method), (404, {}, \'Not Found\'))\n        response.status_code = status_code\n        response.headers.update(headers)\n        response._content = body.encode(\'utf-8\')\n        response.url = url\n        return response\n\nmock_server = MockServer()\nmock_server.add_response(\'http://server.example.com/do_something\', \'POST\', 303, {\'Location\': \'/new_thing_1513\'}, \'\')\nmock_server.add_response(\'http://server.example.com/new_thing_1513\', \'GET\', 307, {\'Location\': \'http://failover.example.com/new_thing_1513\'}, \'\')\nmock_server.add_response(\'http://failover.example.com/new_thing_1513\', \'GET\', 200, {}, \'Success\')\n\nclass MockSession(Session):\n    def __init__(self, server):\n        super().__init__()\n        self.server = server\n\n    def send(self, request, **kwargs):\n        return self.server.request(request.method, request.url, **kwargs)\n\ndef test_resolve_redirects_issue():\n    session = MockSession(mock_server)\n\n    response = session.post(\'http://server.example.com/do_something\')\n\n    if response.status_code == 200 and response.text == \'Success\':\n        print("Issue resolved")\n    elif response.status_code == 404:\n        print("Other issues")\n    else:\n        print("Issue reproduced")\n\ntest_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.adapters import HTTPAdapter\nfrom requests.sessions import Session\nfrom requests.models import Response\nfrom io import BytesIO\n\nclass MockHTTPAdapter(HTTPAdapter):\n    def __init__(self, responses):\n        self.responses = responses\n        super().__init__()\n\n    def send(self, request, *args, **kwargs):\n        url = request.url\n        response = self.responses.pop(0)\n        response.url = url\n        response.request = request\n        return response\n\ndef test_redirect_issue():\n    # Prepare mock responses for the redirection chain\n    responses = []\n\n    # First response: 303 See Other\n    response_303 = Response()\n    response_303.status_code = 303\n    response_303.headers[\'Location\'] = \'/new_thing_1513\'\n    responses.append(response_303)\n\n    # Second response: 307 Temporary Redirect\n    response_307 = Response()\n    response_307.status_code = 307\n    response_307.headers[\'Location\'] = \'//failover.example.com/new_thing_1513\'\n    responses.append(response_307)\n\n    # Third response: Final destination\n    final_response = Response()\n    final_response.status_code = 200\n    responses.append(final_response)\n\n    # Create a session and mount the mock adapter\n    session = Session()\n    adapter = MockHTTPAdapter(responses)\n    session.mount(\'http://\', adapter)\n    session.mount(\'https://\', adapter)\n\n    # Perform the initial request\n    initial_request = requests.Request(\'POST\', \'http://server.example.com/do_something\')\n    prepped = session.prepare_request(initial_request)\n\n    try:\n        response = session.send(prepped)\n        if response.history and response.history[0].status_code == 303 and response.history[1].status_code == 307:\n            if response.request.method == \'POST\':\n                print("Issue reproduced")\n            else:\n                print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception:\n        print("Other issues")\n\ntest_redirect_issue()\n```\n\nThis test simulates the described redirection chain using mock responses. It initializes a session, mounts the `MockHTTPAdapter` to handle the custom redirection responses, and performs the initial POST request. Based on the final request method, it determines whether the issue is reproduced or resolved. If there are other issues or exceptions occur, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response\nfrom requests.sessions import Session\nfrom requests.structures import CaseInsensitiveDict\n\n# Mock server responses for redirection chain\nclass MockResponse(Response):\n    def __init__(self, status_code, headers, url):\n        super().__init__()\n        self.status_code = status_code\n        self.headers = CaseInsensitiveDict(headers)\n        self.url = url\n        self._content = b""\n\ndef mock_resolve_redirects(res, req, **kwargs):\n    responses = {\n        \'http://server.example.com/do_something\': MockResponse(\n            303, {\'Location\': \'http://server.example.com/new_thing_1513\'}, \'http://server.example.com/do_something\'),\n        \'http://server.example.com/new_thing_1513\': MockResponse(\n            307, {\'Location\': \'http://failover.example.com/new_thing_1513\'}, \'http://server.example.com/new_thing_1513\'),\n        \'http://failover.example.com/new_thing_1513\': MockResponse(\n            200, {}, \'http://failover.example.com/new_thing_1513\'),\n    }\n    while True:\n        if res.url in responses:\n            res = responses[res.url]\n            yield res\n        else:\n            break\n\ndef test_resolve_redirects_issue():\n    session = Session()\n    session.resolve_redirects = mock_resolve_redirects  # Override the resolve_redirects method\n\n    try:\n        req = requests.Request(\'POST\', \'http://server.example.com/do_something\')\n        prepped = session.prepare_request(req)\n\n        # Directly sending the request to the mock response for initial redirection\n        resp = MockResponse(303, {\'Location\': \'http://server.example.com/new_thing_1513\'}, prepped.url)\n        history = list(session.resolve_redirects(resp, prepped))\n\n        # The last request should be a GET, as per the 303 redirection rule\n        if history[-1].request.method == \'GET\':\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\ntest_resolve_redirects_issue()\n```\n\nThis test script:\n1. Mocks the server responses to simulate the redirection chain.\n2. Overrides the `Session.resolve_redirects` method to use the mocked responses.\n3. Prepares the initial POST request and processes the redirections.\n4. Checks the method of the final request in the redirection chain.\n5. Prints "Issue reproduced" if the final request method is not GET, indicating the issue is present.\n6. Prints "Issue resolved" if the final request method is GET, indicating the issue has been fixed.\n7. Prints "Other issues" if any other issues are encountered during the test execution.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response, PreparedRequest\nfrom requests.sessions import Session\n\ndef create_mock_response(status_code, url, headers=None):\n    response = Response()\n    response.status_code = status_code\n    response.headers = headers or {}\n    response.url = url\n    return response\n\ndef test_resolve_redirects_issue():\n    session = Session()\n    original_request = PreparedRequest()\n    original_request.prepare(\n        method=\'POST\',\n        url=\'http://server.example.com/do_something\'\n    )\n\n    # Mocking the responses for redirections\n    first_response = create_mock_response(\n        303, \'http://server.example.com/new_thing_1513\',\n        headers={\'Location\': \'/new_thing_1513\'}\n    )\n    second_response = create_mock_response(\n        307, \'http://failover.example.com/new_thing_1513\',\n        headers={\'Location\': \'//failover.example.com/new_thing_1513\'}\n    )\n\n    responses = [first_response, second_response]\n\n    def mock_send(request, **kwargs):\n        if request.url == \'http://server.example.com/do_something\':\n            return responses.pop(0)\n        elif request.url == \'http://server.example.com/new_thing_1513\':\n            return responses.pop(0)\n        else:\n            return create_mock_response(200, request.url)\n\n    session.send = mock_send\n\n    redirections = session.resolve_redirects(\n        first_response,\n        original_request\n    )\n\n    try:\n        for response in redirections:\n            # we want to verify the sequence and ensure the last request is GET\n            if response.url == \'http://failover.example.com/new_thing_1513\' and response.request.method == \'POST\':\n                print("Issue reproduced")\n                return\n    except Exception as e:\n        print("Other issues")\n        return\n\n    print("Issue resolved")\n\ntest_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='Sure, here is a complete test that reproduces the issue described:\n\n```python\nimport requests\nfrom requests.sessions import Session\nfrom requests.models import Response\nfrom urllib.parse import urljoin\n\n# Mock server responses\nclass MockServer:\n    def __init__(self):\n        self.redirect_chain = [\n            ("/do_something", 303, "/new_thing_1513"),\n            ("/new_thing_1513", 307, "//failover.example.com/new_thing_1513")\n        ]\n        self.index = 0\n\n    def handler(self, request):\n        if self.index < len(self.redirect_chain):\n            path, status_code, location = self.redirect_chain[self.index]\n            if request.path_url == path:\n                self.index += 1\n                response = Response()\n                response.status_code = status_code\n                response.headers[\'Location\'] = location\n                response.url = urljoin(request.url, location)\n                return response\n        response = Response()\n        response.status_code = 200\n        response.url = request.url\n        return response\n\ndef test_session_resolve_redirects():\n    mock_server = MockServer()\n    session = Session()\n\n    original_request = requests.Request(\'POST\', \'http://server.example.com/do_something\')\n    prepped = session.prepare_request(original_request)\n\n    def send_mock_request(request, **kwargs):\n        return mock_server.handler(request)\n\n    session.send = send_mock_request\n\n    response = session.send(prepped)\n\n    if response.history:\n        last_request = response.history[-1].request\n        if last_request.method == \'POST\':\n            print("Issue reproduced")\n        elif last_request.method == \'GET\':\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    else:\n        print("Other issues")\n\ntest_session_resolve_redirects()\n```\n\nThis test sets up a `MockServer` to simulate the described redirect chain and uses that mock server to handle requests made by the `requests.Session`. It checks if the final method used after following the redirects is `POST`, which indicates the issue is reproduced, or `GET`, which indicates the issue has been resolved. If the final method is something unexpected, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.sessions import Session\nfrom requests.models import PreparedRequest, Response\nfrom requests.structures import CaseInsensitiveDict\n\ndef test_session_resolve_redirects_issue():\n    # Mock Server Responses\n    original_response = Response()\n    original_response.status_code = 303\n    original_response.headers[\'Location\'] = \'/new_thing_1513\'\n    \n    intermediate_response = Response()\n    intermediate_response.status_code = 307\n    intermediate_response.headers[\'Location\'] = \'//failover.example.com/new_thing_1513\'\n    \n    final_response = Response()\n    final_response.status_code = 200\n\n    # Mock sending request and receiving responses\n    def mock_send(request, **kwargs):\n        if request.url == \'http://server.example.com/do_something\':\n            return original_response\n        elif request.url == \'http://server.example.com/new_thing_1513\':\n            return intermediate_response\n        elif request.url == \'http://failover.example.com/new_thing_1513\':\n            return final_response\n        else:\n            raise ValueError("Unexpected URL")\n\n    session = Session()\n    session.send = mock_send\n\n    # Prepare the original request\n    original_request = PreparedRequest()\n    original_request.prepare(\n        method=\'POST\',\n        url=\'http://server.example.com/do_something\',\n        headers=CaseInsensitiveDict({\'Host\': \'server.example.com\'})\n    )\n\n    # Send the request and resolve redirects\n    try:\n        responses = list(session.resolve_redirects(original_response, original_request))\n        if len(responses) == 2 and responses[-1].status_code == 200:\n            if responses[0].request.method == \'POST\' and responses[1].request.method == \'GET\':\n                print("Issue reproduced")\n            else:\n                print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n        raise e\n\ntest_session_resolve_redirects_issue()\n```\n\nThis test script simulates the redirection chain described in the issue by creating mock responses and overriding the `Session.send` method to return these predetermined responses. The test then checks if the request method for the final request in the redirection chain is correctly preserved as a `GET` instead of reverting back to a `POST`. If the method is not correctly preserved, the test will print "Issue reproduced". If the methods are correct, it will print "Issue resolved". If there are other issues (e.g., unexpected exceptions), it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response\nfrom requests.sessions import Session\nfrom requests.structures import CaseInsensitiveDict\n\ndef test_resolve_redirects_issue():\n    # Mock response objects to simulate the redirection chain\n    def mock_response(url, status_code, headers):\n        response = Response()\n        response.status_code = status_code\n        response.headers = CaseInsensitiveDict(headers)\n        response.url = url\n        return response\n\n    # Define the mock server responses\n    responses = [\n        mock_response("http://server.example.com/do_something", 303, {"Location": "/new_thing_1513"}),\n        mock_response("http://server.example.com/new_thing_1513", 307, {"Location": "//failover.example.com/new_thing_1513"}),\n        mock_response("http://failover.example.com/new_thing_1513", 200, {}),\n    ]\n\n    # Override the send method of Session to return our mock responses in sequence\n    class MockSession(Session):\n        def __init__(self, responses):\n            super().__init__()\n            self.responses = responses\n            self.response_index = 0\n\n        def send(self, request, **kwargs):\n            response = self.responses[self.response_index]\n            self.response_index += 1\n            response.request = request\n            return response\n\n    # Create the initial POST request\n    session = MockSession(responses)\n    initial_request = requests.Request("POST", "http://server.example.com/do_something")\n    prepared_request = session.prepare_request(initial_request)\n\n    # Perform the request and follow redirects\n    response = session.send(prepared_request)\n    redirects = session.resolve_redirects(response, prepared_request)\n\n    last_response = None\n    for resp in redirects:\n        last_response = resp\n\n    # Check the method of the last request in the chain\n    if last_response.request.method == "POST":\n        print("Issue reproduced")\n    elif last_response.request.method == "GET":\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\ntest_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Request, Session, Response\nfrom requests.structures import CaseInsensitiveDict\n\ndef mock_response(status_code, headers, content=\'\'):\n    response = Response()\n    response.status_code = status_code\n    response.headers = CaseInsensitiveDict(headers)\n    response._content = content.encode(\'utf-8\')\n    response.url = headers.get(\'Location\', \'http://server.example.com\')\n    return response\n\ndef test_resolve_redirects_issue():\n    session = Session()\n\n    # Mock the initial POST request\n    initial_request = Request(\'POST\', \'http://server.example.com/do_something\')\n    prepared_initial_request = session.prepare_request(initial_request)\n\n    # Mock the 303 See Other response\n    response_303 = mock_response(\n        303, {\'Location\': \'http://server.example.com/new_thing_1513\'}\n    )\n\n    # Mock the 307 Temporary Redirect response\n    response_307 = mock_response(\n        307, {\'Location\': \'http://failover.example.com/new_thing_1513\'}\n    )\n\n    # Mock the final GET request to failover.example.com\n    final_request = Request(\'GET\', \'http://failover.example.com/new_thing_1513\')\n    prepared_final_request = session.prepare_request(final_request)\n\n    # Simulate the redirect chain manually\n    responses = [response_303, response_307]\n    current_request = prepared_initial_request\n    for response in responses:\n        if response.status_code in (301, 302, 303):\n            current_request.method = \'GET\'  # 303 should switch method to GET\n        current_request.url = response.headers[\'Location\']\n\n    # Check what the final request\'s method is\n    final_method = current_request.method\n\n    # Verify if the issue is reproduced\n    if final_method == \'POST\':\n        print("Issue reproduced")\n    elif final_method == \'GET\':\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\ntest_resolve_redirects_issue()\n```\n\nExplanation:\n1. The `mock_response` function creates a mock `Response` object.\n2. The `test_resolve_redirects_issue` function simulates the redirect chain described in the issue.\n3. The test manually processes each response to simulate `Session.resolve_redirects`, modifying the request method based on redirection status codes.\n4. The final request method is checked to determine if the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response\nfrom requests.sessions import Session\n\ndef create_mock_response(status_code, url, method=\'GET\', headers=None):\n    response = Response()\n    response.status_code = status_code\n    response.headers = headers or {}\n    response.url = url\n    response.request = requests.Request(method, url).prepare()\n    return response\n\ndef mock_resolve_redirects(session, request, stream=False, timeout=None, verify=True, cert=None, proxies=None):\n    responses = [\n        create_mock_response(303, \'http://server.example.com/new_thing_1513\', \'POST\', {\'Location\': \'/new_thing_1513\'}),\n        create_mock_response(307, \'http://failover.example.com/new_thing_1513\', \'GET\', {\'Location\': \'http://failover.example.com/new_thing_1513\'})\n    ]\n    for response in responses:\n        yield response\n\ndef test_issue_reproduction():\n    session = Session()\n    session.resolve_redirects = lambda response, request, **kwargs: mock_resolve_redirects(session, request, **kwargs)\n\n    original_request = requests.Request(\'POST\', \'http://server.example.com/do_something\').prepare()\n    response = create_mock_response(303, \'http://server.example.com/new_thing_1513\', \'POST\', {\'Location\': \'/new_thing_1513\'})\n\n    try:\n        for resp in session.resolve_redirects(response, original_request):\n            if resp.request.method == \'POST\':\n                print("Issue reproduced")\n                return\n        print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n        return\n\ntest_issue_reproduction()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response, PreparedRequest\n\ndef mock_response(status_code, url, method="GET", headers=None):\n    response = Response()\n    response.status_code = status_code\n    response.headers[\'Location\'] = url\n    response.request = PreparedRequest()\n    response.request.prepare(\n        method=method,\n        url=url,\n        headers=headers or {}\n    )\n    return response\n\ndef test_resolve_redirects_issue():\n    session = requests.Session()\n    \n    # Mock the initial POST request and two subsequent redirects\n    initial_response = mock_response(\n        303, "http://server.example.com/new_thing_1513", method="POST"\n    )\n    redirect_response_303 = mock_response(\n        307, "http://failover.example.com/new_thing_1513", method="GET"\n    )\n    final_response = mock_response(\n        200, "http://failover.example.com/new_thing_1513", method="GET"\n    )\n\n    def mock_send(request, **kwargs):\n        if request.url == "http://server.example.com/do_something":\n            return initial_response\n        elif request.url == "http://server.example.com/new_thing_1513":\n            return redirect_response_303\n        elif request.url == "http://failover.example.com/new_thing_1513":\n            return final_response\n        else:\n            response = Response()\n            response.status_code = 404\n            return response\n\n    session.send = mock_send\n\n    try:\n        response = session.request(\'POST\', \'http://server.example.com/do_something\')\n        \n        # Check the final response to determine if the issue is reproduced\n        if response.url == "http://failover.example.com/new_thing_1513" and response.request.method == "POST":\n            print("Issue reproduced")\n        elif response.url == "http://failover.example.com/new_thing_1513" and response.request.method == "GET":\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests import Session\nfrom requests.models import PreparedRequest\n\ndef test_session_resolve_redirects():\n    # Set up a mock server with redirections\n    from http.server import BaseHTTPRequestHandler, HTTPServer\n    import threading\n    \n    class MockServerRequestHandler(BaseHTTPRequestHandler):\n        def do_POST(self):\n            if self.path == "/do_something":\n                self.send_response(303)\n                self.send_header(\'Location\', \'/new_thing_1513\')\n                self.end_headers()\n            else:\n                self.send_response(501)\n                self.end_headers()\n        \n        def do_GET(self):\n            if self.path == "/new_thing_1513":\n                self.send_response(307)\n                self.send_header(\'Location\', \'http://localhost:{}/new_thing_1513\'.format(PORT))\n                self.end_headers()\n            else:\n                self.send_response(200)\n                self.end_headers()\n\n    def start_mock_server():\n        httpd = HTTPServer((\'\', PORT), MockServerRequestHandler)\n        httpd.serve_forever()\n\n    # Start the mock server in a new thread\n    PORT = 8000\n    server_thread = threading.Thread(target=start_mock_server)\n    server_thread.setDaemon(True)\n    server_thread.start()\n\n    # Prepare the session and request\n    session = Session()\n    request = requests.Request(\'POST\', \'http://localhost:{}/do_something\'.format(PORT))\n    prepared_request = session.prepare_request(request)\n\n    # Capture the outcome\n    try:\n        response = session.send(prepared_request, allow_redirects=True)\n        if response.request.method == \'POST\':\n            print("Issue reproduced")\n        elif response.request.method == \'GET\':\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues:", e)\n\ntest_session_resolve_redirects()\n```\n\n**Explanation:**\n\n1. **Imports:**\n   - We import necessary modules: `requests`, `Session`, and `PreparedRequest`.\n   - Import modules for setting up a mock server (`BaseHTTPRequestHandler`, `HTTPServer`, `threading`).\n\n2. **Mock Server:**\n   - We define a mock HTTP server using `BaseHTTPRequestHandler` to simulate the redirection chain described in the issue.\n   - The server responds to a `POST` request to `/do_something` with a `303 See Other` redirect to `/new_thing_1513`.\n   - A `GET` request to `/new_thing_1513` results in a `307 Temporary Redirect` back to the same path at the mock server.\n\n3. **Server Thread:**\n   - The mock server runs in a separate thread to handle requests concurrently with the test.\n\n4. **Session Setup:**\n   - A `Session` object and a prepared request (`POST` to the initial URL) are created.\n\n5. **Check Outcome:**\n   - The `send` method of `Session` is used to follow redirects.\n   - Depending on the final request method, it prints:\n     - "Issue reproduced" if the method is `POST` after the redirects.\n     - "Issue resolved" if the method is `GET`.\n     - "Other issues" if something unexpected occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.adapters import HTTPAdapter\nfrom requests.sessions import Session\nfrom requests.models import Response\nfrom requests.structures import CaseInsensitiveDict\n\nclass MockAdapter(HTTPAdapter):\n    def send(self, request, *args, **kwargs):\n        response = Response()\n        response.request = request\n\n        if request.url == "http://server.example.com/do_something":\n            response.status_code = 303\n            response.headers[\'Location\'] = "/new_thing_1513"\n        elif request.url == "http://server.example.com/new_thing_1513":\n            response.status_code = 307\n            response.headers[\'Location\'] = "//failover.example.com/new_thing_1513"\n        elif request.url == "http://failover.example.com/new_thing_1513":\n            response.status_code = 200\n        else:\n            response.status_code = 404\n\n        response._content = b""\n        return response\n\ndef test_redirect_method_preservation():\n    session = Session()\n    adapter = MockAdapter()\n    session.mount("http://", adapter)\n    session.mount("https://", adapter)\n\n    initial_request = requests.Request(\'POST\', \'http://server.example.com/do_something\')\n    prepared_request = session.prepare_request(initial_request)\n\n    try:\n        response = session.send(prepared_request, allow_redirects=True)\n        final_request = response.history[-1].request if response.history else response.request\n\n        if final_request.method == \'POST\':\n            print("Issue reproduced")\n        elif final_request.method == \'GET\':\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_redirect_method_preservation()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response, Request\nfrom requests.sessions import Session\nfrom requests.structures import CaseInsensitiveDict\n\ndef mock_response(url, status_code, headers=None, content=""):\n    """Creates a mock response object."""\n    response = Response()\n    response.url = url\n    response.status_code = status_code\n    response.headers = CaseInsensitiveDict(headers or {})\n    response._content = content.encode("utf-8")\n    return response\n\nclass MockSession(Session):\n    def __init__(self, *args, **kwargs):\n        super(MockSession, self).__init__(*args, **kwargs)\n        self.redirect_responses = []\n\n    def send(self, request, **kwargs):\n        if self.redirect_responses:\n            return self.redirect_responses.pop(0)\n        return super(MockSession, self).send(request, **kwargs)\n\ndef test_resolve_redirects_issue():\n    session = MockSession()\n    \n    redirect_303_response = mock_response(\n        url="http://server.example.com/do_something",\n        status_code=303,\n        headers={"Location": "/new_thing_1513"}\n    )\n    \n    redirect_307_response = mock_response(\n        url="http://server.example.com/new_thing_1513",\n        status_code=307,\n        headers={"Location": "//failover.example.com/new_thing_1513"}\n    )\n    \n    final_get_response = mock_response(\n        url="http://failover.example.com/new_thing_1513",\n        status_code=200,\n        content="Success"\n    )\n    \n    session.redirect_responses = [redirect_303_response, redirect_307_response, final_get_response]\n    \n    initial_request = Request(\n        method="POST",\n        url="http://server.example.com/do_something",\n        headers={"Host": "server.example.com"},\n    )\n    prepared_request = session.prepare_request(initial_request)\n\n    try:\n        response = session.send(prepared_request)\n        if response.request.method == "POST":\n            print("Issue reproduced")\n        elif response.request.method == "GET" and response.status_code == 200:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_resolve_redirects_issue()\n```\n\nThis test script sets up a `MockSession` to simulate the described redirection chain. The redirection responses and their respective `Location` headers are mocked to replicate the issue scenario. The script then triggers the initial POST request and checks the method of the final request. If the method is POST, it indicates the issue is reproduced. If the method is GET and the response status code is 200, it indicates the issue is resolved. Any other outcomes will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the generated test that reflects the issue described and follows the specified format.\n\n```python\nimport requests\nfrom requests import Session\nfrom requests.models import PreparedRequest, Response\nfrom requests.structures import CaseInsensitiveDict\n\ndef test_resolve_redirects_issue():\n    # Mocking server responses for the redirection chain\n    session = Session()\n\n    def mock_response(url, status_code, headers):\n        response = Response()\n        response.status_code = status_code\n        response.headers = CaseInsensitiveDict(headers)\n        response.url = url\n        return response\n\n    def mock_send(request, **kwargs):\n        if request.url == \'http://server.example.com/do_something\':\n            return mock_response(\'http://server.example.com/do_something\', 303, {\'Location\': \'/new_thing_1513\'})\n        elif request.url == \'http://server.example.com/new_thing_1513\':\n            return mock_response(\'http://server.example.com/new_thing_1513\', 307, {\'Location\': \'http://failover.example.com/new_thing_1513\'})\n        elif request.url == \'http://failover.example.com/new_thing_1513\':\n            return mock_response(\'http://failover.example.com/new_thing_1513\', 200, {})\n\n    # Monkey patch session.send to simulate the redirection chain\n    session.send = mock_send\n\n    # Original request to be redirected\n    original_request = PreparedRequest()\n    original_request.prepare(\n        method=\'POST\',\n        url=\'http://server.example.com/do_something\',\n        headers={\'Host\': \'server.example.com\'}\n    )\n\n    # Simulate fetching the redirects\n    try:\n        response = session.request(method=original_request.method, url=original_request.url, headers=original_request.headers)\n        for r in session.resolve_redirects(response, original_request):\n            response = r\n\n        if response.request.method == \'POST\':\n            print("Issue reproduced")\n        elif response.request.method == \'GET\':\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_resolve_redirects_issue()\n```\n\nThis test code will:\n\n1. Mock the server responses to simulate the described redirection chain.\n2. Use the `Session.resolve_redirects` method to handle the redirects.\n3. Check if the final method used in the redirected request is a `POST` (indicating the issue is reproduced) or a `GET` (indicating the issue is resolved).\n\nMake sure `requests` is installed in your environment to run this test.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.sessions import Session\nfrom requests.models import Response, Request\nfrom requests.adapters import HTTPAdapter\nfrom requests.structures import CaseInsensitiveDict\n\nclass MockAdapter(HTTPAdapter):\n    def __init__(self, responses):\n        self.responses = responses\n        self.call_count = 0\n        super(MockAdapter, self).__init__()\n\n    def send(self, request, **kwargs):\n        response = self.responses[self.call_count]\n        self.call_count += 1\n        return response\n\ndef create_mock_response(status_code, headers):\n    response = Response()\n    response.status_code = status_code\n    response.headers = CaseInsensitiveDict(headers)\n    return response\n\ndef test_issue_reproduce():\n    responses = [\n        create_mock_response(303, {"Location": "/new_thing_1513"}),\n        create_mock_response(307, {"Location": "//failover.example.com/new_thing_1513"})\n    ]\n    \n    session = Session()\n    adapter = MockAdapter(responses)\n    session.mount(\'http://\', adapter)\n    session.mount(\'https://\', adapter)\n\n    original_request = Request(\'POST\', \'http://server.example.com/do_something\')\n    prepared_request = session.prepare_request(original_request)\n\n    try:\n        responses = session.resolve_redirects(prepared_request, responses[0])\n        method_chain = [resp.request.method for resp in responses]\n        if method_chain == [\'GET\', \'POST\']:\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        print("Other issues", e)\n\ntest_issue_reproduce()\n```\n\nThis test creates a mock HTTP adapter to simulate the redirection chain described in the issue. The `MockAdapter` class is used to provide predefined responses for each HTTP request. The test then makes a request and checks whether the issue is reproduced by examining the methods of the requests in the redirection chain. If the issue is reproduced, it prints "Issue reproduced." If the issue is resolved, it prints "Issue resolved." If there are other issues, it prints "Other issues" along with the exception message.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests import Session, Request\nfrom requests.models import PreparedRequest\nfrom requests.adapters import HTTPAdapter\nfrom requests.exceptions import RequestException\nfrom requests.structures import CaseInsensitiveDict\nfrom urllib3.response import HTTPResponse\nfrom io import BytesIO\n\nclass MockHTTPAdapter(HTTPAdapter):\n    def __init__(self, responses):\n        self.responses = responses\n        self.requests_made = []\n        super(MockHTTPAdapter, self).__init__()\n\n    def send(self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None):\n        self.requests_made.append(request)\n        response = self.responses.pop(0)\n        return response\n\ndef mock_response(status_code, headers, body):\n    raw = HTTPResponse(\n        body=BytesIO(body.encode(\'utf-8\')),\n        status=status_code,\n        headers=headers,\n        preload_content=False\n    )\n    response = requests.Response()\n    response.status_code = status_code\n    response.headers = CaseInsensitiveDict(headers)\n    response.raw = raw\n    response.url = request.url\n    return response\n\ndef test_redirect_issue():\n    responses = [\n        mock_response(303, {\'Location\': \'/new_thing_1513\'}, \'\'),\n        mock_response(307, {\'Location\': \'http://failover.example.com/new_thing_1513\'}, \'\'),\n    ]\n\n    s = Session()\n    adapter = MockHTTPAdapter(responses)\n    s.mount(\'http://\', adapter)\n    s.mount(\'https://\', adapter)\n\n    try:\n        s.post(\'http://server.example.com/do_something\')\n    except RequestException as e:\n        print("Other issues")\n        return\n    \n    if len(adapter.requests_made) < 2:\n        print("Other issues")\n        return\n    \n    first_request_method = adapter.requests_made[0].method\n    second_request_method = adapter.requests_made[-1].method\n\n    if first_request_method == \'POST\' and second_request_method == \'POST\':\n        print("Issue reproduced")\n    elif first_request_method == \'POST\' and second_request_method == \'GET\':\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\ntest_redirect_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.sessions import Session\nfrom requests.models import Response, PreparedRequest\n\n# Mock adapter to simulate HTTP responses for testing\nclass MockAdapter(requests.adapters.HTTPAdapter):\n    def __init__(self, responses):\n        self.responses = responses\n        self.index = 0\n        super().__init__()\n\n    def send(self, request, **kwargs):\n        response = self.responses[self.index]\n        self.index += 1\n        return response\n\ndef build_response(status_code, headers, request):\n    response = Response()\n    response.status_code = status_code\n    response.headers = headers\n    response._content = b\'\'\n    response.request = request\n    response.url = request.url\n    return response\n\ndef test_session_resolve_redirects_issue():\n    session = Session()\n    responses = []\n\n    # Original POST request\n    original_request = PreparedRequest()\n    original_request.prepare(\n        method=\'POST\',\n        url=\'http://server.example.com/do_something\',\n        headers={\'Host\': \'server.example.com\'}\n    )\n\n    # First redirection with 303 See Other (should convert POST to GET)\n    responses.append(build_response(\n        status_code=303,\n        headers={\'Location\': \'/new_thing_1513\'},\n        request=original_request\n    ))\n\n    # Second redirection with 307 Temporary Redirect (should preserve GET method)\n    responses.append(build_response(\n        status_code=307,\n        headers={\'Location\': \'http://failover.example.com/new_thing_1513\'},\n        request=None  # to be set by the MockAdapter\n    ))\n\n    session.mount(\'http://\', MockAdapter(responses))\n\n    try:\n        response = session.send(original_request)\n        final_request_method = response.request.method\n        if final_request_method == \'POST\':\n            print("Issue reproduced")\n        elif final_request_method == \'GET\':\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_session_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.adapters import HTTPAdapter\nfrom requests.models import Response\nfrom requests.sessions import Session\nfrom requests.structures import CaseInsensitiveDict\nfrom requests.exceptions import TooManyRedirects\n\n# Mock server to simulate the redirection chain\nclass MockServer(HTTPAdapter):\n    def __init__(self):\n        super().__init__()\n        self.responses = {\n            \'http://server.example.com/do_something\': self._response_303,\n            \'http://server.example.com/new_thing_1513\': self._response_307,\n            \'http://failover.example.com/new_thing_1513\': self._final_response,\n        }\n\n    def send(self, request, **kwargs):\n        response_function = self.responses.get(request.url, self._default_response)\n        return response_function(request)\n\n    def _response_303(self, request):\n        response = Response()\n        response.status_code = 303\n        response.headers = CaseInsensitiveDict({\'Location\': \'/new_thing_1513\'})\n        response.request = request\n        response.url = request.url\n        response._content = b\'\'\n        return response\n\n    def _response_307(self, request):\n        response = Response()\n        response.status_code = 307\n        response.headers = CaseInsensitiveDict({\'Location\': \'//failover.example.com/new_thing_1513\'})\n        response.request = request\n        response.url = request.url\n        response._content = b\'\'\n        return response\n\n    def _final_response(self, request):\n        response = Response()\n        response.status_code = 200\n        response.request = request\n        response.url = request.url\n        response._content = b\'Success\'\n        return response\n\n    def _default_response(self, request):\n        response = Response()\n        response.status_code = 404\n        response.request = request\n        response.url = request.url\n        response._content = b\'Not Found\'\n        return response\n\ndef test_resolve_redirects_issue():\n    session = Session()\n    session.mount(\'http://\', MockServer())\n    session.mount(\'https://\', MockServer())\n\n    try:\n        response = session.post(\'http://server.example.com/do_something\')\n\n        if response.status_code == 200 and response.request.method == \'GET\' and response.url == \'http://failover.example.com/new_thing_1513\':\n            print("Issue resolved")\n        elif response.request.method == \'POST\':\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except TooManyRedirects:\n        print("Other issues")\n\ntest_resolve_redirects_issue()\n```\n\nThe provided test setup simulates the redirection chain using a mock HTTP server and then uses the `requests` library to make a POST request that should trigger the issue described. It checks the final outcome to determine if the issue related to method preservation after a 303 redirection followed by a 307 redirection is reproduced, resolved, or if other issues are present.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests import Session, Request\nfrom requests.models import Response\nfrom requests.adapters import HTTPAdapter\nfrom requests.packages.urllib3.util.retry import Retry\nfrom requests_testadapter import Resp\n\nclass MockAdapter(HTTPAdapter):\n    def __init__(self, responses):\n        self.responses = responses\n        super().__init__()\n\n    def send(self, request, **kwargs):\n        response = self.responses.pop(0)\n        response.request = request\n        return response\n\ndef test_issue_resolve_redirects():\n    # Mock responses for the test\n    responses = [\n        Resp(status=303, headers={\'Location\': \'/new_thing_1513\'}),\n        Resp(status=307, headers={\'Location\': \'//failover.example.com/new_thing_1513\'}),\n        Resp(status=200)\n    ]\n    \n    # Create a session and mount the mock adapter\n    session = Session()\n    session.mount(\'http://\', MockAdapter(responses))\n    session.mount(\'https://\', MockAdapter(responses))\n\n    # Original POST request\n    original_request = Request(\'POST\', \'http://server.example.com/do_something\')\n    prepared_request = session.prepare_request(original_request)\n\n    try:\n        # Send request and follow redirects\n        response = session.send(prepared_request, allow_redirects=True)\n        final_request = response.request\n\n        # Check if the final request method is a GET\n        if final_request.method == \'GET\':\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_issue_resolve_redirects()\n```\n\nThis test sets up a mock environment to simulate the redirection chain described in the issue. The test verifies whether the final request method is `GET` when it should be, and prints the appropriate message based on the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests import Request, Session\nfrom requests.models import Response\nfrom requests.structures import CaseInsensitiveDict\n\ndef mock_response(url, status_code, headers):\n    response = Response()\n    response.status_code = status_code\n    response.headers = CaseInsensitiveDict(headers)\n    response.url = url\n    return response\n\ndef test_resolve_redirects_issue():\n    session = Session()\n\n    # Mocking the initial POST request\n    original_request = Request(\'POST\', \'http://server.example.com/do_something\').prepare()\n\n    # Mock the responses for redirections\n    response1 = mock_response(\'http://server.example.com/do_something\', 303, {\'Location\': \'/new_thing_1513\'})\n    response2 = mock_response(\'http://server.example.com/new_thing_1513\', 307, {\'Location\': \'//failover.example.com/new_thing_1513\'})\n\n    # Attach the responses to the session\n    def mock_send(request, **kwargs):\n        if request.url == \'http://server.example.com/do_something\':\n            return response1\n        elif request.url == \'http://server.example.com/new_thing_1513\':\n            return response2\n        elif request.url == \'http://failover.example.com/new_thing_1513\':\n            return mock_response(\'http://failover.example.com/new_thing_1513\', 200, {})\n\n    # Replace the session\'s send method with our mock\n    session.send = mock_send\n\n    try:\n        final_response = session.send(original_request)\n        final_request_method = final_response.request.method\n        final_request_url = final_response.request.url\n    except Exception as e:\n        print("Other issues")\n        return\n\n    # Check if the issue is reproduced\n    if final_request_method == \'POST\' and final_request_url == \'http://failover.example.com/new_thing_1513\':\n        print("Issue reproduced")\n    elif final_request_method == \'GET\' and final_request_url == \'http://failover.example.com/new_thing_1513\':\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\ntest_resolve_redirects_issue()\n```\n\nThis test will:\n\n1. Mock the initial POST request.\n2. Set up mock responses for the redirection chain as described in the issue.\n3. Attach these responses to the session.\n4. Replace the session\'s `send` method with a mock function that returns the appropriate response based on the request URL.\n5. Determine if the issue is reproduced or resolved based on the final request method and URL.\n\nRun the test to see if the issue described in the issue text is reproduced or resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.adapters import HTTPAdapter\nfrom requests.models import Response\nfrom requests.sessions import Session\nfrom requests.structures import CaseInsensitiveDict\nfrom urllib3.util import Timeout\n\nclass MockAdapter(HTTPAdapter):\n    def __init__(self, responses):\n        super().__init__()\n        self.responses = responses\n        self.call_count = 0\n\n    def send(self, request, **kwargs):\n        response = self.responses[self.call_count]\n        self.call_count += 1\n        return response\n\ndef create_mock_response(status_code, headers, url):\n    response = Response()\n    response.status_code = status_code\n    response.headers = CaseInsensitiveDict(headers)\n    response.url = url\n    return response\n\ndef test_resolve_redirects_issue():\n    # Mock responses for the redirection chain\n    responses = [\n        create_mock_response(303, {\'Location\': \'/new_thing_1513\'}, \'http://server.example.com/do_something\'),\n        create_mock_response(307, {\'Location\': \'http://failover.example.com/new_thing_1513\'}, \'http://server.example.com/new_thing_1513\')\n    ]\n    \n    # Create a session and mount the mock adapter\n    session = Session()\n    adapter = MockAdapter(responses)\n    session.mount(\'http://\', adapter)\n    \n    # Perform the initial request\n    initial_request = requests.Request(\'POST\', \'http://server.example.com/do_something\')\n    prepped = session.prepare_request(initial_request)\n    \n    try:\n        response = session.send(prepped, allow_redirects=True)\n    except requests.exceptions.RequestException:\n        print("Other issues")\n        return\n    \n    # Check the final request method\n    if adapter.call_count == 2:\n        final_request_method = responses[1].request.method\n        if final_request_method == \'POST\':\n            print("Issue reproduced")\n        elif final_request_method == \'GET\':\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    else:\n        print("Other issues")\n\ntest_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests import Session\nfrom requests.models import PreparedRequest\nfrom requests.adapters import HTTPAdapter\nfrom requests.exceptions import RequestException\nfrom urllib3.util import Retry\n\ndef mock_redirect_server():\n    from flask import Flask, request, redirect, Response\n    app = Flask(__name__)\n\n    @app.route(\'/do_something\', methods=[\'POST\'])\n    def do_something():\n        return redirect(\'/new_thing_1513\', code=303)\n\n    @app.route(\'/new_thing_1513\', methods=[\'GET\'])\n    def new_thing_1513():\n        response = Response(status=307)\n        response.headers[\'Location\'] = \'//failover.example.com/new_thing_1513\'\n        return response\n\n    @app.route(\'/new_thing_1513_failover\', methods=[\'GET\'])\n    def new_thing_1513_failover():\n        return "Success", 200\n\n    return app\n\ndef test_session_resolve_redirects():\n    import threading\n    from werkzeug.serving import make_server\n\n    app = mock_redirect_server()\n    server = make_server(\'127.0.0.1\', 5000, app)\n    thread = threading.Thread(target=server.serve_forever)\n    thread.start()\n\n    try:\n        session = Session()\n        retries = Retry(connect=3, backoff_factor=0.5)\n        adapter = HTTPAdapter(max_retries=retries)\n        session.mount(\'http://\', adapter)\n\n        request = PreparedRequest()\n        request.prepare(method=\'POST\', url=\'http://127.0.0.1:5000/do_something\')\n\n        try:\n            response = session.send(request, allow_redirects=True)\n        except RequestException as e:\n            print(f"Request failed: {e}")\n            print("Other issues")\n            return\n\n        if response.status_code == 200 and response.text == "Success":\n            print("Issue resolved")\n        elif response.request.method == \'POST\':\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n    finally:\n        server.shutdown()\n        thread.join()\n\ntest_session_resolve_redirects()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import PreparedRequest\nfrom requests.sessions import Session\nfrom requests.exceptions import TooManyRedirects\n\ndef mock_response(status_code, headers, content=""):\n    response = requests.Response()\n    response.status_code = status_code\n    response.headers = headers\n    response._content = content.encode(\'utf-8\')\n    return response\n\ndef test_resolve_redirects_issue():\n    session = Session()\n\n    # Mock the initial POST request\n    initial_request = PreparedRequest()\n    initial_request.prepare(\n        method=\'POST\',\n        url=\'http://server.example.com/do_something\',\n        headers={\'Host\': \'server.example.com\'},\n        data=\'\'\n    )\n\n    responses = [\n        mock_response(303, {\'Location\': \'http://server.example.com/new_thing_1513\'}),\n        mock_response(307, {\'Location\': \'http://failover.example.com/new_thing_1513\'})\n    ]\n\n    def mock_send(request, **kwargs):\n        nonlocal responses\n        if responses:\n            return responses.pop(0)\n        else:\n            raise TooManyRedirects\n\n    session.send = mock_send\n\n    try:\n        final_response = session.resolve_redirects(initial_request, session.send, stream=False, timeout=None, verify=True, cert=None, proxies=None)\n        for r in final_response:\n            pass  # Resolve the iterator\n\n        if initial_request.method == \'POST\' and r.request.method == \'POST\':\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except TooManyRedirects:\n        print("Other issues")\n\ntest_resolve_redirects_issue()\n```\n\nExplanation:\n1. **Necessary imports**: Imported `requests`, `PreparedRequest`, `Session`, and `TooManyRedirects`.\n2. **Code to reproduce the issue**:\n   - Created a mock function `mock_response` to simulate responses.\n   - Prepared an initial POST request.\n   - Created a list of responses to simulate the redirection chain.\n   - Overrode the `session.send` method with `mock_send` to return the predefined responses.\n3. **Outcome handling**:\n   - Checked if the initial request\'s method was \'POST\' and the final request\'s method remained \'POST\' after redirections. If so, printed "Issue reproduced".\n   - If the method was correctly modified to \'GET\' due to a 303 redirect, printed "Issue resolved".\n   - In case of any other issue (like breaking the redirection chain), printed "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.sessions import Session\nfrom requests.models import Response\n\ndef create_mock_response(url, status_code, headers):\n    response = Response()\n    response.status_code = status_code\n    response.headers.update(headers)\n    response.url = url\n    response.reason = \'OK\'\n    return response\n\ndef test_resolve_redirects_issue():\n    # Mock the original POST request\n    original_request = requests.Request(\'POST\', \'http://server.example.com/do_something\')\n    prepared_request = original_request.prepare()\n\n    # Mock the response for the first redirect (303 See Other)\n    first_redirect_response = create_mock_response(\n        \'http://server.example.com/new_thing_1513\',\n        303,\n        {\'Location\': \'/new_thing_1513\'}\n    )\n\n    # Mock the response for the second redirect (307 Temporary Redirect)\n    second_redirect_response = create_mock_response(\n        \'http://failover.example.com/new_thing_1513\',\n        307,\n        {\'Location\': \'//failover.example.com/new_thing_1513\'}\n    )\n\n    # Create a session and mock the sending of requests\n    session = Session()\n\n    # Mock sending the requests and getting the responses in sequence\n    session.send = lambda request, **kwargs: {\n        \'http://server.example.com/do_something\': first_redirect_response,\n        \'http://server.example.com/new_thing_1513\': second_redirect_response,\n    }[request.url]\n\n    try:\n        # Attempt to resolve the redirects\n        responses = list(session.resolve_redirects(\n            first_redirect_response,\n            prepared_request\n        ))\n\n        # Check if the final request method is GET\n        if responses[-1].request.method == \'GET\':\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n\n\ntest_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests import Session, Request\nfrom requests.structures import CaseInsensitiveDict\nfrom requests.models import Response\n\ndef mock_response(status_code, url, method=\'GET\', headers=None):\n    """Helper function to create a mock response object."""\n    response = Response()\n    response.status_code = status_code\n    response.headers = CaseInsensitiveDict(headers or {})\n    response.raw = None\n    response.url = url\n    response.encoding = \'utf-8\'\n    response.request = Request(method=method, url=url).prepare()\n    return response\n\ndef test_resolve_redirects_issue():\n    session = Session()\n    \n    # Mock responses for the redirection chain\n    def mock_send(request, **kwargs):\n        if request.url == "http://server.example.com/do_something":\n            return mock_response(303, "http://server.example.com/new_thing_1513", method=\'POST\')\n        elif request.url == "http://server.example.com/new_thing_1513":\n            return mock_response(307, "http://failover.example.com/new_thing_1513", method=\'GET\')\n        elif request.url == "http://failover.example.com/new_thing_1513":\n            if request.method == \'POST\':\n                return mock_response(200, request.url, method=\'POST\')\n            elif request.method == \'GET\':\n                return mock_response(200, request.url, method=\'GET\')\n    \n    # Monkey patch the session\'s send method\n    session.send = mock_send\n    \n    # Start the initial request\n    initial_request = Request(\'POST\', \'http://server.example.com/do_something\').prepare()\n    responses = session.resolve_redirects(mock_response(303, "http://server.example.com/new_thing_1513", method=\'POST\'), initial_request)\n    \n    final_response = list(responses)[-1]\n    \n    if final_response.url == "http://failover.example.com/new_thing_1513":\n        if final_response.request.method == \'POST\':\n            print("Issue reproduced")\n        elif final_response.request.method == \'GET\':\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    else:\n        print("Other issues")\n\ntest_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.sessions import Session\nfrom requests.models import Response\n\n# Mocking server responses for testing\nclass MockResponse(Response):\n    def __init__(self, status_code, headers=None):\n        super().__init__()\n        self.status_code = status_code\n        self.headers = headers or {}\n\n    @property\n    def is_redirect(self):\n        return self.status_code in (301, 302, 303, 307, 308)\n\n    @property\n    def next(self):\n        if self.is_redirect:\n            response = MockResponse(307, headers={\'Location\': \'http://failover.example.com/new_thing_1513\'})\n            return response\n\ndef mock_send(request, **kwargs):\n    if request.url == "http://server.example.com/do_something":\n        response = MockResponse(303, headers={\'Location\': \'http://server.example.com/new_thing_1513\'})\n        response.request = request\n        return response\n    elif request.url == "http://server.example.com/new_thing_1513":\n        response = MockResponse(307, headers={\'Location\': \'http://failover.example.com/new_thing_1513\'})\n        response.request = request\n        return response\n    else:\n        return MockResponse(200)\n\n# Replace the actual send method with our mock_send\nSession.send = mock_send\n\ndef test_resolve_redirects_issue():\n    session = requests.Session()\n\n    # Initial POST request\n    initial_request = requests.Request(\'POST\', \'http://server.example.com/do_something\')\n    prepped = session.prepare_request(initial_request)\n\n    # Handle redirections\n    try:\n        response = session.send(prepped)\n\n        if response.status_code == 200:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except requests.exceptions.RequestException as e:\n        # Check if the last request was incorrectly a POST\n        if e.request.method == "POST":\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.sessions import Session\nfrom requests.models import Response, PreparedRequest\n\ndef mock_response(url, status_code, headers):\n    response = Response()\n    response.status_code = status_code\n    response.headers.update(headers)\n    response.url = url\n    response._content = b\'\'\n    return response\n\ndef test_redirect_issue():\n    session = Session()\n\n    # Mocking request and response cycles\n    def mock_send(request, **kwargs):\n        if request.url == "http://server.example.com/do_something":\n            return mock_response(\n                request.url,\n                303,\n                {\'Location\': \'/new_thing_1513\'}\n            )\n        elif request.url == "http://server.example.com/new_thing_1513":\n            return mock_response(\n                request.url,\n                307,\n                {\'Location\': \'//failover.example.com/new_thing_1513\'}\n            )\n        elif request.url == "http://failover.example.com/new_thing_1513":\n            return mock_response(request.url, 200, {})\n        else:\n            response = Response()\n            response.status_code = 404\n            response.url = request.url\n            response._content = b\'\'\n            return response\n\n    # Monkey patch the session to use the mock_send\n    session.send = mock_send\n\n    original_request = requests.Request("POST", "http://server.example.com/do_something").prepare()\n\n    try:\n        response = session.resolve_redirects(original_request, session.send)\n        final_response = None\n\n        for resp in response:\n            final_response = resp\n\n        if final_response is not None and final_response.status_code == 200 and final_response.request.method == "GET":\n            print("Issue reproduced")\n        elif final_response is not None and final_response.status_code == 200:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n\n    except Exception as e:\n        print("Other issues", e)\n\ntest_redirect_issue()\n```\n\nExplanation of the test:\n\n1. **Necessary Imports:** The necessary modules from `requests` are imported.\n2. **Mocking the Responses:** A helper function `mock_response` is defined to generate mock responses with specific headers and status codes.\n3. **Monkey Patching `Session.send`:** The `session.send` method is patched to use the `mock_send` function to simulate the redirection workflow described in the issue.\n4. **Original Request:** The original `POST` request is prepared.\n5. **Handling the Redirections:** The `resolve_redirects` method is called to follow the redirections. The final response is inspected to check the method used.\n6. **Outcome Printing:** Depending on the final request method, appropriate messages are printed to indicate if the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests import Request, Session\nfrom requests.models import Response\nfrom unittest.mock import patch\n\ndef test_session_resolve_redirects_issue():\n    # Custom function to mock responses for our test\n    def mock_send(request, **kwargs):\n        if request.url == \'http://server.example.com/do_something\':\n            response = Response()\n            response.status_code = 303\n            response.headers[\'Location\'] = \'http://server.example.com/new_thing_1513\'\n            response._content = b\'\'\n            response.url = request.url\n            return response\n        elif request.url == \'http://server.example.com/new_thing_1513\':\n            response = Response()\n            response.status_code = 307\n            response.headers[\'Location\'] = \'http://failover.example.com/new_thing_1513\'\n            response._content = b\'\'\n            response.url = request.url\n            return response\n        elif request.url == \'http://failover.example.com/new_thing_1513\':\n            response = Response()\n            response.status_code = 200\n            response._content = b\'Success\'\n            response.url = request.url\n            return response\n        else:\n            response = Response()\n            response.status_code = 404\n            response._content = b\'\'\n            response.url = request.url\n            return response\n\n    # Mock the send method in the Session object\n    with patch(\'requests.Session.send\', side_effect=mock_send):\n        session = Session()\n\n        # Initial request which will follow the redirect chain\n        request = Request(\'POST\', \'http://server.example.com/do_something\')\n        prepped = session.prepare_request(request)\n        response = session.send(prepped)\n\n        # Check the method of the final request\n        if response.url == \'http://failover.example.com/new_thing_1513\' and response.request.method == \'GET\':\n            print("Issue resolved")\n        elif response.url == \'http://failover.example.com/new_thing_1513\' and response.request.method == \'POST\':\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_session_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response\nfrom requests.sessions import Session\n\ndef mock_response(status_code, url):\n    response = Response()\n    response.status_code = status_code\n    response.headers[\'Location\'] = url\n    response.url = url\n    return response\n\ndef test_session_resolve_redirects_issue():\n    session = Session()\n\n    def mock_send(request, **kwargs):\n        if request.url == "http://server.example.com/do_something":\n            return mock_response(303, "http://server.example.com/new_thing_1513")\n        elif request.url == "http://server.example.com/new_thing_1513":\n            return mock_response(307, "http://failover.example.com/new_thing_1513")\n        elif request.url == "http://failover.example.com/new_thing_1513":\n            return mock_response(200, "http://failover.example.com/new_thing_1513")\n        return Response()\n\n    session.send = mock_send\n\n    # Create the initial POST request\n    initial_request = requests.Request(\'POST\', \'http://server.example.com/do_something\').prepare()\n    \n    # Follow the redirects\n    response = session.resolve_redirects(initial_request, session.send(initial_request), stream=False)\n\n    final_response = None\n    try:\n        for resp in response:\n            final_response = resp\n\n        # Check that the final request method is GET and not POST\n        if final_response.request.method == "GET":\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n\ntest_session_resolve_redirects_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests import Session\nfrom requests.models import Response\nfrom requests.structures import CaseInsensitiveDict\nfrom urllib.parse import urlparse, urljoin\n\nclass MockServer:\n    def __init__(self):\n        self.urls = {\n            \'http://server.example.com/do_something\': self.do_something,\n            \'http://server.example.com/new_thing_1513\': self.new_thing_1513,\n            \'http://failover.example.com/new_thing_1513\': self.failover_thing_1513\n        }\n\n    def do_something(self, request):\n        response = Response()\n        response.status_code = 303\n        response.headers[\'Location\'] = \'/new_thing_1513\'\n        return response\n\n    def new_thing_1513(self, request):\n        response = Response()\n        response.status_code = 307\n        response.headers[\'Location\'] = \'http://failover.example.com/new_thing_1513\'\n        return response\n\n    def failover_thing_1513(self, request):\n        response = Response()\n        response.status_code = 200\n        return response\n\n    def request(self, method, url, **kwargs):\n        parsed_url = urlparse(url)\n        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"\n        if base_url in self.urls:\n            return self.urls[base_url](requests.Request(method, url, **kwargs).prepare())\n        response = Response()\n        response.status_code = 404\n        return response\n\n# Mock the Session\'s send method\noriginal_send = Session.send\ndef mock_send(self, request, **kwargs):\n    return mock_server.request(request.method, request.url, **kwargs)\n\n# Running the test\nmock_server = MockServer()\nSession.send = mock_send\n\ntry:\n    session = Session()\n    response = session.post(\'http://server.example.com/do_something\')\n    final_request = response.history[-1] if response.history else response.request\n    if final_request.method == \'POST\':\n        print("Issue reproduced")\n    elif final_request.method == \'GET\':\n        print("Issue resolved")\n    else:\n        print("Other issues")\nexcept Exception as e:\n    print("Other issues")\n\n# Restore the original send method to not affect other tests\nSession.send = original_send\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response, PreparedRequest\n\ndef mock_response(status_code, url, method=\'GET\'):\n    response = Response()\n    response.status_code = status_code\n    response.headers[\'Location\'] = url\n    response._content = b""\n    response.request = PreparedRequest()\n    response.request.prepare(method=method, url=url)\n    return response\n\ndef test_session_resolve_redirects_issue():\n    session = requests.Session()\n\n    # Mock the response chain\n    original_request = PreparedRequest()\n    original_request.prepare(method=\'POST\', url=\'http://server.example.com/do_something\')\n\n    intermediate_response = mock_response(303, \'http://server.example.com/new_thing_1513\', method=\'POST\')\n    intermediate_response.request = original_request\n\n    final_response = mock_response(307, \'http://failover.example.com/new_thing_1513\', method=\'GET\')\n    final_response.request = intermediate_response.request\n\n    def mock_send(request, *args, **kwargs):\n        if request.url == \'http://server.example.com/do_something\':\n            return intermediate_response\n        elif request.url == \'http://server.example.com/new_thing_1513\':\n            return final_response\n        elif request.url == \'http://failover.example.com/new_thing_1513\':\n            response = Response()\n            response.status_code = 200\n            response._content = b"Success"\n            response.request = request\n            return response\n\n    session.send = mock_send\n\n    response = session.send(original_request)\n    redirects = list(session.resolve_redirects(response, original_request))\n\n    if len(redirects) == 2 and redirects[1].request.method == \'GET\':\n        print("Issue resolved")\n    elif len(redirects) == 2 and redirects[1].request.method == \'POST\':\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_session_resolve_redirects_issue()\n```\n\nThis test script mocks the redirection chain described in the issue and checks if the final request method is correct. The output will indicate whether the issue has been reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.adapters import HTTPAdapter\nfrom requests.models import Response\nfrom requests.sessions import Session\nfrom requests.structures import CaseInsensitiveDict\nfrom requests_testadapter import Resp\n\n# Mock HTTP responses to simulate the redirection chain\nclass MockAdapter(HTTPAdapter):\n    def send(self, request, **kwargs):\n        if request.url == \'http://server.example.com/do_something\':\n            response = Response()\n            response.status_code = 303\n            response.headers[\'Location\'] = \'http://server.example.com/new_thing_1513\'\n            response.request = request\n            response._content = b\'\'\n            return response\n        elif request.url == \'http://server.example.com/new_thing_1513\':\n            response = Response()\n            response.status_code = 307\n            response.headers[\'Location\'] = \'http://failover.example.com/new_thing_1513\'\n            response.request = request\n            response._content = b\'\'\n            return response\n        elif request.url == \'http://failover.example.com/new_thing_1513\':\n            response = Response()\n            response.status_code = 200\n            response.request = request\n            response._content = b\'Success\'\n            return response\n        else:\n            response = Response()\n            response.status_code = 404\n            response._content = b\'Not Found\'\n            return response\n\n# Test function to reproduce or verify the issue\ndef test_resolve_redirects():\n    session = Session()\n    session.mount(\'http://\', MockAdapter())\n\n    try:\n        response = session.post(\'http://server.example.com/do_something\')\n        redirected_url = response.url\n        final_method = response.request.method\n\n        if redirected_url == \'http://failover.example.com/new_thing_1513\' and final_method == \'POST\':\n            print("Issue reproduced")\n        elif redirected_url == \'http://failover.example.com/new_thing_1513\' and final_method == \'GET\':\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(F"Other issues: {e}")\n\ntest_resolve_redirects()\n```\n\nThis test script does the following:\n1. Sets up mock HTTP responses to simulate the redirection chain described in the issue.\n2. Uses the `requests` library to send a `POST` request and follow redirects.\n3. Checks the final redirected URL and the HTTP method used to determine whether the issue is reproduced, resolved, or if there are other issues.\n\nThe expected outcome for reproduction of the issue is that the final request method is `POST` instead of `GET`, which matches the behavior described in the issue. If the final method is `GET`, the issue is considered resolved. Any other outcome or exceptions will indicate other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='```python\nimport requests\nfrom requests.models import Response, PreparedRequest\nfrom requests.sessions import Session\n\ndef mock_response(url, status_code, headers):\n    response = Response()\n    response.status_code = status_code\n    response.headers = headers\n    response.url = url\n    response._content = b\'\'\n    return response\n\ndef test_session_resolve_redirects_issue():\n    with requests.Session() as session:\n        # Mocks for responses for the redirection chain\n        def mock_send(request, **kwargs):\n            if request.url == \'http://server.example.com/do_something\':\n                return mock_response(\n                    url=\'http://server.example.com/do_something\',\n                    status_code=303,\n                    headers={\'Location\': \'/new_thing_1513\'}\n                )\n            elif request.url == \'http://server.example.com/new_thing_1513\':\n                return mock_response(\n                    url=\'http://server.example.com/new_thing_1513\',\n                    status_code=307,\n                    headers={\'Location\': \'//failover.example.com/new_thing_1513\'}\n                )\n            elif request.url == \'http://failover.example.com/new_thing_1513\':\n                return mock_response(\n                    url=\'http://failover.example.com/new_thing_1513\',\n                    status_code=200,\n                    headers={}\n                )\n            return mock_response(url=request.url, status_code=404, headers={})\n\n        # Patch session.send to mock responses\n        session.send = mock_send\n\n        # Original POST request\n        original_request = PreparedRequest()\n        original_request.prepare(\n            method=\'POST\',\n            url=\'http://server.example.com/do_something\',\n            headers={\'Host\': \'server.example.com\'}\n        )\n\n        # Initiate the request which will cause redirections\n        response = session.send(original_request)\n\n        if response.status_code == 200:\n            if response.request.method == \'GET\':\n                print("Issue resolved")\n            else:\n                print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_session_resolve_redirects_issue()\n```\n\n1. Necessary imports: The test imports `requests` and related classes (`Response`, `PreparedRequest`, `Session`).\n2. Code to reproduce the issue described in the issue text: Mocks a series of responses to simulate the redirection chain.\n3. Prints "Issue reproduced" if the outcome indicates that the issue is reproduced: If the final request method is not `GET`.\n4. Prints "Issue resolved" if the outcome indicates that the issue has been successfully resolved: If the final request method is `GET`.\n5. Prints "Other issues" if the outcome indicates there are other issues with the source code: If the response status code is not 200.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299859, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=18280, prompt_tokens=525, total_tokens=18805, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:19:31,064 - INFO - raw output:
+```python
+import requests
+from requests.models import Response
+from requests.sessions import Session
+
+def mock_response(url, status_code, headers):
+    response = Response()
+    response.status_code = status_code
+    response.headers = headers
+    response.url = url
+    return response
+
+def test_session_resolve_redirects_issue():
+    session = Session()
+
+    # Mock the initial POST request
+    initial_request = requests.Request('POST', 'http://server.example.com/do_something')
+    prepared_initial_request = session.prepare_request(initial_request)
+
+    # Mock the responses for the redirection chain
+    responses = [
+        mock_response('http://server.example.com/do_something', 303, {'Location': '/new_thing_1513'}),
+        mock_response('http://server.example.com/new_thing_1513', 307, {'Location': '//failover.example.com/new_thing_1513'}),
+        mock_response('http://failover.example.com/new_thing_1513', 200, {})
+    ]
+
+    def mock_send(request, **kwargs):
+        for response in responses:
+            if request.url == response.url:
+                return response
+        return Response()
+
+    # Patch the session's send method to use the mock_send
+    session.send = mock_send
+
+    # Perform the request and follow redirects
+    response = session.send(prepared_initial_request, allow_redirects=True)
+
+    # Check the final request method
+    final_request_method = response.request.method
+
+    if final_request_method == 'POST':
+        print("Issue reproduced")
+    elif final_request_method == 'GET':
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+test_session_resolve_redirects_issue()
+```
+
+This test script sets up a mock environment to simulate the redirection chain described in the issue. It checks if the final request method is `POST` (indicating the issue is reproduced) or `GET` (indicating the issue is resolved). If the final request method is neither `POST` nor `GET`, it prints "Other issues".
+2025-05-03 14:19:31,065 - INFO - raw output:
+```python
+import requests
+from requests.models import Response, PreparedRequest
+from requests.sessions import Session
+
+def mock_response(url, method='GET', status_code=200, headers=None):
+    response = Response()
+    response.status_code = status_code
+    response.headers = headers or {}
+    response._content = b''
+    response.url = url
+    response.request = PreparedRequest()
+    response.request.prepare(url=url, method=method)
+    return response
+
+def test_session_resolve_redirects():
+    session = Session()
+
+    def request_side_effect(request, **kwargs):
+        if request.url == "http://server.example.com/do_something":
+            return mock_response("http://server.example.com/new_thing_1513", 
+                                 method='POST', status_code=303, 
+                                 headers={'Location': '/new_thing_1513'})
+        elif request.url == "http://server.example.com/new_thing_1513":
+            return mock_response("http://failover.example.com/new_thing_1513", 
+                                 method='GET', status_code=307, 
+                                 headers={'Location': '//failover.example.com/new_thing_1513'})
+        elif request.url == "http://failover.example.com/new_thing_1513":
+            return mock_response("http://failover.example.com/new_thing_1513", 
+                                 method='GET', status_code=200)
+
+    session.send = request_side_effect
+
+    initial_request = requests.Request('POST', 'http://server.example.com/do_something')
+    prepared_request = session.prepare_request(initial_request)
+    settings = session.merge_environment_settings(prepared_request.url, {}, None, None, None)
+
+    try:
+        response = session.send(prepared_request, **settings)
+        while 'location' in response.headers and response.is_redirect:
+            prepared_request = session.resolve_redirects(response, prepared_request, **settings)
+            response = next(prepared_request)
+    except Exception as e:
+        print("Other issues", e)
+        return
+
+    if response.request.method == 'POST':
+        print("Issue reproduced")
+    elif response.request.method == 'GET':
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+test_session_resolve_redirects()
+```
+2025-05-03 14:19:31,065 - INFO - raw output:
+```python
+import requests
+from requests import Session, Request, Response
+from requests.models import PreparedRequest
+from requests.structures import CaseInsensitiveDict
+from io import BytesIO
+
+class MockAdapter(requests.adapters.HTTPAdapter):
+    def __init__(self, responses):
+        self.responses = responses
+        super().__init__()
+
+    def send(self, request, **kwargs):
+        response = self.responses.pop(0)
+        return response
+
+def test_session_resolve_redirects_issue():
+    responses = [
+        Response(),
+        Response(),
+        Response()
+    ]
+    
+    responses[0].status_code = 303
+    responses[0].headers['Location'] = '/new_thing_1513'
+    responses[0]._content = b''
+
+    responses[1].status_code = 307
+    responses[1].headers['Location'] = '//failover.example.com/new_thing_1513'
+    responses[1]._content = b''
+
+    responses[2].status_code = 200
+    responses[2]._content = b'OK'
+
+    session = Session()
+    session.mount('http://', MockAdapter(responses))
+
+    def prep_request(method, url):
+        req = Request(method=method, url=url)
+        prepped = session.prepare_request(req)
+        return prepped
+
+    original_request = prep_request('POST', 'http://server.example.com/do_something')
+
+    try:
+        response = session.send(original_request)
+        final_request = response.history[-1].request
+
+        if final_request.method == 'POST':
+            print("Issue reproduced")
+        elif final_request.method == 'GET':
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+        print(f"Exception encountered: {e}")
+
+test_session_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,065 - INFO - raw output:
+```python
+import requests
+from requests import Request, Session
+from requests.models import Response
+from requests.structures import CaseInsensitiveDict
+
+def create_mock_response(status_code, location, method, url):
+    response = Response()
+    response.status_code = status_code
+    response.headers = CaseInsensitiveDict({'Location': location})
+    response.request = Request(method, url).prepare()
+    return response
+
+def test_resolve_redirects_issue():
+    session = Session()
+
+    original_request = Request('POST', 'http://server.example.com/do_something').prepare()
+
+    # Mock responses
+    first_response = create_mock_response(303, '/new_thing_1513', 'POST', 'http://server.example.com/do_something')
+    second_response = create_mock_response(307, '//failover.example.com/new_thing_1513', 'GET', 'http://server.example.com/new_thing_1513')
+
+    responses = [first_response, second_response]
+
+    def mock_send(request, **kwargs):
+        if request.url == 'http://server.example.com/do_something':
+            return responses.pop(0)
+        elif request.url == 'http://server.example.com/new_thing_1513':
+            return responses.pop(0)
+        elif request.url == 'http://failover.example.com/new_thing_1513':
+            return Response()  # Mock final response
+        else:
+            raise ValueError("Unexpected URL: {}".format(request.url))
+    
+    session.send = mock_send
+
+    # Resolve redirects
+    prepared = original_request
+    history = []
+    for resp in session.resolve_redirects(first_response, original_request):
+        history.append(resp)
+        prepared = resp.request
+
+    # Check final request method
+    try:
+        final_request_method = prepared.method
+        if final_request_method == 'GET':
+            print("Issue resolved")
+        elif final_request_method == 'POST':
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues:", e)
+
+test_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,065 - INFO - raw output:
+```python
+import requests
+from requests.models import Response
+
+# Mock server responses for the redirection chain
+def mock_response(url, status_code, headers=None):
+    response = Response()
+    response.status_code = status_code
+    response.headers.update(headers or {})
+    response.url = url
+    return response
+
+# Custom Session class to handle the mocked responses
+class MockSession(requests.Session):
+    def __init__(self, responses):
+        super().__init__()
+        self.responses = responses
+        self.response_index = 0
+
+    def resolve_redirects(self, resp, req, **kwargs):
+        while 'location' in resp.headers:
+            # Get the next response in the sequence
+            location = resp.headers['location']
+            if not location.startswith('http'):
+                location = requests.compat.urljoin(resp.url, location)
+            next_url = location
+            
+            self.response_index += 1
+            resp = self.responses[self.response_index]
+            resp.url = next_url
+            
+            yield resp
+
+    def send(self, request, **kwargs):
+        response = self.responses[self.response_index]
+        response.request = request
+        return response
+
+# Test function to reproduce the issue
+def test_resolve_redirects_issue():
+    try:
+        mock_responses = [
+            mock_response('http://server.example.com/do_something', 303, {'Location': '/new_thing_1513'}),
+            mock_response('http://server.example.com/new_thing_1513', 307, {'Location': 'http://failover.example.com/new_thing_1513'}),
+            mock_response('http://failover.example.com/new_thing_1513', 200)
+        ]
+
+        session = MockSession(mock_responses)
+        
+        # Initial POST request
+        response = session.post('http://server.example.com/do_something')
+        
+        # Check the method of the final request in the chain
+        if response.request.method == 'POST':
+            print("Issue reproduced")
+        elif response.request.method == 'GET':
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,065 - INFO - raw output:
+```python
+import requests
+from requests.models import Response
+from unittest.mock import patch
+
+def mocked_requests_post(url, *args, **kwargs):
+    # Mock the initial POST request
+    if url == "http://server.example.com/do_something":
+        response = Response()
+        response.status_code = 303
+        response.headers['Location'] = "/new_thing_1513"
+        return response
+    return None
+
+def mocked_requests_get(url, *args, **kwargs):
+    # Mock the intermediate GET request
+    if url == "http://server.example.com/new_thing_1513":
+        response = Response()
+        response.status_code = 307
+        response.headers['Location'] = "//failover.example.com/new_thing_1513"
+        return response
+    
+    # Mock the final GET request
+    if url == "http://failover.example.com/new_thing_1513":
+        response = Response()
+        response.status_code = 200
+        return response
+
+    return None
+
+def test_issue_reproduction():
+    with patch('requests.Session.request') as mock_request:
+        mock_request.side_effect = lambda method, url, *args, **kwargs: (
+            mocked_requests_post(url, *args, **kwargs)
+            if method == 'POST' else
+            mocked_requests_get(url, *args, **kwargs)
+        )
+        
+        session = requests.Session()
+        
+        # Initial POST request
+        response = session.post("http://server.example.com/do_something")
+        
+        if response.status_code == 200:
+            print("Issue resolved")
+            return
+
+        elif response.status_code == 307 and response.request.method == 'POST':
+            print("Issue reproduced")
+            return
+
+        else:
+            print("Other issues")
+            return
+
+test_issue_reproduction()
+```
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests.models import Response
+from requests.sessions import Session
+
+class MockResponse(Response):
+    def __init__(self, status_code, headers):
+        super().__init__()
+        self.status_code = status_code
+        self.headers = headers
+
+def mock_send(self, request, **kwargs):
+    if request.url == 'http://server.example.com/do_something':
+        response = MockResponse(303, {'Location': 'http://server.example.com/new_thing_1513'})
+    elif request.url == 'http://server.example.com/new_thing_1513':
+        response = MockResponse(307, {'Location': 'http://failover.example.com/new_thing_1513'})
+    elif request.url == 'http://failover.example.com/new_thing_1513':
+        response = MockResponse(200, {})
+    else:
+        response = MockResponse(404, {})
+    
+    response.request = request
+    return response
+
+Session.send = mock_send
+
+def test_resolve_redirects_issue():
+    session = Session()
+    url = 'http://server.example.com/do_something'
+    response = session.post(url)
+
+    if response.history:
+        if response.history[0].status_code == 303 and response.history[1].status_code == 307:
+            if response.request.method == 'POST':
+                print("Issue reproduced")
+            else:
+                print("Issue resolved")
+        else:
+            print("Other issues")
+    else:
+        print("Other issues")
+
+test_resolve_redirects_issue()
+```
+
+Explanation:
+1. **Imports:** The necessary imports for the test include the `requests` package and specific classes like `Response` and `Session`.
+2. **Mocking Mechanism:** A `MockResponse` class is created to mimic the behavior of actual HTTP responses.
+3. **Mock Send Function:** The `mock_send` function simulates the redirection chain described in the issue. It sends a 303 See Other response on the first request, a 307 Temporary Redirect on the second, and a final 200 OK for the last request in the chain.
+4. **Monkey Patching:** The `Session.send` method is monkey-patched to use the `mock_send` function.
+5. **Test Function:** The `test_resolve_redirects_issue` function initiates a POST request and checks the redirection history to determine if the issue is reproduced, resolved, or if there are other issues.
+
+This test should help you verify whether the described issue is present in your codebase.
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests import Session
+from requests.models import Response
+
+# Mock server to handle various redirects
+class MockServer:
+    def __init__(self):
+        self.responses = {}
+
+    def add_response(self, url, method, status_code, headers, body):
+        self.responses[(url, method)] = (status_code, headers, body)
+
+    def request(self, method, url, **kwargs):
+        response = Response()
+        status_code, headers, body = self.responses.get((url, method), (404, {}, 'Not Found'))
+        response.status_code = status_code
+        response.headers.update(headers)
+        response._content = body.encode('utf-8')
+        response.url = url
+        return response
+
+mock_server = MockServer()
+mock_server.add_response('http://server.example.com/do_something', 'POST', 303, {'Location': '/new_thing_1513'}, '')
+mock_server.add_response('http://server.example.com/new_thing_1513', 'GET', 307, {'Location': 'http://failover.example.com/new_thing_1513'}, '')
+mock_server.add_response('http://failover.example.com/new_thing_1513', 'GET', 200, {}, 'Success')
+
+class MockSession(Session):
+    def __init__(self, server):
+        super().__init__()
+        self.server = server
+
+    def send(self, request, **kwargs):
+        return self.server.request(request.method, request.url, **kwargs)
+
+def test_resolve_redirects_issue():
+    session = MockSession(mock_server)
+
+    response = session.post('http://server.example.com/do_something')
+
+    if response.status_code == 200 and response.text == 'Success':
+        print("Issue resolved")
+    elif response.status_code == 404:
+        print("Other issues")
+    else:
+        print("Issue reproduced")
+
+test_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests.adapters import HTTPAdapter
+from requests.sessions import Session
+from requests.models import Response
+from io import BytesIO
+
+class MockHTTPAdapter(HTTPAdapter):
+    def __init__(self, responses):
+        self.responses = responses
+        super().__init__()
+
+    def send(self, request, *args, **kwargs):
+        url = request.url
+        response = self.responses.pop(0)
+        response.url = url
+        response.request = request
+        return response
+
+def test_redirect_issue():
+    # Prepare mock responses for the redirection chain
+    responses = []
+
+    # First response: 303 See Other
+    response_303 = Response()
+    response_303.status_code = 303
+    response_303.headers['Location'] = '/new_thing_1513'
+    responses.append(response_303)
+
+    # Second response: 307 Temporary Redirect
+    response_307 = Response()
+    response_307.status_code = 307
+    response_307.headers['Location'] = '//failover.example.com/new_thing_1513'
+    responses.append(response_307)
+
+    # Third response: Final destination
+    final_response = Response()
+    final_response.status_code = 200
+    responses.append(final_response)
+
+    # Create a session and mount the mock adapter
+    session = Session()
+    adapter = MockHTTPAdapter(responses)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+
+    # Perform the initial request
+    initial_request = requests.Request('POST', 'http://server.example.com/do_something')
+    prepped = session.prepare_request(initial_request)
+
+    try:
+        response = session.send(prepped)
+        if response.history and response.history[0].status_code == 303 and response.history[1].status_code == 307:
+            if response.request.method == 'POST':
+                print("Issue reproduced")
+            else:
+                print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception:
+        print("Other issues")
+
+test_redirect_issue()
+```
+
+This test simulates the described redirection chain using mock responses. It initializes a session, mounts the `MockHTTPAdapter` to handle the custom redirection responses, and performs the initial POST request. Based on the final request method, it determines whether the issue is reproduced or resolved. If there are other issues or exceptions occur, it prints "Other issues".
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests.models import Response
+from requests.sessions import Session
+from requests.structures import CaseInsensitiveDict
+
+# Mock server responses for redirection chain
+class MockResponse(Response):
+    def __init__(self, status_code, headers, url):
+        super().__init__()
+        self.status_code = status_code
+        self.headers = CaseInsensitiveDict(headers)
+        self.url = url
+        self._content = b""
+
+def mock_resolve_redirects(res, req, **kwargs):
+    responses = {
+        'http://server.example.com/do_something': MockResponse(
+            303, {'Location': 'http://server.example.com/new_thing_1513'}, 'http://server.example.com/do_something'),
+        'http://server.example.com/new_thing_1513': MockResponse(
+            307, {'Location': 'http://failover.example.com/new_thing_1513'}, 'http://server.example.com/new_thing_1513'),
+        'http://failover.example.com/new_thing_1513': MockResponse(
+            200, {}, 'http://failover.example.com/new_thing_1513'),
+    }
+    while True:
+        if res.url in responses:
+            res = responses[res.url]
+            yield res
+        else:
+            break
+
+def test_resolve_redirects_issue():
+    session = Session()
+    session.resolve_redirects = mock_resolve_redirects  # Override the resolve_redirects method
+
+    try:
+        req = requests.Request('POST', 'http://server.example.com/do_something')
+        prepped = session.prepare_request(req)
+
+        # Directly sending the request to the mock response for initial redirection
+        resp = MockResponse(303, {'Location': 'http://server.example.com/new_thing_1513'}, prepped.url)
+        history = list(session.resolve_redirects(resp, prepped))
+
+        # The last request should be a GET, as per the 303 redirection rule
+        if history[-1].request.method == 'GET':
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+test_resolve_redirects_issue()
+```
+
+This test script:
+1. Mocks the server responses to simulate the redirection chain.
+2. Overrides the `Session.resolve_redirects` method to use the mocked responses.
+3. Prepares the initial POST request and processes the redirections.
+4. Checks the method of the final request in the redirection chain.
+5. Prints "Issue reproduced" if the final request method is not GET, indicating the issue is present.
+6. Prints "Issue resolved" if the final request method is GET, indicating the issue has been fixed.
+7. Prints "Other issues" if any other issues are encountered during the test execution.
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests.models import Response, PreparedRequest
+from requests.sessions import Session
+
+def create_mock_response(status_code, url, headers=None):
+    response = Response()
+    response.status_code = status_code
+    response.headers = headers or {}
+    response.url = url
+    return response
+
+def test_resolve_redirects_issue():
+    session = Session()
+    original_request = PreparedRequest()
+    original_request.prepare(
+        method='POST',
+        url='http://server.example.com/do_something'
+    )
+
+    # Mocking the responses for redirections
+    first_response = create_mock_response(
+        303, 'http://server.example.com/new_thing_1513',
+        headers={'Location': '/new_thing_1513'}
+    )
+    second_response = create_mock_response(
+        307, 'http://failover.example.com/new_thing_1513',
+        headers={'Location': '//failover.example.com/new_thing_1513'}
+    )
+
+    responses = [first_response, second_response]
+
+    def mock_send(request, **kwargs):
+        if request.url == 'http://server.example.com/do_something':
+            return responses.pop(0)
+        elif request.url == 'http://server.example.com/new_thing_1513':
+            return responses.pop(0)
+        else:
+            return create_mock_response(200, request.url)
+
+    session.send = mock_send
+
+    redirections = session.resolve_redirects(
+        first_response,
+        original_request
+    )
+
+    try:
+        for response in redirections:
+            # we want to verify the sequence and ensure the last request is GET
+            if response.url == 'http://failover.example.com/new_thing_1513' and response.request.method == 'POST':
+                print("Issue reproduced")
+                return
+    except Exception as e:
+        print("Other issues")
+        return
+
+    print("Issue resolved")
+
+test_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,066 - INFO - raw output:
+Sure, here is a complete test that reproduces the issue described:
+
+```python
+import requests
+from requests.sessions import Session
+from requests.models import Response
+from urllib.parse import urljoin
+
+# Mock server responses
+class MockServer:
+    def __init__(self):
+        self.redirect_chain = [
+            ("/do_something", 303, "/new_thing_1513"),
+            ("/new_thing_1513", 307, "//failover.example.com/new_thing_1513")
+        ]
+        self.index = 0
+
+    def handler(self, request):
+        if self.index < len(self.redirect_chain):
+            path, status_code, location = self.redirect_chain[self.index]
+            if request.path_url == path:
+                self.index += 1
+                response = Response()
+                response.status_code = status_code
+                response.headers['Location'] = location
+                response.url = urljoin(request.url, location)
+                return response
+        response = Response()
+        response.status_code = 200
+        response.url = request.url
+        return response
+
+def test_session_resolve_redirects():
+    mock_server = MockServer()
+    session = Session()
+
+    original_request = requests.Request('POST', 'http://server.example.com/do_something')
+    prepped = session.prepare_request(original_request)
+
+    def send_mock_request(request, **kwargs):
+        return mock_server.handler(request)
+
+    session.send = send_mock_request
+
+    response = session.send(prepped)
+
+    if response.history:
+        last_request = response.history[-1].request
+        if last_request.method == 'POST':
+            print("Issue reproduced")
+        elif last_request.method == 'GET':
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    else:
+        print("Other issues")
+
+test_session_resolve_redirects()
+```
+
+This test sets up a `MockServer` to simulate the described redirect chain and uses that mock server to handle requests made by the `requests.Session`. It checks if the final method used after following the redirects is `POST`, which indicates the issue is reproduced, or `GET`, which indicates the issue has been resolved. If the final method is something unexpected, it prints "Other issues".
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests.sessions import Session
+from requests.models import PreparedRequest, Response
+from requests.structures import CaseInsensitiveDict
+
+def test_session_resolve_redirects_issue():
+    # Mock Server Responses
+    original_response = Response()
+    original_response.status_code = 303
+    original_response.headers['Location'] = '/new_thing_1513'
+    
+    intermediate_response = Response()
+    intermediate_response.status_code = 307
+    intermediate_response.headers['Location'] = '//failover.example.com/new_thing_1513'
+    
+    final_response = Response()
+    final_response.status_code = 200
+
+    # Mock sending request and receiving responses
+    def mock_send(request, **kwargs):
+        if request.url == 'http://server.example.com/do_something':
+            return original_response
+        elif request.url == 'http://server.example.com/new_thing_1513':
+            return intermediate_response
+        elif request.url == 'http://failover.example.com/new_thing_1513':
+            return final_response
+        else:
+            raise ValueError("Unexpected URL")
+
+    session = Session()
+    session.send = mock_send
+
+    # Prepare the original request
+    original_request = PreparedRequest()
+    original_request.prepare(
+        method='POST',
+        url='http://server.example.com/do_something',
+        headers=CaseInsensitiveDict({'Host': 'server.example.com'})
+    )
+
+    # Send the request and resolve redirects
+    try:
+        responses = list(session.resolve_redirects(original_response, original_request))
+        if len(responses) == 2 and responses[-1].status_code == 200:
+            if responses[0].request.method == 'POST' and responses[1].request.method == 'GET':
+                print("Issue reproduced")
+            else:
+                print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+        raise e
+
+test_session_resolve_redirects_issue()
+```
+
+This test script simulates the redirection chain described in the issue by creating mock responses and overriding the `Session.send` method to return these predetermined responses. The test then checks if the request method for the final request in the redirection chain is correctly preserved as a `GET` instead of reverting back to a `POST`. If the method is not correctly preserved, the test will print "Issue reproduced". If the methods are correct, it will print "Issue resolved". If there are other issues (e.g., unexpected exceptions), it will print "Other issues".
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests.models import Response
+from requests.sessions import Session
+from requests.structures import CaseInsensitiveDict
+
+def test_resolve_redirects_issue():
+    # Mock response objects to simulate the redirection chain
+    def mock_response(url, status_code, headers):
+        response = Response()
+        response.status_code = status_code
+        response.headers = CaseInsensitiveDict(headers)
+        response.url = url
+        return response
+
+    # Define the mock server responses
+    responses = [
+        mock_response("http://server.example.com/do_something", 303, {"Location": "/new_thing_1513"}),
+        mock_response("http://server.example.com/new_thing_1513", 307, {"Location": "//failover.example.com/new_thing_1513"}),
+        mock_response("http://failover.example.com/new_thing_1513", 200, {}),
+    ]
+
+    # Override the send method of Session to return our mock responses in sequence
+    class MockSession(Session):
+        def __init__(self, responses):
+            super().__init__()
+            self.responses = responses
+            self.response_index = 0
+
+        def send(self, request, **kwargs):
+            response = self.responses[self.response_index]
+            self.response_index += 1
+            response.request = request
+            return response
+
+    # Create the initial POST request
+    session = MockSession(responses)
+    initial_request = requests.Request("POST", "http://server.example.com/do_something")
+    prepared_request = session.prepare_request(initial_request)
+
+    # Perform the request and follow redirects
+    response = session.send(prepared_request)
+    redirects = session.resolve_redirects(response, prepared_request)
+
+    last_response = None
+    for resp in redirects:
+        last_response = resp
+
+    # Check the method of the last request in the chain
+    if last_response.request.method == "POST":
+        print("Issue reproduced")
+    elif last_response.request.method == "GET":
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+test_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests.models import Request, Session, Response
+from requests.structures import CaseInsensitiveDict
+
+def mock_response(status_code, headers, content=''):
+    response = Response()
+    response.status_code = status_code
+    response.headers = CaseInsensitiveDict(headers)
+    response._content = content.encode('utf-8')
+    response.url = headers.get('Location', 'http://server.example.com')
+    return response
+
+def test_resolve_redirects_issue():
+    session = Session()
+
+    # Mock the initial POST request
+    initial_request = Request('POST', 'http://server.example.com/do_something')
+    prepared_initial_request = session.prepare_request(initial_request)
+
+    # Mock the 303 See Other response
+    response_303 = mock_response(
+        303, {'Location': 'http://server.example.com/new_thing_1513'}
+    )
+
+    # Mock the 307 Temporary Redirect response
+    response_307 = mock_response(
+        307, {'Location': 'http://failover.example.com/new_thing_1513'}
+    )
+
+    # Mock the final GET request to failover.example.com
+    final_request = Request('GET', 'http://failover.example.com/new_thing_1513')
+    prepared_final_request = session.prepare_request(final_request)
+
+    # Simulate the redirect chain manually
+    responses = [response_303, response_307]
+    current_request = prepared_initial_request
+    for response in responses:
+        if response.status_code in (301, 302, 303):
+            current_request.method = 'GET'  # 303 should switch method to GET
+        current_request.url = response.headers['Location']
+
+    # Check what the final request's method is
+    final_method = current_request.method
+
+    # Verify if the issue is reproduced
+    if final_method == 'POST':
+        print("Issue reproduced")
+    elif final_method == 'GET':
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+test_resolve_redirects_issue()
+```
+
+Explanation:
+1. The `mock_response` function creates a mock `Response` object.
+2. The `test_resolve_redirects_issue` function simulates the redirect chain described in the issue.
+3. The test manually processes each response to simulate `Session.resolve_redirects`, modifying the request method based on redirection status codes.
+4. The final request method is checked to determine if the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests.models import Response
+from requests.sessions import Session
+
+def create_mock_response(status_code, url, method='GET', headers=None):
+    response = Response()
+    response.status_code = status_code
+    response.headers = headers or {}
+    response.url = url
+    response.request = requests.Request(method, url).prepare()
+    return response
+
+def mock_resolve_redirects(session, request, stream=False, timeout=None, verify=True, cert=None, proxies=None):
+    responses = [
+        create_mock_response(303, 'http://server.example.com/new_thing_1513', 'POST', {'Location': '/new_thing_1513'}),
+        create_mock_response(307, 'http://failover.example.com/new_thing_1513', 'GET', {'Location': 'http://failover.example.com/new_thing_1513'})
+    ]
+    for response in responses:
+        yield response
+
+def test_issue_reproduction():
+    session = Session()
+    session.resolve_redirects = lambda response, request, **kwargs: mock_resolve_redirects(session, request, **kwargs)
+
+    original_request = requests.Request('POST', 'http://server.example.com/do_something').prepare()
+    response = create_mock_response(303, 'http://server.example.com/new_thing_1513', 'POST', {'Location': '/new_thing_1513'})
+
+    try:
+        for resp in session.resolve_redirects(response, original_request):
+            if resp.request.method == 'POST':
+                print("Issue reproduced")
+                return
+        print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+        return
+
+test_issue_reproduction()
+```
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests.models import Response, PreparedRequest
+
+def mock_response(status_code, url, method="GET", headers=None):
+    response = Response()
+    response.status_code = status_code
+    response.headers['Location'] = url
+    response.request = PreparedRequest()
+    response.request.prepare(
+        method=method,
+        url=url,
+        headers=headers or {}
+    )
+    return response
+
+def test_resolve_redirects_issue():
+    session = requests.Session()
+    
+    # Mock the initial POST request and two subsequent redirects
+    initial_response = mock_response(
+        303, "http://server.example.com/new_thing_1513", method="POST"
+    )
+    redirect_response_303 = mock_response(
+        307, "http://failover.example.com/new_thing_1513", method="GET"
+    )
+    final_response = mock_response(
+        200, "http://failover.example.com/new_thing_1513", method="GET"
+    )
+
+    def mock_send(request, **kwargs):
+        if request.url == "http://server.example.com/do_something":
+            return initial_response
+        elif request.url == "http://server.example.com/new_thing_1513":
+            return redirect_response_303
+        elif request.url == "http://failover.example.com/new_thing_1513":
+            return final_response
+        else:
+            response = Response()
+            response.status_code = 404
+            return response
+
+    session.send = mock_send
+
+    try:
+        response = session.request('POST', 'http://server.example.com/do_something')
+        
+        # Check the final response to determine if the issue is reproduced
+        if response.url == "http://failover.example.com/new_thing_1513" and response.request.method == "POST":
+            print("Issue reproduced")
+        elif response.url == "http://failover.example.com/new_thing_1513" and response.request.method == "GET":
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests import Session
+from requests.models import PreparedRequest
+
+def test_session_resolve_redirects():
+    # Set up a mock server with redirections
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    import threading
+    
+    class MockServerRequestHandler(BaseHTTPRequestHandler):
+        def do_POST(self):
+            if self.path == "/do_something":
+                self.send_response(303)
+                self.send_header('Location', '/new_thing_1513')
+                self.end_headers()
+            else:
+                self.send_response(501)
+                self.end_headers()
+        
+        def do_GET(self):
+            if self.path == "/new_thing_1513":
+                self.send_response(307)
+                self.send_header('Location', 'http://localhost:{}/new_thing_1513'.format(PORT))
+                self.end_headers()
+            else:
+                self.send_response(200)
+                self.end_headers()
+
+    def start_mock_server():
+        httpd = HTTPServer(('', PORT), MockServerRequestHandler)
+        httpd.serve_forever()
+
+    # Start the mock server in a new thread
+    PORT = 8000
+    server_thread = threading.Thread(target=start_mock_server)
+    server_thread.setDaemon(True)
+    server_thread.start()
+
+    # Prepare the session and request
+    session = Session()
+    request = requests.Request('POST', 'http://localhost:{}/do_something'.format(PORT))
+    prepared_request = session.prepare_request(request)
+
+    # Capture the outcome
+    try:
+        response = session.send(prepared_request, allow_redirects=True)
+        if response.request.method == 'POST':
+            print("Issue reproduced")
+        elif response.request.method == 'GET':
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues:", e)
+
+test_session_resolve_redirects()
+```
+
+**Explanation:**
+
+1. **Imports:**
+   - We import necessary modules: `requests`, `Session`, and `PreparedRequest`.
+   - Import modules for setting up a mock server (`BaseHTTPRequestHandler`, `HTTPServer`, `threading`).
+
+2. **Mock Server:**
+   - We define a mock HTTP server using `BaseHTTPRequestHandler` to simulate the redirection chain described in the issue.
+   - The server responds to a `POST` request to `/do_something` with a `303 See Other` redirect to `/new_thing_1513`.
+   - A `GET` request to `/new_thing_1513` results in a `307 Temporary Redirect` back to the same path at the mock server.
+
+3. **Server Thread:**
+   - The mock server runs in a separate thread to handle requests concurrently with the test.
+
+4. **Session Setup:**
+   - A `Session` object and a prepared request (`POST` to the initial URL) are created.
+
+5. **Check Outcome:**
+   - The `send` method of `Session` is used to follow redirects.
+   - Depending on the final request method, it prints:
+     - "Issue reproduced" if the method is `POST` after the redirects.
+     - "Issue resolved" if the method is `GET`.
+     - "Other issues" if something unexpected occurs.
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests.adapters import HTTPAdapter
+from requests.sessions import Session
+from requests.models import Response
+from requests.structures import CaseInsensitiveDict
+
+class MockAdapter(HTTPAdapter):
+    def send(self, request, *args, **kwargs):
+        response = Response()
+        response.request = request
+
+        if request.url == "http://server.example.com/do_something":
+            response.status_code = 303
+            response.headers['Location'] = "/new_thing_1513"
+        elif request.url == "http://server.example.com/new_thing_1513":
+            response.status_code = 307
+            response.headers['Location'] = "//failover.example.com/new_thing_1513"
+        elif request.url == "http://failover.example.com/new_thing_1513":
+            response.status_code = 200
+        else:
+            response.status_code = 404
+
+        response._content = b""
+        return response
+
+def test_redirect_method_preservation():
+    session = Session()
+    adapter = MockAdapter()
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+
+    initial_request = requests.Request('POST', 'http://server.example.com/do_something')
+    prepared_request = session.prepare_request(initial_request)
+
+    try:
+        response = session.send(prepared_request, allow_redirects=True)
+        final_request = response.history[-1].request if response.history else response.request
+
+        if final_request.method == 'POST':
+            print("Issue reproduced")
+        elif final_request.method == 'GET':
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_redirect_method_preservation()
+```
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests.models import Response, Request
+from requests.sessions import Session
+from requests.structures import CaseInsensitiveDict
+
+def mock_response(url, status_code, headers=None, content=""):
+    """Creates a mock response object."""
+    response = Response()
+    response.url = url
+    response.status_code = status_code
+    response.headers = CaseInsensitiveDict(headers or {})
+    response._content = content.encode("utf-8")
+    return response
+
+class MockSession(Session):
+    def __init__(self, *args, **kwargs):
+        super(MockSession, self).__init__(*args, **kwargs)
+        self.redirect_responses = []
+
+    def send(self, request, **kwargs):
+        if self.redirect_responses:
+            return self.redirect_responses.pop(0)
+        return super(MockSession, self).send(request, **kwargs)
+
+def test_resolve_redirects_issue():
+    session = MockSession()
+    
+    redirect_303_response = mock_response(
+        url="http://server.example.com/do_something",
+        status_code=303,
+        headers={"Location": "/new_thing_1513"}
+    )
+    
+    redirect_307_response = mock_response(
+        url="http://server.example.com/new_thing_1513",
+        status_code=307,
+        headers={"Location": "//failover.example.com/new_thing_1513"}
+    )
+    
+    final_get_response = mock_response(
+        url="http://failover.example.com/new_thing_1513",
+        status_code=200,
+        content="Success"
+    )
+    
+    session.redirect_responses = [redirect_303_response, redirect_307_response, final_get_response]
+    
+    initial_request = Request(
+        method="POST",
+        url="http://server.example.com/do_something",
+        headers={"Host": "server.example.com"},
+    )
+    prepared_request = session.prepare_request(initial_request)
+
+    try:
+        response = session.send(prepared_request)
+        if response.request.method == "POST":
+            print("Issue reproduced")
+        elif response.request.method == "GET" and response.status_code == 200:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_resolve_redirects_issue()
+```
+
+This test script sets up a `MockSession` to simulate the described redirection chain. The redirection responses and their respective `Location` headers are mocked to replicate the issue scenario. The script then triggers the initial POST request and checks the method of the final request. If the method is POST, it indicates the issue is reproduced. If the method is GET and the response status code is 200, it indicates the issue is resolved. Any other outcomes will print "Other issues".
+2025-05-03 14:19:31,066 - INFO - raw output:
+Certainly! Below is the generated test that reflects the issue described and follows the specified format.
+
+```python
+import requests
+from requests import Session
+from requests.models import PreparedRequest, Response
+from requests.structures import CaseInsensitiveDict
+
+def test_resolve_redirects_issue():
+    # Mocking server responses for the redirection chain
+    session = Session()
+
+    def mock_response(url, status_code, headers):
+        response = Response()
+        response.status_code = status_code
+        response.headers = CaseInsensitiveDict(headers)
+        response.url = url
+        return response
+
+    def mock_send(request, **kwargs):
+        if request.url == 'http://server.example.com/do_something':
+            return mock_response('http://server.example.com/do_something', 303, {'Location': '/new_thing_1513'})
+        elif request.url == 'http://server.example.com/new_thing_1513':
+            return mock_response('http://server.example.com/new_thing_1513', 307, {'Location': 'http://failover.example.com/new_thing_1513'})
+        elif request.url == 'http://failover.example.com/new_thing_1513':
+            return mock_response('http://failover.example.com/new_thing_1513', 200, {})
+
+    # Monkey patch session.send to simulate the redirection chain
+    session.send = mock_send
+
+    # Original request to be redirected
+    original_request = PreparedRequest()
+    original_request.prepare(
+        method='POST',
+        url='http://server.example.com/do_something',
+        headers={'Host': 'server.example.com'}
+    )
+
+    # Simulate fetching the redirects
+    try:
+        response = session.request(method=original_request.method, url=original_request.url, headers=original_request.headers)
+        for r in session.resolve_redirects(response, original_request):
+            response = r
+
+        if response.request.method == 'POST':
+            print("Issue reproduced")
+        elif response.request.method == 'GET':
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_resolve_redirects_issue()
+```
+
+This test code will:
+
+1. Mock the server responses to simulate the described redirection chain.
+2. Use the `Session.resolve_redirects` method to handle the redirects.
+3. Check if the final method used in the redirected request is a `POST` (indicating the issue is reproduced) or a `GET` (indicating the issue is resolved).
+
+Make sure `requests` is installed in your environment to run this test.
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests.sessions import Session
+from requests.models import Response, Request
+from requests.adapters import HTTPAdapter
+from requests.structures import CaseInsensitiveDict
+
+class MockAdapter(HTTPAdapter):
+    def __init__(self, responses):
+        self.responses = responses
+        self.call_count = 0
+        super(MockAdapter, self).__init__()
+
+    def send(self, request, **kwargs):
+        response = self.responses[self.call_count]
+        self.call_count += 1
+        return response
+
+def create_mock_response(status_code, headers):
+    response = Response()
+    response.status_code = status_code
+    response.headers = CaseInsensitiveDict(headers)
+    return response
+
+def test_issue_reproduce():
+    responses = [
+        create_mock_response(303, {"Location": "/new_thing_1513"}),
+        create_mock_response(307, {"Location": "//failover.example.com/new_thing_1513"})
+    ]
+    
+    session = Session()
+    adapter = MockAdapter(responses)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+
+    original_request = Request('POST', 'http://server.example.com/do_something')
+    prepared_request = session.prepare_request(original_request)
+
+    try:
+        responses = session.resolve_redirects(prepared_request, responses[0])
+        method_chain = [resp.request.method for resp in responses]
+        if method_chain == ['GET', 'POST']:
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        print("Other issues", e)
+
+test_issue_reproduce()
+```
+
+This test creates a mock HTTP adapter to simulate the redirection chain described in the issue. The `MockAdapter` class is used to provide predefined responses for each HTTP request. The test then makes a request and checks whether the issue is reproduced by examining the methods of the requests in the redirection chain. If the issue is reproduced, it prints "Issue reproduced." If the issue is resolved, it prints "Issue resolved." If there are other issues, it prints "Other issues" along with the exception message.
+2025-05-03 14:19:31,066 - INFO - raw output:
+```python
+import requests
+from requests import Session, Request
+from requests.models import PreparedRequest
+from requests.adapters import HTTPAdapter
+from requests.exceptions import RequestException
+from requests.structures import CaseInsensitiveDict
+from urllib3.response import HTTPResponse
+from io import BytesIO
+
+class MockHTTPAdapter(HTTPAdapter):
+    def __init__(self, responses):
+        self.responses = responses
+        self.requests_made = []
+        super(MockHTTPAdapter, self).__init__()
+
+    def send(self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None):
+        self.requests_made.append(request)
+        response = self.responses.pop(0)
+        return response
+
+def mock_response(status_code, headers, body):
+    raw = HTTPResponse(
+        body=BytesIO(body.encode('utf-8')),
+        status=status_code,
+        headers=headers,
+        preload_content=False
+    )
+    response = requests.Response()
+    response.status_code = status_code
+    response.headers = CaseInsensitiveDict(headers)
+    response.raw = raw
+    response.url = request.url
+    return response
+
+def test_redirect_issue():
+    responses = [
+        mock_response(303, {'Location': '/new_thing_1513'}, ''),
+        mock_response(307, {'Location': 'http://failover.example.com/new_thing_1513'}, ''),
+    ]
+
+    s = Session()
+    adapter = MockHTTPAdapter(responses)
+    s.mount('http://', adapter)
+    s.mount('https://', adapter)
+
+    try:
+        s.post('http://server.example.com/do_something')
+    except RequestException as e:
+        print("Other issues")
+        return
+    
+    if len(adapter.requests_made) < 2:
+        print("Other issues")
+        return
+    
+    first_request_method = adapter.requests_made[0].method
+    second_request_method = adapter.requests_made[-1].method
+
+    if first_request_method == 'POST' and second_request_method == 'POST':
+        print("Issue reproduced")
+    elif first_request_method == 'POST' and second_request_method == 'GET':
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+test_redirect_issue()
+```
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests.sessions import Session
+from requests.models import Response, PreparedRequest
+
+# Mock adapter to simulate HTTP responses for testing
+class MockAdapter(requests.adapters.HTTPAdapter):
+    def __init__(self, responses):
+        self.responses = responses
+        self.index = 0
+        super().__init__()
+
+    def send(self, request, **kwargs):
+        response = self.responses[self.index]
+        self.index += 1
+        return response
+
+def build_response(status_code, headers, request):
+    response = Response()
+    response.status_code = status_code
+    response.headers = headers
+    response._content = b''
+    response.request = request
+    response.url = request.url
+    return response
+
+def test_session_resolve_redirects_issue():
+    session = Session()
+    responses = []
+
+    # Original POST request
+    original_request = PreparedRequest()
+    original_request.prepare(
+        method='POST',
+        url='http://server.example.com/do_something',
+        headers={'Host': 'server.example.com'}
+    )
+
+    # First redirection with 303 See Other (should convert POST to GET)
+    responses.append(build_response(
+        status_code=303,
+        headers={'Location': '/new_thing_1513'},
+        request=original_request
+    ))
+
+    # Second redirection with 307 Temporary Redirect (should preserve GET method)
+    responses.append(build_response(
+        status_code=307,
+        headers={'Location': 'http://failover.example.com/new_thing_1513'},
+        request=None  # to be set by the MockAdapter
+    ))
+
+    session.mount('http://', MockAdapter(responses))
+
+    try:
+        response = session.send(original_request)
+        final_request_method = response.request.method
+        if final_request_method == 'POST':
+            print("Issue reproduced")
+        elif final_request_method == 'GET':
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_session_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests.adapters import HTTPAdapter
+from requests.models import Response
+from requests.sessions import Session
+from requests.structures import CaseInsensitiveDict
+from requests.exceptions import TooManyRedirects
+
+# Mock server to simulate the redirection chain
+class MockServer(HTTPAdapter):
+    def __init__(self):
+        super().__init__()
+        self.responses = {
+            'http://server.example.com/do_something': self._response_303,
+            'http://server.example.com/new_thing_1513': self._response_307,
+            'http://failover.example.com/new_thing_1513': self._final_response,
+        }
+
+    def send(self, request, **kwargs):
+        response_function = self.responses.get(request.url, self._default_response)
+        return response_function(request)
+
+    def _response_303(self, request):
+        response = Response()
+        response.status_code = 303
+        response.headers = CaseInsensitiveDict({'Location': '/new_thing_1513'})
+        response.request = request
+        response.url = request.url
+        response._content = b''
+        return response
+
+    def _response_307(self, request):
+        response = Response()
+        response.status_code = 307
+        response.headers = CaseInsensitiveDict({'Location': '//failover.example.com/new_thing_1513'})
+        response.request = request
+        response.url = request.url
+        response._content = b''
+        return response
+
+    def _final_response(self, request):
+        response = Response()
+        response.status_code = 200
+        response.request = request
+        response.url = request.url
+        response._content = b'Success'
+        return response
+
+    def _default_response(self, request):
+        response = Response()
+        response.status_code = 404
+        response.request = request
+        response.url = request.url
+        response._content = b'Not Found'
+        return response
+
+def test_resolve_redirects_issue():
+    session = Session()
+    session.mount('http://', MockServer())
+    session.mount('https://', MockServer())
+
+    try:
+        response = session.post('http://server.example.com/do_something')
+
+        if response.status_code == 200 and response.request.method == 'GET' and response.url == 'http://failover.example.com/new_thing_1513':
+            print("Issue resolved")
+        elif response.request.method == 'POST':
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except TooManyRedirects:
+        print("Other issues")
+
+test_resolve_redirects_issue()
+```
+
+The provided test setup simulates the redirection chain using a mock HTTP server and then uses the `requests` library to make a POST request that should trigger the issue described. It checks the final outcome to determine if the issue related to method preservation after a 303 redirection followed by a 307 redirection is reproduced, resolved, or if other issues are present.
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests import Session, Request
+from requests.models import Response
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+from requests_testadapter import Resp
+
+class MockAdapter(HTTPAdapter):
+    def __init__(self, responses):
+        self.responses = responses
+        super().__init__()
+
+    def send(self, request, **kwargs):
+        response = self.responses.pop(0)
+        response.request = request
+        return response
+
+def test_issue_resolve_redirects():
+    # Mock responses for the test
+    responses = [
+        Resp(status=303, headers={'Location': '/new_thing_1513'}),
+        Resp(status=307, headers={'Location': '//failover.example.com/new_thing_1513'}),
+        Resp(status=200)
+    ]
+    
+    # Create a session and mount the mock adapter
+    session = Session()
+    session.mount('http://', MockAdapter(responses))
+    session.mount('https://', MockAdapter(responses))
+
+    # Original POST request
+    original_request = Request('POST', 'http://server.example.com/do_something')
+    prepared_request = session.prepare_request(original_request)
+
+    try:
+        # Send request and follow redirects
+        response = session.send(prepared_request, allow_redirects=True)
+        final_request = response.request
+
+        # Check if the final request method is a GET
+        if final_request.method == 'GET':
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_issue_resolve_redirects()
+```
+
+This test sets up a mock environment to simulate the redirection chain described in the issue. The test verifies whether the final request method is `GET` when it should be, and prints the appropriate message based on the outcome.
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests import Request, Session
+from requests.models import Response
+from requests.structures import CaseInsensitiveDict
+
+def mock_response(url, status_code, headers):
+    response = Response()
+    response.status_code = status_code
+    response.headers = CaseInsensitiveDict(headers)
+    response.url = url
+    return response
+
+def test_resolve_redirects_issue():
+    session = Session()
+
+    # Mocking the initial POST request
+    original_request = Request('POST', 'http://server.example.com/do_something').prepare()
+
+    # Mock the responses for redirections
+    response1 = mock_response('http://server.example.com/do_something', 303, {'Location': '/new_thing_1513'})
+    response2 = mock_response('http://server.example.com/new_thing_1513', 307, {'Location': '//failover.example.com/new_thing_1513'})
+
+    # Attach the responses to the session
+    def mock_send(request, **kwargs):
+        if request.url == 'http://server.example.com/do_something':
+            return response1
+        elif request.url == 'http://server.example.com/new_thing_1513':
+            return response2
+        elif request.url == 'http://failover.example.com/new_thing_1513':
+            return mock_response('http://failover.example.com/new_thing_1513', 200, {})
+
+    # Replace the session's send method with our mock
+    session.send = mock_send
+
+    try:
+        final_response = session.send(original_request)
+        final_request_method = final_response.request.method
+        final_request_url = final_response.request.url
+    except Exception as e:
+        print("Other issues")
+        return
+
+    # Check if the issue is reproduced
+    if final_request_method == 'POST' and final_request_url == 'http://failover.example.com/new_thing_1513':
+        print("Issue reproduced")
+    elif final_request_method == 'GET' and final_request_url == 'http://failover.example.com/new_thing_1513':
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+test_resolve_redirects_issue()
+```
+
+This test will:
+
+1. Mock the initial POST request.
+2. Set up mock responses for the redirection chain as described in the issue.
+3. Attach these responses to the session.
+4. Replace the session's `send` method with a mock function that returns the appropriate response based on the request URL.
+5. Determine if the issue is reproduced or resolved based on the final request method and URL.
+
+Run the test to see if the issue described in the issue text is reproduced or resolved.
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests.adapters import HTTPAdapter
+from requests.models import Response
+from requests.sessions import Session
+from requests.structures import CaseInsensitiveDict
+from urllib3.util import Timeout
+
+class MockAdapter(HTTPAdapter):
+    def __init__(self, responses):
+        super().__init__()
+        self.responses = responses
+        self.call_count = 0
+
+    def send(self, request, **kwargs):
+        response = self.responses[self.call_count]
+        self.call_count += 1
+        return response
+
+def create_mock_response(status_code, headers, url):
+    response = Response()
+    response.status_code = status_code
+    response.headers = CaseInsensitiveDict(headers)
+    response.url = url
+    return response
+
+def test_resolve_redirects_issue():
+    # Mock responses for the redirection chain
+    responses = [
+        create_mock_response(303, {'Location': '/new_thing_1513'}, 'http://server.example.com/do_something'),
+        create_mock_response(307, {'Location': 'http://failover.example.com/new_thing_1513'}, 'http://server.example.com/new_thing_1513')
+    ]
+    
+    # Create a session and mount the mock adapter
+    session = Session()
+    adapter = MockAdapter(responses)
+    session.mount('http://', adapter)
+    
+    # Perform the initial request
+    initial_request = requests.Request('POST', 'http://server.example.com/do_something')
+    prepped = session.prepare_request(initial_request)
+    
+    try:
+        response = session.send(prepped, allow_redirects=True)
+    except requests.exceptions.RequestException:
+        print("Other issues")
+        return
+    
+    # Check the final request method
+    if adapter.call_count == 2:
+        final_request_method = responses[1].request.method
+        if final_request_method == 'POST':
+            print("Issue reproduced")
+        elif final_request_method == 'GET':
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    else:
+        print("Other issues")
+
+test_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests import Session
+from requests.models import PreparedRequest
+from requests.adapters import HTTPAdapter
+from requests.exceptions import RequestException
+from urllib3.util import Retry
+
+def mock_redirect_server():
+    from flask import Flask, request, redirect, Response
+    app = Flask(__name__)
+
+    @app.route('/do_something', methods=['POST'])
+    def do_something():
+        return redirect('/new_thing_1513', code=303)
+
+    @app.route('/new_thing_1513', methods=['GET'])
+    def new_thing_1513():
+        response = Response(status=307)
+        response.headers['Location'] = '//failover.example.com/new_thing_1513'
+        return response
+
+    @app.route('/new_thing_1513_failover', methods=['GET'])
+    def new_thing_1513_failover():
+        return "Success", 200
+
+    return app
+
+def test_session_resolve_redirects():
+    import threading
+    from werkzeug.serving import make_server
+
+    app = mock_redirect_server()
+    server = make_server('127.0.0.1', 5000, app)
+    thread = threading.Thread(target=server.serve_forever)
+    thread.start()
+
+    try:
+        session = Session()
+        retries = Retry(connect=3, backoff_factor=0.5)
+        adapter = HTTPAdapter(max_retries=retries)
+        session.mount('http://', adapter)
+
+        request = PreparedRequest()
+        request.prepare(method='POST', url='http://127.0.0.1:5000/do_something')
+
+        try:
+            response = session.send(request, allow_redirects=True)
+        except RequestException as e:
+            print(f"Request failed: {e}")
+            print("Other issues")
+            return
+
+        if response.status_code == 200 and response.text == "Success":
+            print("Issue resolved")
+        elif response.request.method == 'POST':
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+    finally:
+        server.shutdown()
+        thread.join()
+
+test_session_resolve_redirects()
+```
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests.models import PreparedRequest
+from requests.sessions import Session
+from requests.exceptions import TooManyRedirects
+
+def mock_response(status_code, headers, content=""):
+    response = requests.Response()
+    response.status_code = status_code
+    response.headers = headers
+    response._content = content.encode('utf-8')
+    return response
+
+def test_resolve_redirects_issue():
+    session = Session()
+
+    # Mock the initial POST request
+    initial_request = PreparedRequest()
+    initial_request.prepare(
+        method='POST',
+        url='http://server.example.com/do_something',
+        headers={'Host': 'server.example.com'},
+        data=''
+    )
+
+    responses = [
+        mock_response(303, {'Location': 'http://server.example.com/new_thing_1513'}),
+        mock_response(307, {'Location': 'http://failover.example.com/new_thing_1513'})
+    ]
+
+    def mock_send(request, **kwargs):
+        nonlocal responses
+        if responses:
+            return responses.pop(0)
+        else:
+            raise TooManyRedirects
+
+    session.send = mock_send
+
+    try:
+        final_response = session.resolve_redirects(initial_request, session.send, stream=False, timeout=None, verify=True, cert=None, proxies=None)
+        for r in final_response:
+            pass  # Resolve the iterator
+
+        if initial_request.method == 'POST' and r.request.method == 'POST':
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except TooManyRedirects:
+        print("Other issues")
+
+test_resolve_redirects_issue()
+```
+
+Explanation:
+1. **Necessary imports**: Imported `requests`, `PreparedRequest`, `Session`, and `TooManyRedirects`.
+2. **Code to reproduce the issue**:
+   - Created a mock function `mock_response` to simulate responses.
+   - Prepared an initial POST request.
+   - Created a list of responses to simulate the redirection chain.
+   - Overrode the `session.send` method with `mock_send` to return the predefined responses.
+3. **Outcome handling**:
+   - Checked if the initial request's method was 'POST' and the final request's method remained 'POST' after redirections. If so, printed "Issue reproduced".
+   - If the method was correctly modified to 'GET' due to a 303 redirect, printed "Issue resolved".
+   - In case of any other issue (like breaking the redirection chain), printed "Other issues".
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests.sessions import Session
+from requests.models import Response
+
+def create_mock_response(url, status_code, headers):
+    response = Response()
+    response.status_code = status_code
+    response.headers.update(headers)
+    response.url = url
+    response.reason = 'OK'
+    return response
+
+def test_resolve_redirects_issue():
+    # Mock the original POST request
+    original_request = requests.Request('POST', 'http://server.example.com/do_something')
+    prepared_request = original_request.prepare()
+
+    # Mock the response for the first redirect (303 See Other)
+    first_redirect_response = create_mock_response(
+        'http://server.example.com/new_thing_1513',
+        303,
+        {'Location': '/new_thing_1513'}
+    )
+
+    # Mock the response for the second redirect (307 Temporary Redirect)
+    second_redirect_response = create_mock_response(
+        'http://failover.example.com/new_thing_1513',
+        307,
+        {'Location': '//failover.example.com/new_thing_1513'}
+    )
+
+    # Create a session and mock the sending of requests
+    session = Session()
+
+    # Mock sending the requests and getting the responses in sequence
+    session.send = lambda request, **kwargs: {
+        'http://server.example.com/do_something': first_redirect_response,
+        'http://server.example.com/new_thing_1513': second_redirect_response,
+    }[request.url]
+
+    try:
+        # Attempt to resolve the redirects
+        responses = list(session.resolve_redirects(
+            first_redirect_response,
+            prepared_request
+        ))
+
+        # Check if the final request method is GET
+        if responses[-1].request.method == 'GET':
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+
+
+test_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests import Session, Request
+from requests.structures import CaseInsensitiveDict
+from requests.models import Response
+
+def mock_response(status_code, url, method='GET', headers=None):
+    """Helper function to create a mock response object."""
+    response = Response()
+    response.status_code = status_code
+    response.headers = CaseInsensitiveDict(headers or {})
+    response.raw = None
+    response.url = url
+    response.encoding = 'utf-8'
+    response.request = Request(method=method, url=url).prepare()
+    return response
+
+def test_resolve_redirects_issue():
+    session = Session()
+    
+    # Mock responses for the redirection chain
+    def mock_send(request, **kwargs):
+        if request.url == "http://server.example.com/do_something":
+            return mock_response(303, "http://server.example.com/new_thing_1513", method='POST')
+        elif request.url == "http://server.example.com/new_thing_1513":
+            return mock_response(307, "http://failover.example.com/new_thing_1513", method='GET')
+        elif request.url == "http://failover.example.com/new_thing_1513":
+            if request.method == 'POST':
+                return mock_response(200, request.url, method='POST')
+            elif request.method == 'GET':
+                return mock_response(200, request.url, method='GET')
+    
+    # Monkey patch the session's send method
+    session.send = mock_send
+    
+    # Start the initial request
+    initial_request = Request('POST', 'http://server.example.com/do_something').prepare()
+    responses = session.resolve_redirects(mock_response(303, "http://server.example.com/new_thing_1513", method='POST'), initial_request)
+    
+    final_response = list(responses)[-1]
+    
+    if final_response.url == "http://failover.example.com/new_thing_1513":
+        if final_response.request.method == 'POST':
+            print("Issue reproduced")
+        elif final_response.request.method == 'GET':
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    else:
+        print("Other issues")
+
+test_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests.sessions import Session
+from requests.models import Response
+
+# Mocking server responses for testing
+class MockResponse(Response):
+    def __init__(self, status_code, headers=None):
+        super().__init__()
+        self.status_code = status_code
+        self.headers = headers or {}
+
+    @property
+    def is_redirect(self):
+        return self.status_code in (301, 302, 303, 307, 308)
+
+    @property
+    def next(self):
+        if self.is_redirect:
+            response = MockResponse(307, headers={'Location': 'http://failover.example.com/new_thing_1513'})
+            return response
+
+def mock_send(request, **kwargs):
+    if request.url == "http://server.example.com/do_something":
+        response = MockResponse(303, headers={'Location': 'http://server.example.com/new_thing_1513'})
+        response.request = request
+        return response
+    elif request.url == "http://server.example.com/new_thing_1513":
+        response = MockResponse(307, headers={'Location': 'http://failover.example.com/new_thing_1513'})
+        response.request = request
+        return response
+    else:
+        return MockResponse(200)
+
+# Replace the actual send method with our mock_send
+Session.send = mock_send
+
+def test_resolve_redirects_issue():
+    session = requests.Session()
+
+    # Initial POST request
+    initial_request = requests.Request('POST', 'http://server.example.com/do_something')
+    prepped = session.prepare_request(initial_request)
+
+    # Handle redirections
+    try:
+        response = session.send(prepped)
+
+        if response.status_code == 200:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except requests.exceptions.RequestException as e:
+        # Check if the last request was incorrectly a POST
+        if e.request.method == "POST":
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests.sessions import Session
+from requests.models import Response, PreparedRequest
+
+def mock_response(url, status_code, headers):
+    response = Response()
+    response.status_code = status_code
+    response.headers.update(headers)
+    response.url = url
+    response._content = b''
+    return response
+
+def test_redirect_issue():
+    session = Session()
+
+    # Mocking request and response cycles
+    def mock_send(request, **kwargs):
+        if request.url == "http://server.example.com/do_something":
+            return mock_response(
+                request.url,
+                303,
+                {'Location': '/new_thing_1513'}
+            )
+        elif request.url == "http://server.example.com/new_thing_1513":
+            return mock_response(
+                request.url,
+                307,
+                {'Location': '//failover.example.com/new_thing_1513'}
+            )
+        elif request.url == "http://failover.example.com/new_thing_1513":
+            return mock_response(request.url, 200, {})
+        else:
+            response = Response()
+            response.status_code = 404
+            response.url = request.url
+            response._content = b''
+            return response
+
+    # Monkey patch the session to use the mock_send
+    session.send = mock_send
+
+    original_request = requests.Request("POST", "http://server.example.com/do_something").prepare()
+
+    try:
+        response = session.resolve_redirects(original_request, session.send)
+        final_response = None
+
+        for resp in response:
+            final_response = resp
+
+        if final_response is not None and final_response.status_code == 200 and final_response.request.method == "GET":
+            print("Issue reproduced")
+        elif final_response is not None and final_response.status_code == 200:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+
+    except Exception as e:
+        print("Other issues", e)
+
+test_redirect_issue()
+```
+
+Explanation of the test:
+
+1. **Necessary Imports:** The necessary modules from `requests` are imported.
+2. **Mocking the Responses:** A helper function `mock_response` is defined to generate mock responses with specific headers and status codes.
+3. **Monkey Patching `Session.send`:** The `session.send` method is patched to use the `mock_send` function to simulate the redirection workflow described in the issue.
+4. **Original Request:** The original `POST` request is prepared.
+5. **Handling the Redirections:** The `resolve_redirects` method is called to follow the redirections. The final response is inspected to check the method used.
+6. **Outcome Printing:** Depending on the final request method, appropriate messages are printed to indicate if the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests import Request, Session
+from requests.models import Response
+from unittest.mock import patch
+
+def test_session_resolve_redirects_issue():
+    # Custom function to mock responses for our test
+    def mock_send(request, **kwargs):
+        if request.url == 'http://server.example.com/do_something':
+            response = Response()
+            response.status_code = 303
+            response.headers['Location'] = 'http://server.example.com/new_thing_1513'
+            response._content = b''
+            response.url = request.url
+            return response
+        elif request.url == 'http://server.example.com/new_thing_1513':
+            response = Response()
+            response.status_code = 307
+            response.headers['Location'] = 'http://failover.example.com/new_thing_1513'
+            response._content = b''
+            response.url = request.url
+            return response
+        elif request.url == 'http://failover.example.com/new_thing_1513':
+            response = Response()
+            response.status_code = 200
+            response._content = b'Success'
+            response.url = request.url
+            return response
+        else:
+            response = Response()
+            response.status_code = 404
+            response._content = b''
+            response.url = request.url
+            return response
+
+    # Mock the send method in the Session object
+    with patch('requests.Session.send', side_effect=mock_send):
+        session = Session()
+
+        # Initial request which will follow the redirect chain
+        request = Request('POST', 'http://server.example.com/do_something')
+        prepped = session.prepare_request(request)
+        response = session.send(prepped)
+
+        # Check the method of the final request
+        if response.url == 'http://failover.example.com/new_thing_1513' and response.request.method == 'GET':
+            print("Issue resolved")
+        elif response.url == 'http://failover.example.com/new_thing_1513' and response.request.method == 'POST':
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_session_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests.models import Response
+from requests.sessions import Session
+
+def mock_response(status_code, url):
+    response = Response()
+    response.status_code = status_code
+    response.headers['Location'] = url
+    response.url = url
+    return response
+
+def test_session_resolve_redirects_issue():
+    session = Session()
+
+    def mock_send(request, **kwargs):
+        if request.url == "http://server.example.com/do_something":
+            return mock_response(303, "http://server.example.com/new_thing_1513")
+        elif request.url == "http://server.example.com/new_thing_1513":
+            return mock_response(307, "http://failover.example.com/new_thing_1513")
+        elif request.url == "http://failover.example.com/new_thing_1513":
+            return mock_response(200, "http://failover.example.com/new_thing_1513")
+        return Response()
+
+    session.send = mock_send
+
+    # Create the initial POST request
+    initial_request = requests.Request('POST', 'http://server.example.com/do_something').prepare()
+    
+    # Follow the redirects
+    response = session.resolve_redirects(initial_request, session.send(initial_request), stream=False)
+
+    final_response = None
+    try:
+        for resp in response:
+            final_response = resp
+
+        # Check that the final request method is GET and not POST
+        if final_response.request.method == "GET":
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+
+test_session_resolve_redirects_issue()
+```
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests import Session
+from requests.models import Response
+from requests.structures import CaseInsensitiveDict
+from urllib.parse import urlparse, urljoin
+
+class MockServer:
+    def __init__(self):
+        self.urls = {
+            'http://server.example.com/do_something': self.do_something,
+            'http://server.example.com/new_thing_1513': self.new_thing_1513,
+            'http://failover.example.com/new_thing_1513': self.failover_thing_1513
+        }
+
+    def do_something(self, request):
+        response = Response()
+        response.status_code = 303
+        response.headers['Location'] = '/new_thing_1513'
+        return response
+
+    def new_thing_1513(self, request):
+        response = Response()
+        response.status_code = 307
+        response.headers['Location'] = 'http://failover.example.com/new_thing_1513'
+        return response
+
+    def failover_thing_1513(self, request):
+        response = Response()
+        response.status_code = 200
+        return response
+
+    def request(self, method, url, **kwargs):
+        parsed_url = urlparse(url)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
+        if base_url in self.urls:
+            return self.urls[base_url](requests.Request(method, url, **kwargs).prepare())
+        response = Response()
+        response.status_code = 404
+        return response
+
+# Mock the Session's send method
+original_send = Session.send
+def mock_send(self, request, **kwargs):
+    return mock_server.request(request.method, request.url, **kwargs)
+
+# Running the test
+mock_server = MockServer()
+Session.send = mock_send
+
+try:
+    session = Session()
+    response = session.post('http://server.example.com/do_something')
+    final_request = response.history[-1] if response.history else response.request
+    if final_request.method == 'POST':
+        print("Issue reproduced")
+    elif final_request.method == 'GET':
+        print("Issue resolved")
+    else:
+        print("Other issues")
+except Exception as e:
+    print("Other issues")
+
+# Restore the original send method to not affect other tests
+Session.send = original_send
+```
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests.models import Response, PreparedRequest
+
+def mock_response(status_code, url, method='GET'):
+    response = Response()
+    response.status_code = status_code
+    response.headers['Location'] = url
+    response._content = b""
+    response.request = PreparedRequest()
+    response.request.prepare(method=method, url=url)
+    return response
+
+def test_session_resolve_redirects_issue():
+    session = requests.Session()
+
+    # Mock the response chain
+    original_request = PreparedRequest()
+    original_request.prepare(method='POST', url='http://server.example.com/do_something')
+
+    intermediate_response = mock_response(303, 'http://server.example.com/new_thing_1513', method='POST')
+    intermediate_response.request = original_request
+
+    final_response = mock_response(307, 'http://failover.example.com/new_thing_1513', method='GET')
+    final_response.request = intermediate_response.request
+
+    def mock_send(request, *args, **kwargs):
+        if request.url == 'http://server.example.com/do_something':
+            return intermediate_response
+        elif request.url == 'http://server.example.com/new_thing_1513':
+            return final_response
+        elif request.url == 'http://failover.example.com/new_thing_1513':
+            response = Response()
+            response.status_code = 200
+            response._content = b"Success"
+            response.request = request
+            return response
+
+    session.send = mock_send
+
+    response = session.send(original_request)
+    redirects = list(session.resolve_redirects(response, original_request))
+
+    if len(redirects) == 2 and redirects[1].request.method == 'GET':
+        print("Issue resolved")
+    elif len(redirects) == 2 and redirects[1].request.method == 'POST':
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_session_resolve_redirects_issue()
+```
+
+This test script mocks the redirection chain described in the issue and checks if the final request method is correct. The output will indicate whether the issue has been reproduced, resolved, or if there are other issues.
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests.adapters import HTTPAdapter
+from requests.models import Response
+from requests.sessions import Session
+from requests.structures import CaseInsensitiveDict
+from requests_testadapter import Resp
+
+# Mock HTTP responses to simulate the redirection chain
+class MockAdapter(HTTPAdapter):
+    def send(self, request, **kwargs):
+        if request.url == 'http://server.example.com/do_something':
+            response = Response()
+            response.status_code = 303
+            response.headers['Location'] = 'http://server.example.com/new_thing_1513'
+            response.request = request
+            response._content = b''
+            return response
+        elif request.url == 'http://server.example.com/new_thing_1513':
+            response = Response()
+            response.status_code = 307
+            response.headers['Location'] = 'http://failover.example.com/new_thing_1513'
+            response.request = request
+            response._content = b''
+            return response
+        elif request.url == 'http://failover.example.com/new_thing_1513':
+            response = Response()
+            response.status_code = 200
+            response.request = request
+            response._content = b'Success'
+            return response
+        else:
+            response = Response()
+            response.status_code = 404
+            response._content = b'Not Found'
+            return response
+
+# Test function to reproduce or verify the issue
+def test_resolve_redirects():
+    session = Session()
+    session.mount('http://', MockAdapter())
+
+    try:
+        response = session.post('http://server.example.com/do_something')
+        redirected_url = response.url
+        final_method = response.request.method
+
+        if redirected_url == 'http://failover.example.com/new_thing_1513' and final_method == 'POST':
+            print("Issue reproduced")
+        elif redirected_url == 'http://failover.example.com/new_thing_1513' and final_method == 'GET':
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(F"Other issues: {e}")
+
+test_resolve_redirects()
+```
+
+This test script does the following:
+1. Sets up mock HTTP responses to simulate the redirection chain described in the issue.
+2. Uses the `requests` library to send a `POST` request and follow redirects.
+3. Checks the final redirected URL and the HTTP method used to determine whether the issue is reproduced, resolved, or if there are other issues.
+
+The expected outcome for reproduction of the issue is that the final request method is `POST` instead of `GET`, which matches the behavior described in the issue. If the final method is `GET`, the issue is considered resolved. Any other outcome or exceptions will indicate other issues.
+2025-05-03 14:19:31,067 - INFO - raw output:
+```python
+import requests
+from requests.models import Response, PreparedRequest
+from requests.sessions import Session
+
+def mock_response(url, status_code, headers):
+    response = Response()
+    response.status_code = status_code
+    response.headers = headers
+    response.url = url
+    response._content = b''
+    return response
+
+def test_session_resolve_redirects_issue():
+    with requests.Session() as session:
+        # Mocks for responses for the redirection chain
+        def mock_send(request, **kwargs):
+            if request.url == 'http://server.example.com/do_something':
+                return mock_response(
+                    url='http://server.example.com/do_something',
+                    status_code=303,
+                    headers={'Location': '/new_thing_1513'}
+                )
+            elif request.url == 'http://server.example.com/new_thing_1513':
+                return mock_response(
+                    url='http://server.example.com/new_thing_1513',
+                    status_code=307,
+                    headers={'Location': '//failover.example.com/new_thing_1513'}
+                )
+            elif request.url == 'http://failover.example.com/new_thing_1513':
+                return mock_response(
+                    url='http://failover.example.com/new_thing_1513',
+                    status_code=200,
+                    headers={}
+                )
+            return mock_response(url=request.url, status_code=404, headers={})
+
+        # Patch session.send to mock responses
+        session.send = mock_send
+
+        # Original POST request
+        original_request = PreparedRequest()
+        original_request.prepare(
+            method='POST',
+            url='http://server.example.com/do_something',
+            headers={'Host': 'server.example.com'}
+        )
+
+        # Initiate the request which will cause redirections
+        response = session.send(original_request)
+
+        if response.status_code == 200:
+            if response.request.method == 'GET':
+                print("Issue resolved")
+            else:
+                print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_session_resolve_redirects_issue()
+```
+
+1. Necessary imports: The test imports `requests` and related classes (`Response`, `PreparedRequest`, `Session`).
+2. Code to reproduce the issue described in the issue text: Mocks a series of responses to simulate the redirection chain.
+3. Prints "Issue reproduced" if the outcome indicates that the issue is reproduced: If the final request method is not `GET`.
+4. Prints "Issue resolved" if the outcome indicates that the issue has been successfully resolved: If the final request method is `GET`.
+5. Prints "Other issues" if the outcome indicates there are other issues with the source code: If the response status code is not 200.

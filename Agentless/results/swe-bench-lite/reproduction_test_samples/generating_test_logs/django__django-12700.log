@@ -1,0 +1,2887 @@
+2025-05-02 17:20:54,385 - INFO - ================ generating test for django__django-12700 ================
+2025-05-02 17:20:54,521 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+Settings are cleaned insufficiently.
+Description
+	
+Posting publicly after checking with the rest of the security team.
+I just ran into a case where django.views.debug.SafeExceptionReporterFilter.get_safe_settings() would return several un-cleansed values. Looking at cleanse_setting() I realized that we ​only take care of `dict`s but don't take other types of iterables into account but ​return them as-is.
+Example:
+In my settings.py I have this:
+MY_SETTING = {
+	"foo": "value",
+	"secret": "value",
+	"token": "value",
+	"something": [
+		{"foo": "value"},
+		{"secret": "value"},
+		{"token": "value"},
+	],
+	"else": [
+		[
+			{"foo": "value"},
+			{"secret": "value"},
+			{"token": "value"},
+		],
+		[
+			{"foo": "value"},
+			{"secret": "value"},
+			{"token": "value"},
+		],
+	]
+}
+On Django 3.0 and below:
+>>> import pprint
+>>> from django.views.debug import get_safe_settings
+>>> pprint.pprint(get_safe_settings()["MY_SETTING"])
+{'else': [[{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}],
+		 [{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}]],
+ 'foo': 'value',
+ 'secret': '********************',
+ 'something': [{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}],
+ 'token': '********************'}
+On Django 3.1 and up:
+>>> from django.views.debug import SafeExceptionReporterFilter
+>>> import pprint
+>>> pprint.pprint(SafeExceptionReporterFilter().get_safe_settings()["MY_SETTING"])
+{'else': [[{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}],
+		 [{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}]],
+ 'foo': 'value',
+ 'secret': '********************',
+ 'something': [{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}],
+ 'token': '********************'}
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:54,540 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 13:53:49,320 - INFO - ================ generating test for django__django-12700 ================
+2025-05-03 13:53:49,338 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+Settings are cleaned insufficiently.
+Description
+	
+Posting publicly after checking with the rest of the security team.
+I just ran into a case where django.views.debug.SafeExceptionReporterFilter.get_safe_settings() would return several un-cleansed values. Looking at cleanse_setting() I realized that we ​only take care of `dict`s but don't take other types of iterables into account but ​return them as-is.
+Example:
+In my settings.py I have this:
+MY_SETTING = {
+	"foo": "value",
+	"secret": "value",
+	"token": "value",
+	"something": [
+		{"foo": "value"},
+		{"secret": "value"},
+		{"token": "value"},
+	],
+	"else": [
+		[
+			{"foo": "value"},
+			{"secret": "value"},
+			{"token": "value"},
+		],
+		[
+			{"foo": "value"},
+			{"secret": "value"},
+			{"token": "value"},
+		],
+	]
+}
+On Django 3.0 and below:
+>>> import pprint
+>>> from django.views.debug import get_safe_settings
+>>> pprint.pprint(get_safe_settings()["MY_SETTING"])
+{'else': [[{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}],
+		 [{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}]],
+ 'foo': 'value',
+ 'secret': '********************',
+ 'something': [{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}],
+ 'token': '********************'}
+On Django 3.1 and up:
+>>> from django.views.debug import SafeExceptionReporterFilter
+>>> import pprint
+>>> pprint.pprint(SafeExceptionReporterFilter().get_safe_settings()["MY_SETTING"])
+{'else': [[{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}],
+		 [{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}]],
+ 'foo': 'value',
+ 'secret': '********************',
+ 'something': [{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}],
+ 'token': '********************'}
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 13:53:49,338 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 13:53:49,349 - INFO - Creating API request
+2025-05-03 13:53:53,299 - INFO - API response ChatCompletion(id='chatcmpl-BTCHdnPYdgRBaytDgLxRJ4JywQxnV', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_safe_settings_cleansing():\n    # Define the settings as described in the issue\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    # Mock the settings to include MY_SETTING\n    settings = {"MY_SETTING": MY_SETTING}\n\n    # Get the safe settings using SafeExceptionReporterFilter\n    safe_settings = SafeExceptionReporterFilter().get_safe_settings(settings)\n\n    # Expected output after cleansing\n    expected_output = {\n        \'else\': [\n            [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}],\n            [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}]\n        ],\n        \'foo\': \'value\',\n        \'secret\': \'********************\',\n        \'something\': [\n            {\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}\n        ],\n        \'token\': \'********************\'\n    }\n\n    # Check if the issue is reproduced or resolved\n    try:\n        assert safe_settings["MY_SETTING"] == expected_output\n        print("Issue resolved")\n    except AssertionError:\n        print("Issue reproduced")\n    except Exception as e:\n        print("Other issues:", str(e))\n\ntest_safe_settings_cleansing()\n```\n\nThis test script does the following:\n1. Imports the necessary modules.\n2. Defines the settings as described in the issue.\n3. Mocks the settings to include `MY_SETTING`.\n4. Uses `SafeExceptionReporterFilter` to get the safe settings.\n5. Compares the output with the expected cleansed output.\n6. Prints "Issue resolved" if the output matches the expected output, "Issue reproduced" if it does not, and "Other issues" if any other exception occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746298429, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=478, prompt_tokens=818, total_tokens=1296, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 13:53:53,299 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 13:53:53,311 - INFO - Creating API request
+2025-05-03 13:55:19,176 - INFO - API response ChatCompletion(id='chatcmpl-BTCHh5sI8hImykK97ySdM4Zd4SrzX', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.views.debug import SafeExceptionReporterFilter, get_safe_settings\nimport pprint\n\n# Define the settings dictionary as described in the issue\nMY_SETTING = {\n    "foo": "value",\n    "secret": "value",\n    "token": "value",\n    "something": [\n        {"foo": "value"},\n        {"secret": "value"},\n        {"token": "value"},\n    ],\n    "else": [\n        [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n    ]\n}\n\ndef test_settings_cleaning():\n    try:\n        # Set the settings dictionary to be used by the SafeExceptionReporterFilter\n        SafeExceptionReporterFilter.__init__ = lambda self: None\n        SafeExceptionReporterFilter.get_safe_settings = lambda self: {"MY_SETTING": MY_SETTING}\n\n        # Get the cleaned settings using SafeExceptionReporterFilter\n        cleaned_settings = SafeExceptionReporterFilter().get_safe_settings()["MY_SETTING"]\n        \n        # Expected cleaned settings\n        expected_cleaned_settings = {\n            "foo": "value",\n            "secret": "********************",\n            "token": "********************",\n            "something": [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "********************"},\n                    {"token": "********************"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "********************"},\n                    {"token": "********************"},\n                ],\n            ]\n        }\n        \n        # Check if the current cleaning logic matches the expected cleaned settings\n        if cleaned_settings == expected_cleaned_settings:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues", str(e))\n\ntest_settings_cleaning()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_settings_cleaned_insufficiently():\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    # Simulate adding MY_SETTING to Django settings\n    class DummySettings:\n        MY_SETTING = MY_SETTING\n    \n    settings = DummySettings()\n\n    # Obtain the safe settings using the SafeExceptionReporterFilter\n    safe_settings = SafeExceptionReporterFilter().get_safe_settings(settings)\n    \n    # Check the values in the safe settings\n    try:\n        if safe_settings["MY_SETTING"] == {\n            "foo": "value",\n            "secret": "********************",\n            "token": "********************",\n            "something": [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "********************"},\n                    {"token": "********************"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "********************"},\n                    {"token": "********************"},\n                ],\n            ]\n        }:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except KeyError:\n        print("Other issues")\n\ntest_settings_cleaned_insufficiently()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\n# Define the settings for testing\nsettings.configure(\n    MY_SETTING={\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ],\n    }\n)\n\ndef test_cleanse_setting_issue():\n    try:\n        # Get the safe settings\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        # Extract the specific setting to check\n        my_setting = safe_settings["MY_SETTING"]\n        \n        # Expected structure after cleansing\n        expected_setting = {\n            "foo": "value",\n            "secret": "********************",\n            "token": "********************",\n            "something": [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "********************"},\n                    {"token": "********************"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "********************"},\n                    {"token": "********************"},\n                ],\n            ]\n        }\n\n        # Compare the actual setting with the expected setting\n        if my_setting == expected_setting:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\n# Run the test\ntest_cleanse_setting_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_settings_cleansing_issue():\n    # Setup Django settings for testing\n    settings.configure(\n        MY_SETTING={\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ]\n        }\n    )\n    \n    expected_output = {\n        "foo": "value",\n        "secret": "********************",\n        "token": "********************",\n        "something": [\n            {"foo": "value"},\n            {"secret": "********************"},\n            {"token": "********************"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n        ]\n    }\n    \n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        actual_output = safe_settings["MY_SETTING"]\n        \n        if actual_output == expected_output:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print(f"Other issues: {str(e)}")\n\ntest_settings_cleansing_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_get_safe_settings_issue():\n    # Setting up Django settings for the test\n    settings.configure(\n        MY_SETTING={\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ]\n        }\n    )\n\n    try:\n        # Get the sanitized settings\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        my_setting = safe_settings["MY_SETTING"]\n\n        # Expected output for comparison\n        expected_output = {\n            "foo": "value",\n            "secret": "********************",\n            "token": "********************",\n            "something": [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "********************"},\n                    {"token": "********************"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "********************"},\n                    {"token": "********************"},\n                ],\n            ],\n        }\n\n        # Check if the issue is reproduced\n        if my_setting != expected_output:\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_get_safe_settings_issue()\n```\n\nExplanation:\n1. **Necessary Imports**: `pprint`, `settings` from `django.conf`, `SafeExceptionReporterFilter` from `django.views.debug`.\n2. **Code to Reproduce**:\n   - Configures the Django settings with the problematic `MY_SETTING` value.\n   - Fetches the sanitized settings using `SafeExceptionReporterFilter().get_safe_settings()`.\n   - Compares the fetched `MY_SETTING` with the expected sanitized output.\n3. **Outcome Messages**:\n   - Prints "Issue reproduced" if the fetched settings are not as expected (indicating the issue exists).\n   - Prints "Issue resolved" if the fetched settings match the expected sanitized output.\n   - Prints "Other issues" if any other exception occurs during the execution.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_safe_settings_issue():\n    # Define the settings as per the issue description\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    # Mimic the process to capture the safe settings\n    settings = {\n        "MY_SETTING": MY_SETTING\n    }\n    \n    safe_settings = SafeExceptionReporterFilter().get_safe_settings(settings)\n    \n    expected_output = {\n        \'else\': [[{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}],\n                 [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}]],\n        \'foo\': \'value\',\n        \'secret\': \'********************\',\n        \'something\': [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}],\n        \'token\': \'********************\'\n    }\n    \n    try:\n        # Check if the output matches the expected output to determine if the issue is resolved\n        assert safe_settings["MY_SETTING"] == expected_output\n        print("Issue resolved")\n    except AssertionError:\n        if safe_settings["MY_SETTING"] == MY_SETTING:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_safe_settings_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\n# Define the settings to be tested\nsettings.configure(\n    MY_SETTING={\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n)\n\ndef test_safe_settings():\n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()["MY_SETTING"]\n    except Exception as e:\n        print("Other issues")\n        print(f"Exception occurred: {e}")\n        return\n\n    # Expected outcome if the issue is resolved\n    expected_safe_settings = {\n        "foo": "value",\n        "secret": "********************",\n        "token": "********************",\n        "something": [\n            {"foo": "value"},\n            {"secret": "********************"},\n            {"token": "********************"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n        ]\n    }\n\n    # Compare the safe settings with the expected outcome\n    if safe_settings == expected_safe_settings:\n        print("Issue resolved")\n    else:\n        uncleaned_values = [\n            {"foo": "value"}, {"secret": "value"}, {"token": "value"}\n        ]\n        if (safe_settings["something"] == uncleaned_values and\n            safe_settings["else"] == [uncleaned_values, uncleaned_values]):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_safe_settings()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\nimport pprint\n\ndef test_safe_settings_cleansing():\n    settings.configure(\n        MY_SETTING={\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ]\n        }\n    )\n\n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        my_setting = safe_settings["MY_SETTING"]\n        \n        if (\n            my_setting["secret"] == "********************" and\n            my_setting["token"] == "********************" and\n            my_setting["something"][1]["secret"] == "********************" and\n            my_setting["something"][2]["token"] == "********************" and\n            my_setting["else"][0][1]["secret"] == "********************" and\n            my_setting["else"][1][2]["token"] == "********************"\n        ):\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except:\n        print("Other issues")\n\ntest_safe_settings_cleansing()\n```\n\nThis script sets up a Django settings configuration that mimics the scenario described in the issue. It then extracts the safe settings using `SafeExceptionReporterFilter().get_safe_settings()`, and checks that all sensitive values are correctly cleansed. If the sensitive values are not properly cleansed, it prints "Issue reproduced". If they are, it prints "Issue resolved". If there are any other issues during execution, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test that you can use to reproduce the issue described in the provided issue text. The test will also help verify if the issue has been fixed.\n\n```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\n# Configure Django settings\nsettings.configure(\n    MY_SETTING={\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n)\n\ndef test_safe_settings_cleanse():\n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        \n        # The expected output\n        expected_output = {\n            \'else\': [[{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}],\n                     [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}]],\n            \'foo\': \'value\',\n            \'secret\': \'********************\',\n            \'something\': [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}],\n            \'token\': \'********************\'\n        }\n\n        # Print the settings for debugging\n        pprint.pprint(safe_settings["MY_SETTING"])\n\n        # Check if the settings match the expected output\n        if safe_settings["MY_SETTING"] == expected_output:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n\n    except Exception as e:\n        print("Other issues", str(e))\n\ntest_safe_settings_cleanse()\n```\n\n### Explanation:\n1. **Necessary Imports**: We import `pprint`, `settings`, and `SafeExceptionReporterFilter`.\n2. **Configure Django Settings**: We configure the Django settings manually within the script, defining the potentially problematic `MY_SETTING`.\n3. **Test Function `test_safe_settings_cleanse`**:\n   - **Try Block**: \n     - Fetches the safe settings using `SafeExceptionReporterFilter`.\n     - Defines the expected cleansed output.\n     - Uses `pprint` to print the actual settings for debugging.\n     - Compares the actual output with the expected output.\n     - Prints "Issue resolved" if they match, otherwise "Issue reproduced".\n   - **Except Block**: Catches any unexpected exceptions and prints "Other issues".\n\nThis test should help you determine if the issue is reproduced or resolved after making changes to the source code.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.views.debug import SafeExceptionReporterFilter\nimport pprint\n\ndef test_safe_exception_reporter_filter() -> None:\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    filtered_settings = SafeExceptionReporterFilter().get_safe_settings(MY_SETTING)\n    expected_filtered_settings = {\n        "foo": "value",\n        "secret": "********************",\n        "token": "********************",\n        "something": [\n            {"foo": "value"},\n            {"secret": "********************"},\n            {"token": "********************"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n        ]\n    }\n\n    try:\n        assert filtered_settings == expected_filtered_settings\n        print("Issue resolved")\n    except AssertionError:\n        print("Issue reproduced")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_safe_exception_reporter_filter()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter, get_safe_settings\nimport pprint\n\n# Temporary settings to simulate the issue\nsettings.configure(\n    MY_SETTING={\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n)\n\ndef test_safe_settings():\n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        pprint.pprint(safe_settings["MY_SETTING"])\n\n        # Check for the issue described\n        if (safe_settings["MY_SETTING"]["something"][0]["secret"] == "value" or\n            safe_settings["MY_SETTING"]["else"][0][0]["secret"] == "value"):\n            print("Issue reproduced")\n        elif (safe_settings["MY_SETTING"]["something"][0]["secret"] == "********************" and\n            safe_settings["MY_SETTING"]["else"][0][0]["secret"] == "********************"):\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n        print(str(e))\n\ntest_safe_settings()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.views.debug import SafeExceptionReporterFilter\nimport pprint\n\ndef test_settings_cleansing_issue():\n    try:\n        # Simulate the settings as described in the issue\n        MY_SETTING = {\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ]\n        }\n        \n        # Create a SafeExceptionReporterFilter instance\n        reporter_filter = SafeExceptionReporterFilter()\n        \n        # Mock the settings retrieval\n        settings = {"MY_SETTING": MY_SETTING}\n        safe_settings = reporter_filter.get_safe_settings(settings)\n\n        # Check the cleansing of the settings\n        cleansed_setting = safe_settings["MY_SETTING"]\n        pprint.pprint(cleansed_setting)\n        \n        # Check if the issue is reproduced\n        if (\n            cleansed_setting["secret"] == "********************" and\n            cleansed_setting["token"] == "********************" and\n            all(i["secret"] == "value" for i in cleansed_setting["something"]) and\n            all(i["token"] == "value" for i in cleansed_setting["something"]) and\n            all(j["secret"] == "value" for sublist in cleansed_setting["else"] for j in sublist) and\n            all(j["token"] == "value" for sublist in cleansed_setting["else"] for j in sublist)\n        ):\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        print("Other issues", e)\n\ntest_settings_cleansing_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.views.debug import SafeExceptionReporterFilter\nfrom django.conf import settings\n\ndef test_settings_cleansing():\n    settings.configure(\n        MY_SETTING={\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ],\n        }\n    )\n\n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        cleansed_setting = safe_settings["MY_SETTING"]\n        pprint.pprint(cleansed_setting)\n        \n        # Check for un-cleansed values\n        def check_cleansing(obj):\n            if isinstance(obj, dict):\n                for key, value in obj.items():\n                    if "secret" in key or "token" in key:\n                        if value != "********************":\n                            return False\n                    if isinstance(value, (dict, list)):\n                        if not check_cleansing(value):\n                            return False\n            elif isinstance(obj, list):\n                for item in obj:\n                    if not check_cleansing(item):\n                        return False\n            return True\n        \n        if not check_cleansing(cleansed_setting):\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\ntest_settings_cleansing()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_safe_settings_cleansing():\n    # Set up the test settings\n    settings.configure(\n        MY_SETTING={\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ]\n        }\n    )\n    \n    # Obtain the safe settings using Django\'s SafeExceptionReporterFilter\n    safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n    \n    # Extract MY_SETTING from the safe settings\n    my_setting = safe_settings.get("MY_SETTING", {})\n\n    # Expected cleansed MY_SETTING\n    expected_cleansed_setting = {\n        "foo": "value",\n        "secret": "********************",\n        "token": "********************",\n        "something": [\n            {"foo": "value"},\n            {"secret": "********************"},\n            {"token": "********************"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n        ]\n    }\n\n    # Compare the obtained safe settings to the expected cleansed settings\n    try:\n        assert my_setting == expected_cleansed_setting\n        print("Issue resolved")\n    except AssertionError:\n        if any(\n            my_setting[key] != expected_cleansed_setting[key]\n            for key in expected_cleansed_setting\n            if isinstance(my_setting[key], list) or isinstance(expected_cleansed_setting[key], list)\n        ):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n# Run the test\ntest_safe_settings_cleansing()\n```\nThis script:\n\n1. Configures a Django setting to reproduce the issue scenario.\n2. Uses Django\'s `SafeExceptionReporterFilter` to get the safe settings.\n3. Compares the sanitized settings against the expected sanitized version.\n4. Prints out whether the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.views.debug import SafeExceptionReporterFilter\nimport pprint\n\ndef test_settings_cleaning_issue():\n    # Test settings\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    # Emulate Django\'s get_safe_settings by manually setting settings\n    class FakeSettings:\n        MY_SETTING = MY_SETTING\n\n    filter = SafeExceptionReporterFilter()\n    filter_settings = filter.get_safe_settings({\'MY_SETTING\': MY_SETTING})\n\n    expected_output = {\n        \'else\': [[{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}],\n                 [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}]],\n        \'foo\': \'value\',\n        \'secret\': \'********************\',\n        \'something\': [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}],\n        \'token\': \'********************\'\n    }\n\n    result = filter_settings["MY_SETTING"]\n\n    if result == expected_output:\n        print("Issue resolved")\n    elif result[\'something\'][1][\'secret\'] == \'value\' or result[\'else\'][0][1][\'secret\'] == \'value\':\n        print("Issue reproduced")\n    else:\n        print("Other issues")\n\ntest_settings_cleaning_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_safe_exception_reporter_filter():\n    # Define the settings to be tested\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    # Mock settings\n    settings = {\n        "MY_SETTING": MY_SETTING\n    }\n\n    # Override get_safe_settings to use our mock settings\n    def get_mock_safe_settings():\n        filter = SafeExceptionReporterFilter()\n        return filter.get_safe_settings(settings)\n\n    # Retrieve the sanitized settings\n    try:\n        safe_settings = get_mock_safe_settings()\n    except Exception:\n        print("Other issues")\n        return\n\n    # Check if sensitive information is properly cleaned\n    try:\n        assert safe_settings["MY_SETTING"]["secret"] == "********************"\n        assert safe_settings["MY_SETTING"]["token"] == "********************"\n\n        for item in safe_settings["MY_SETTING"]["something"]:\n            assert item["secret"] == "********************"\n            assert item["token"] == "********************"\n\n        for sublist in safe_settings["MY_SETTING"]["else"]:\n            for item in sublist:\n                assert item["secret"] == "********************"\n                assert item["token"] == "********************"\n\n        print("Issue resolved")\n    except AssertionError:\n        print("Issue reproduced")\n\ntest_safe_exception_reporter_filter()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_safe_settings_cleaning():\n    # Define the sample settings as described in the issue\n    settings.configure(MY_SETTING={\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    })\n\n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()["MY_SETTING"]\n        \n        # Check if sensitive values inside nested lists and dicts are cleansed\n        if (safe_settings["secret"] == "********************" and\n            safe_settings["token"] == "********************" and\n            all(nested_dict["secret"] == "********************" and nested_dict["token"] == "********************"\n                for nested_dict in safe_settings["something"]) and\n            all(all(inner_dict["secret"] == "********************" and inner_dict["token"] == "********************"\n                    for inner_dict in outer_list)\n                for outer_list in safe_settings["else"])):\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues:", e)\n\ntest_safe_settings_cleaning()\n```\n\nThis script sets up the `MY_SETTING` configuration as described in the issue, then attempts to retrieve and cleanse the settings using `SafeExceptionReporterFilter().get_safe_settings()`. The script checks if the sensitive values are properly cleansed and prints the appropriate message based on the result.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\n# Set up the Django settings for the test\nsettings.configure(\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n)\n\ndef test_settings_cleansing():\n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        my_setting = safe_settings["MY_SETTING"]\n        pprint.pprint(my_setting)\n\n        # Check if the secret and token values are cleansed within nested structures\n        if (my_setting["secret"] == "********************" and\n            my_setting["token"] == "********************" and\n            all(isinstance(item, dict) and\n                item.get("secret") == "********************" and\n                item.get("token") == "********************"\n                for item in my_setting["something"]) and\n            all(all(isinstance(sub_item, dict) and\n                    sub_item.get("secret") == "********************" and\n                    sub_item.get("token") == "********************"\n                    for sub_item in sublist)\n                for sublist in my_setting["else"])):\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\ntest_settings_cleansing()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\nimport pprint\n\ndef test_safe_settings_cleansing():\n    try:\n        # Setting up a Django-like environment for testing purposes\n        settings.configure()\n\n        # Define the problematic setting\n        MY_SETTING = {\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ]\n        }\n\n        # Add the setting to the Django settings\n        settings.MY_SETTING = MY_SETTING\n\n        # Get the safe settings using the SafeExceptionReporterFilter\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n\n        # Print the output\n        pprint.pprint(safe_settings["MY_SETTING"])\n\n        # Check if the issue is reproduced\n        if (safe_settings["MY_SETTING"]["secret"] == "********************" and\n            safe_settings["MY_SETTING"]["token"] == "********************" and\n            safe_settings["MY_SETTING"]["something"][1]["secret"] == "value" and\n            safe_settings["MY_SETTING"]["something"][1]["token"] == "value" and\n            isinstance(safe_settings["MY_SETTING"]["else"], list)):\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n\n    except Exception as e:\n        print("Other issues")\n        print(str(e))\n\ntest_safe_settings_cleansing()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_settings_cleaned_insufficiently() -> None:\n    # Setup a sample settings dictionary similar to the one described in the issue\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    # Mocking Django settings\n    settings.configure(SECRET_KEY=\'dummy\', MY_SETTING=MY_SETTING)\n\n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        result = safe_settings["MY_SETTING"]\n        \n        # Check if the \'secret\' and \'token\' values are masked properly within nested structures\n        if (result[\'secret\'] == \'********************\' and\n            result[\'token\'] == \'********************\' and\n            all(item.get(\'secret\') == \'********************\' and item.get(\'token\') == \'********************\' for item in result[\'something\']) and\n            all(all(inner_item.get(\'secret\') == \'********************\' and inner_item.get(\'token\') == \'********************\' for inner_item in outer_list) for outer_list in result[\'else\'])):\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n        print(e)\n        return\n\ntest_settings_cleaned_insufficiently()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='Here is the complete test to reproduce and verify the issue described in the provided issue text:\n\n```python\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\nimport pprint\n\ndef test_safe_settings_issue():\n    # Define the settings\n    settings.configure(\n        MY_SETTING={\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ]\n        }\n    )\n\n    try:\n        # Fetch the sanitized settings\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        my_setting = safe_settings["MY_SETTING"]\n        \n        # Expected sanitized settings\n        expected_setting = {\n            "foo": "value",\n            "secret": "********************",\n            "token": "********************",\n            "something": [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "********************"},\n                    {"token": "********************"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "********************"},\n                    {"token": "********************"},\n                ],\n            ]\n        }\n\n        # Print the current and expected settings for debugging\n        pprint.pprint(my_setting)\n        pprint.pprint(expected_setting)\n        \n        # Checks if the current settings match the expected sanitized settings\n        if my_setting == expected_setting:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n        pprint.pprint(e)\n\n# Run the test\ntest_safe_settings_issue()\n```\n\nThis test script sets up a Django settings configuration containing various nested structures as described in the issue text. After configuring the settings, it retrieves the safe settings using `SafeExceptionReporterFilter().get_safe_settings()` and compares the output against the expected sanitized settings. Depending on the outcome, it prints "Issue resolved," "Issue reproduced," or "Other issues," allowing you to determine if the issue is present or has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_settings_cleaned_insufficiently() -> None:\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    # Mocking the settings dictionary to simulate Django\'s settings\n    settings_dict = {\n        "MY_SETTING": MY_SETTING\n    }\n    \n    # Simulate the SafeExceptionReporterFilter\'s get_safe_settings() method\n    safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n\n    try:\n        # Check the cleansed settings for MY_SETTING\n        cleansed_setting = safe_settings.get("MY_SETTING")\n        if not cleansed_setting:\n            print("Other issues")\n            return\n        \n        # Comparison values\n        cleansed_value = "********************"\n\n        # Check if \'secret\' and \'token\' are cleansed at all levels\n        if (cleansed_setting["secret"] == cleansed_value and\n            cleansed_setting["token"] == cleansed_value and\n            all(d["secret"] == cleansed_value and d["token"] == cleansed_value for d in cleansed_setting["something"]) and\n            all(all(d["secret"] == cleansed_value and d["token"] == cleansed_value for d in lst) for lst in cleansed_setting["else"])):\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except KeyError:\n        print("Other issues")\n\ntest_settings_cleaned_insufficiently()\n```\n\nThis test code checks if the sensitive values within iterable structures (dictionaries and lists) are properly cleansed by the `SafeExceptionReporterFilter().get_safe_settings()` method. You can use this test to determine if the issue is still present or if it has been resolved. If the sensitive values are not properly cleansed, it prints "Issue reproduced". If the sensitive values are correctly cleansed, it prints "Issue resolved". If there are any other issues encountered during the execution, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\n# Define the settings with sensitive information\nsettings.configure(\n    MY_SETTING={\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n)\n\ndef test_safe_settings_cleansing():\n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        sanitized_setting = safe_settings["MY_SETTING"]\n        \n        # Check if the issue is reproduced\n        if (sanitized_setting["secret"] != "********************" or\n            sanitized_setting["token"] != "********************" or\n            sanitized_setting["something"][1]["secret"] != "********************" or\n            sanitized_setting["else"][0][1]["secret"] != "********************"):\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n        print(str(e))\n\ntest_safe_settings_cleansing()\n```\n\nThis test script checks if the settings are properly sanitized. It will print "Issue reproduced" if the sensitive information (`secret` or `token`) is not properly masked. If everything is properly sanitized, it prints "Issue resolved". If there is any other unexpected issue, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\n# Define the settings as described in the issue\nsettings.configure(\n    MY_SETTING={\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n)\n\ndef test_settings_cleaned_sufficiently():\n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        my_setting = safe_settings["MY_SETTING"]\n\n        # The expected cleaned settings\n        expected_output = {\n            \'else\': [\n                [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}],\n                [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}]\n            ],\n            \'foo\': \'value\',\n            \'secret\': \'********************\',\n            \'something\': [\n                {\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}\n            ],\n            \'token\': \'********************\'\n        }\n\n        # Check if the settings match the expected output\n        if my_setting == expected_output:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n            \n    except Exception as e:\n        print("Other issues")\n        print(str(e))\n\ntest_settings_cleaned_sufficiently()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\n# Define a test function to encapsulate the reproduction logic\ndef test_safe_settings_cleansing():\n    # Simulate the settings that would be in settings.py\n    settings.configure(\n        MY_SETTING={\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ],\n        }\n    )\n\n    # Use SafeExceptionReporterFilter to get the safe settings\n    safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n    \n    # Check the output for expected values\n    expected_output = {\n        \'foo\': \'value\',\n        \'secret\': \'********************\',\n        \'token\': \'********************\',\n        \'something\': [\n            {\'foo\': \'value\'},\n            {\'secret\': \'********************\'},\n            {\'token\': \'********************\'},\n        ],\n        \'else\': [\n            [\n                {\'foo\': \'value\'},\n                {\'secret\': \'********************\'},\n                {\'token\': \'********************\'},\n            ],\n            [\n                {\'foo\': \'value\'},\n                {\'secret\': \'********************\'},\n                {\'token\': \'********************\'},\n            ],\n        ]\n    }\n\n    # Extract the MY_SETTING part of the safe settings\n    actual_output = safe_settings.get("MY_SETTING")\n\n    if actual_output == expected_output:\n        print("Issue resolved")\n    else:\n        if any(\n            item.get("secret") == "value" or item.get("token") == "value"\n            for sublist in actual_output.get("else", [])\n            for item in sublist\n        ):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n# Invoke the test function\ntest_safe_settings_cleansing()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_settings_cleaned_insufficiently():\n    # Define the problematic settings\n    settings.MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    try:\n        # Get the safe settings\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        result = safe_settings["MY_SETTING"]\n\n        # Print the result for debugging\n        pprint.pprint(result)\n\n        # Check if the issue is reproduced or resolved\n        if (\n            result["secret"] != "********************"\n            or result["token"] != "********************"\n            or any(item.get("secret") != "********************" for item in result["something"])\n            or any(item.get("token") != "********************" for item in result["something"])\n            or any(\n                item.get("secret") != "********************" or item.get("token") != "********************"\n                for sublist in result["else"] for item in sublist\n            )\n        ):\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        print("Other issues", e)\n\ntest_settings_cleaned_insufficiently()\n```\n\nThis test script will reproduce the issue described if the settings are not properly cleansed. It will print "Issue reproduced" if the issue is present, "Issue resolved" if the problem has been fixed, and "Other issues" if another exception occurs.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_safe_exception_reporter_filter():\n    # Setting up the example settings as described in the issue\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    # Injecting the settings into the Django settings dictionary\n    settings_dict = {"MY_SETTING": MY_SETTING}\n\n    try:\n        # Fetching the safe settings using SafeExceptionReporterFilter\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings(settings_dict)["MY_SETTING"]\n\n        # Expected result after cleaning sensitive values\n        expected_result = {\n            \'foo\': \'value\',\n            \'secret\': \'********************\',\n            \'token\': \'********************\',\n            \'something\': [\n                {\'foo\': \'value\'},\n                {\'secret\': \'********************\'},\n                {\'token\': \'********************\'},\n            ],\n            \'else\': [\n                [\n                    {\'foo\': \'value\'},\n                    {\'secret\': \'********************\'},\n                    {\'token\': \'********************\'},\n                ],\n                [\n                    {\'foo\': \'value\'},\n                    {\'secret\': \'********************\'},\n                    {\'token\': \'********************\'},\n                ],\n            ]\n        }\n\n        # Comparing the expected result with the actual result\n        if safe_settings == expected_result:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n\n    except Exception as e:\n        print("Other issues")\n        print(str(e))\n\ntest_safe_exception_reporter_filter()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\n# Mock settings for the test\nsettings.configure(\n    MY_SETTING={\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n)\n\ndef test_settings_cleansing():\n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        result = safe_settings["MY_SETTING"]\n\n        # Check if \'secret\' and \'token\' are cleansed at all levels\n        def is_cleansed(value):\n            if isinstance(value, dict):\n                for k, v in value.items():\n                    if k in ["secret", "token"] and v != "********************":\n                        return False\n                    if not is_cleansed(v):\n                        return False\n            elif isinstance(value, (list, tuple)):\n                for item in value:\n                    if not is_cleansed(item):\n                        return False\n            return True\n\n        if not is_cleansed(result):\n            print("Issue reproduced")\n            return\n\n        print("Issue resolved")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_settings_cleansing()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.views.debug import SafeExceptionReporterFilter, get_safe_settings\n\ndef test_safe_exception_reporter_filter():\n    # Define the settings as described in the issue\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n    \n    # Mocking the settings to include our MY_SETTING\n    class MockSettings:\n        MY_SETTING = MY_SETTING\n\n    # Get safe settings using SafeExceptionReporterFilter\n    safe_settings = SafeExceptionReporterFilter().get_safe_settings(MockSettings)\n    \n    # Expected output if the issue is resolved (all sensitive data should be cleansed)\n    expected_output = {\n        \'else\': [\n            [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}],\n            [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}]\n        ],\n        \'foo\': \'value\',\n        \'secret\': \'********************\',\n        \'something\': [\n            {\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}\n        ],\n        \'token\': \'********************\'\n    }\n\n    # Compare the safe settings with the expected output\n    try:\n        assert safe_settings["MY_SETTING"] == expected_output\n        print("Issue resolved")\n    except AssertionError:\n        # If the values do not match, it means the issue is reproduced\n        print("Issue reproduced")\n    except Exception as e:\n        # Catch any other issues\n        print("Other issues:", e)\n\ntest_safe_exception_reporter_filter()\n```\n\nThis test script:\n1. Defines a mock settings class with `MY_SETTING` as described in the issue text.\n2. Uses `SafeExceptionReporterFilter` to cleanse the settings.\n3. Compares the cleansed settings with the expected output to determine if the issue is reproduced or resolved.\n4. Prints appropriate messages based on the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter, get_safe_settings\n\ndef test_safe_settings_cleaning():\n    # Define a minimal settings configuration required for Django\n    settings.configure(\n        MY_SETTING={\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ]\n        },\n        SECRET_KEY="not_so_secret",\n    )\n\n    def reproduce_issue():\n        # Use SafeExceptionReporterFilter to get safe settings\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        return safe_settings["MY_SETTING"]\n\n    def verify_issue_resolution(safe_settings):\n        def is_sensitive(value):\n            # Check if the value is cleansed (i.e., replaced with asterisks)\n            return value == \'********************\'\n\n        # Check if all nested secrets and tokens are cleansed\n        if is_sensitive(safe_settings[\'secret\']) and \\\n           is_sensitive(safe_settings[\'token\']) and \\\n           all(is_sensitive(item[\'secret\']) for item in safe_settings[\'something\']) and \\\n           all(is_sensitive(item[\'token\']) for item in safe_settings[\'something\']) and \\\n           all(is_sensitive(sub_item[\'secret\']) for sublist in safe_settings[\'else\'] for sub_item in sublist) and \\\n           all(is_sensitive(sub_item[\'token\']) for sublist in safe_settings[\'else\'] for sub_item in sublist):\n            return True\n        return False\n\n    try:\n        reproduced_settings = reproduce_issue()\n        pprint.pprint(reproduced_settings)\n\n        # Based on the issue text, check if the issue is reproduced\n        if not verify_issue_resolution(reproduced_settings):\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        print("Other issues:", str(e))\n\ntest_safe_settings_cleaning()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_settings_cleaning_issue():\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    # Mocking the SafeExceptionReporterFilter get_safe_settings method\n    class MockedSafeExceptionReporterFilter(SafeExceptionReporterFilter):\n        def get_safe_settings(self):\n            return {"MY_SETTING": self.cleanse_setting(MY_SETTING)}\n\n    filter = MockedSafeExceptionReporterFilter()\n    safe_settings = filter.get_safe_settings()\n    \n    expected_output = {\n        "foo": "value",\n        "secret": "********************",\n        "token": "********************",\n        "something": [\n            {"foo": "value"},\n            {"secret": "********************"},\n            {"token": "********************"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n        ]\n    }\n\n    try:\n        assert safe_settings["MY_SETTING"] == expected_output\n        print("Issue resolved")\n    except AssertionError:\n        if safe_settings["MY_SETTING"] == MY_SETTING:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_settings_cleaning_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_safe_exception_reporter_filter():\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    expected_output = {\n        \'else\': [\n            [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}],\n            [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}]\n        ],\n        \'foo\': \'value\',\n        \'secret\': \'********************\',\n        \'something\': [\n            {\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}\n        ],\n        \'token\': \'********************\'\n    }\n\n    safefilt = SafeExceptionReporterFilter()\n    safe_settings = safefilt.get_safe_settings({"MY_SETTING": MY_SETTING})\n    \n    if safe_settings["MY_SETTING"] == expected_output:\n        print("Issue resolved")\n    elif safe_settings["MY_SETTING"] != expected_output:\n        if any("value" in v for v in pprint.pformat(safe_settings["MY_SETTING"])):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    \n    return\n\ntest_safe_exception_reporter_filter()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_safe_settings_issue():\n    try:\n        # Define the settings as given in the issue text\n        MY_SETTING = {\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ]\n        }\n\n        # Patch the settings to use the MY_SETTING\n        from django.conf import settings\n        settings.configure()\n        settings.MY_SETTING = MY_SETTING\n\n        # Use SafeExceptionReporterFilter to get safe settings\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n\n        # Check the outcome\n        if safe_settings["MY_SETTING"] == {\n            \'else\': [[{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}],\n                     [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}]],\n            \'foo\': \'value\',\n            \'secret\': \'********************\',\n            \'something\': [{\'foo\': \'value\'}, {\'secret\': \'********************\'}, {\'token\': \'********************\'}],\n            \'token\': \'********************\'\n        }:\n            print("Issue resolved")\n        elif safe_settings["MY_SETTING"] == {\n            \'else\': [[{\'foo\': \'value\'}, {\'secret\': \'value\'}, {\'token\': \'value\'}],\n                     [{\'foo\': \'value\'}, {\'secret\': \'value\'}, {\'token\': \'value\'}]],\n            \'foo\': \'value\',\n            \'secret\': \'********************\',\n            \'something\': [{\'foo\': \'value\'}, {\'secret\': \'value\'}, {\'token\': \'value\'}],\n            \'token\': \'********************\'\n        }:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n        print(str(e))\n\n# Execute the test function\ntest_safe_settings_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_settings_cleaned_insufficiently():\n    # Simulate settings.py\n    settings.configure(\n        MY_SETTING={\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ],\n        }\n    )\n\n    try:\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        result = safe_settings["MY_SETTING"]\n        \n        # Expected sanitized settings\n        expected_output = {\n            \'foo\': \'value\',\n            \'secret\': \'********************\',\n            \'token\': \'********************\',\n            \'something\': [\n                {\'foo\': \'value\'},\n                {\'secret\': \'********************\'},\n                {\'token\': \'********************\'}\n            ],\n            \'else\': [\n                [\n                    {\'foo\': \'value\'},\n                    {\'secret\': \'********************\'},\n                    {\'token\': \'********************\'},\n                ],\n                [\n                    {\'foo\': \'value\'},\n                    {\'secret\': \'********************\'},\n                    {\'token\': \'********************\'},\n                ]\n            ]\n        }\n\n        if result == expected_output:\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues", e)\n\ntest_settings_cleaned_insufficiently()\n```\n\nExplanation:\n1. Imports necessary modules and functions.\n2. Configures a `settings` object with the specific `MY_SETTING` dictionary.\n3. Utilizes `SafeExceptionReporterFilter.get_safe_settings()` to retrieve the sanitized settings.\n4. Compares the returned settings dictionary against the expected sanitized output.\n5. Prints "Issue resolved" if the actual output matches the expected output, "Issue reproduced" if it doesn\'t, and "Other issues" if there\'s an exception.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.views.debug import SafeExceptionReporterFilter, get_safe_settings\nimport pprint\n\ndef test_safe_exception_reporter_filter():\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    # Mock the settings in Django\'s settings\n    import django.conf\n    django.conf.settings.configure(MY_SETTING=MY_SETTING)\n\n    # For Django 3.0 and below\n    try:\n        safe_settings_pre_31 = get_safe_settings()["MY_SETTING"]\n        pprint.pprint(safe_settings_pre_31)\n    except Exception as ex:\n        print("Other issues")\n        return\n\n    if (\n        safe_settings_pre_31[\'secret\'] == \'********************\' and\n        safe_settings_pre_31[\'token\'] == \'********************\' and\n        safe_settings_pre_31[\'something\'][1][\'secret\'] == \'value\'\n    ):\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n        return\n\n    # For Django 3.1 and above\n    try:\n        safe_settings_31_and_up = SafeExceptionReporterFilter().get_safe_settings()["MY_SETTING"]\n        pprint.pprint(safe_settings_31_and_up)\n    except Exception as ex:\n        print("Other issues")\n        return\n\n    if (\n        safe_settings_31_and_up[\'secret\'] == \'********************\' and\n        safe_settings_31_and_up[\'token\'] == \'********************\' and\n        safe_settings_31_and_up[\'something\'][1][\'secret\'] == \'value\'\n    ):\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\n\n    return\n\ntest_safe_exception_reporter_filter()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.conf import settings\nfrom django.views.debug import SafeExceptionReporterFilter\nimport pprint\n\ndef test_safe_settings_cleansing():\n    # Set up the Django settings\n    settings.configure(\n        MY_SETTING={\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ],\n        },\n        DEBUG=True,\n    )\n\n    try:\n        # Get the safe settings using the SafeExceptionReporterFilter\n        safe_settings = SafeExceptionReporterFilter().get_safe_settings()\n        my_setting = safe_settings["MY_SETTING"]\n        \n        # Print the safely cleansed settings\n        pprint.pprint(my_setting)\n        \n        # Check the cleansing logic\n        if (my_setting["secret"] == "********************" and \n            my_setting["token"] == "********************" and\n            all(isinstance(item, dict) and \n                item.get("secret") == "********************" and \n                item.get("token") == "********************"\n                for item in my_setting["something"]) and\n            all(isinstance(sublist, list) and \n                all(isinstance(item, dict) and \n                    item.get("secret") == "********************" and \n                    item.get("token") == "********************"\n                    for item in sublist)\n                for sublist in my_setting["else"])):\n            print("Issue resolved")\n        else:\n            print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n        print(f"Exception occurred: {e}")\n\ntest_safe_settings_cleansing()\n```\n\nThis test script:\n1. Configures the Django settings with various sensitive values.\n2. Uses the `SafeExceptionReporterFilter` to get the cleansed settings.\n3. Prints the `MY_SETTING` content to visually inspect the output.\n4. Checks if the sensitive values (`secret`, `token`) are properly cleansed even within nested dictionaries and lists.\n5. Prints "Issue resolved" if all sensitive values are properly cleansed, "Issue reproduced" if they are not, and "Other issues" if an exception is encountered during the process.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_settings_cleansing_issue():\n    # Simulate the settings\n    settings = {\n        "MY_SETTING": {\n            "foo": "value",\n            "secret": "value",\n            "token": "value",\n            "something": [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "value"},\n                    {"token": "value"},\n                ],\n            ]\n        }\n    }\n\n    # Apply the SafeExceptionReporterFilter to get safe settings\n    safe_settings = SafeExceptionReporterFilter().get_safe_settings(settings)\n    \n    # Expected output where secrets should be cleansed\n    expected_safe_settings = {\n        "MY_SETTING": {\n            "foo": "value",\n            "secret": "********************",\n            "token": "********************",\n            "something": [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            "else": [\n                [\n                    {"foo": "value"},\n                    {"secret": "********************"},\n                    {"token": "********************"},\n                ],\n                [\n                    {"foo": "value"},\n                    {"secret": "********************"},\n                    {"token": "********************"},\n                ],\n            ]\n        }\n    }\n\n    try:\n        assert safe_settings == expected_safe_settings\n        print("Issue resolved")\n    except AssertionError:\n        print("Issue reproduced")\n    except Exception as e:\n        print("Other issues", e)\n\ntest_settings_cleansing_issue()\n```\n\nThis test code attempts to reproduce the issue by creating a settings dictionary similar to the one described in the issue text and then using `SafeExceptionReporterFilter().get_safe_settings(settings)` to check if the sensitive values are cleansed as expected. It then compares the result with the expected output to determine if the issue is reproduced or resolved. If any other exception occurs, it will print "Other issues" along with the exception details.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='```python\nimport pprint\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_settings_cleaning_issue():\n    # Define the settings as per the issue description\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    # Simulate storing the settings (In practice, this would be in settings.py)\n    settings = {"MY_SETTING": MY_SETTING}\n\n    # Use SafeExceptionReporterFilter to get safe settings\n    filter = SafeExceptionReporterFilter()\n    safe_settings = filter.get_safe_settings(settings)\n\n    # Fetch the specific setting to check\n    my_setting_safe = safe_settings["MY_SETTING"]\n\n    # Expected cleaned output\n    expected_safe_output = {\n        "foo": "value",\n        "secret": "********************",\n        "token": "********************",\n        "something": [\n            {"foo": "value"},\n            {"secret": "********************"},\n            {"token": "********************"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n        ]\n    }\n\n    try:\n        assert my_setting_safe == expected_safe_output\n        print("Issue resolved")\n    except AssertionError:\n        print("Issue reproduced")\n    except Exception as e:\n        print("Other issues")\n        print(e)\n\ntest_settings_cleaning_issue()\n```\n\nThis test script will help in determining whether the issue described is still present. If the output matches the `expected_safe_output`, it will print "Issue resolved". If not, it will print "Issue reproduced". If any other error occurs, it will print "Other issues" along with the error message.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.views.debug import SafeExceptionReporterFilter\n\ndef test_safe_exception_reporter_filter():\n    # Setup a mock settings dictionary to reproduce the issue\n    MY_SETTING = {\n        "foo": "value",\n        "secret": "value",\n        "token": "value",\n        "something": [\n            {"foo": "value"},\n            {"secret": "value"},\n            {"token": "value"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "value"},\n                {"token": "value"},\n            ],\n        ]\n    }\n\n    # Mock the settings retrieval for the SafeExceptionReporterFilter\n    class MockSafeExceptionReporterFilter(SafeExceptionReporterFilter):\n        def get_safe_settings(self):\n            return {\'MY_SETTING\': MY_SETTING}\n\n    # Instantiate the mock filter and get the processed settings\n    filter_instance = MockSafeExceptionReporterFilter()\n    safe_settings = filter_instance.get_safe_settings()["MY_SETTING"]\n\n    # Expected output should have \'secret\' and \'token\' values cleansed\n    expected_safe_settings = {\n        "foo": "value",\n        "secret": "********************",\n        "token": "********************",\n        "something": [\n            {"foo": "value"},\n            {"secret": "********************"},\n            {"token": "********************"},\n        ],\n        "else": [\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n            [\n                {"foo": "value"},\n                {"secret": "********************"},\n                {"token": "********************"},\n            ],\n        ]\n    }\n\n    try:\n        assert safe_settings == expected_safe_settings\n        print("Issue resolved")\n    except AssertionError:\n        if any("secret" in sub_dict and sub_dict["secret"] != "********************" for sublist in safe_settings["else"] for sub_dict in sublist):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n\n    return\n\ntest_safe_exception_reporter_filter()\n```\n\nThis test script sets up a mock settings dictionary that mirrors the structure provided in the issue text. It then uses a mock subclass of `SafeExceptionReporterFilter` to simulate retrieving the settings and checks if the sensitive information is properly cleansed. Based on the comparison of the actual output and the expected output, the script prints either "Issue resolved", "Issue reproduced", or "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746298433, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=16366, prompt_tokens=818, total_tokens=17184, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 13:55:19,178 - INFO - raw output:
+```python
+import pprint
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_safe_settings_cleansing():
+    # Define the settings as described in the issue
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    # Mock the settings to include MY_SETTING
+    settings = {"MY_SETTING": MY_SETTING}
+
+    # Get the safe settings using SafeExceptionReporterFilter
+    safe_settings = SafeExceptionReporterFilter().get_safe_settings(settings)
+
+    # Expected output after cleansing
+    expected_output = {
+        'else': [
+            [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}],
+            [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}]
+        ],
+        'foo': 'value',
+        'secret': '********************',
+        'something': [
+            {'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}
+        ],
+        'token': '********************'
+    }
+
+    # Check if the issue is reproduced or resolved
+    try:
+        assert safe_settings["MY_SETTING"] == expected_output
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+    except Exception as e:
+        print("Other issues:", str(e))
+
+test_safe_settings_cleansing()
+```
+
+This test script does the following:
+1. Imports the necessary modules.
+2. Defines the settings as described in the issue.
+3. Mocks the settings to include `MY_SETTING`.
+4. Uses `SafeExceptionReporterFilter` to get the safe settings.
+5. Compares the output with the expected cleansed output.
+6. Prints "Issue resolved" if the output matches the expected output, "Issue reproduced" if it does not, and "Other issues" if any other exception occurs.
+2025-05-03 13:55:19,178 - INFO - raw output:
+```python
+from django.views.debug import SafeExceptionReporterFilter, get_safe_settings
+import pprint
+
+# Define the settings dictionary as described in the issue
+MY_SETTING = {
+    "foo": "value",
+    "secret": "value",
+    "token": "value",
+    "something": [
+        {"foo": "value"},
+        {"secret": "value"},
+        {"token": "value"},
+    ],
+    "else": [
+        [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+    ]
+}
+
+def test_settings_cleaning():
+    try:
+        # Set the settings dictionary to be used by the SafeExceptionReporterFilter
+        SafeExceptionReporterFilter.__init__ = lambda self: None
+        SafeExceptionReporterFilter.get_safe_settings = lambda self: {"MY_SETTING": MY_SETTING}
+
+        # Get the cleaned settings using SafeExceptionReporterFilter
+        cleaned_settings = SafeExceptionReporterFilter().get_safe_settings()["MY_SETTING"]
+        
+        # Expected cleaned settings
+        expected_cleaned_settings = {
+            "foo": "value",
+            "secret": "********************",
+            "token": "********************",
+            "something": [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "********************"},
+                    {"token": "********************"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "********************"},
+                    {"token": "********************"},
+                ],
+            ]
+        }
+        
+        # Check if the current cleaning logic matches the expected cleaned settings
+        if cleaned_settings == expected_cleaned_settings:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues", str(e))
+
+test_settings_cleaning()
+```
+2025-05-03 13:55:19,178 - INFO - raw output:
+```python
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_settings_cleaned_insufficiently():
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    # Simulate adding MY_SETTING to Django settings
+    class DummySettings:
+        MY_SETTING = MY_SETTING
+    
+    settings = DummySettings()
+
+    # Obtain the safe settings using the SafeExceptionReporterFilter
+    safe_settings = SafeExceptionReporterFilter().get_safe_settings(settings)
+    
+    # Check the values in the safe settings
+    try:
+        if safe_settings["MY_SETTING"] == {
+            "foo": "value",
+            "secret": "********************",
+            "token": "********************",
+            "something": [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "********************"},
+                    {"token": "********************"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "********************"},
+                    {"token": "********************"},
+                ],
+            ]
+        }:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except KeyError:
+        print("Other issues")
+
+test_settings_cleaned_insufficiently()
+```
+2025-05-03 13:55:19,178 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+# Define the settings for testing
+settings.configure(
+    MY_SETTING={
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ],
+    }
+)
+
+def test_cleanse_setting_issue():
+    try:
+        # Get the safe settings
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        # Extract the specific setting to check
+        my_setting = safe_settings["MY_SETTING"]
+        
+        # Expected structure after cleansing
+        expected_setting = {
+            "foo": "value",
+            "secret": "********************",
+            "token": "********************",
+            "something": [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "********************"},
+                    {"token": "********************"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "********************"},
+                    {"token": "********************"},
+                ],
+            ]
+        }
+
+        # Compare the actual setting with the expected setting
+        if my_setting == expected_setting:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+# Run the test
+test_cleanse_setting_issue()
+```
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_settings_cleansing_issue():
+    # Setup Django settings for testing
+    settings.configure(
+        MY_SETTING={
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ]
+        }
+    )
+    
+    expected_output = {
+        "foo": "value",
+        "secret": "********************",
+        "token": "********************",
+        "something": [
+            {"foo": "value"},
+            {"secret": "********************"},
+            {"token": "********************"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+        ]
+    }
+    
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        actual_output = safe_settings["MY_SETTING"]
+        
+        if actual_output == expected_output:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print(f"Other issues: {str(e)}")
+
+test_settings_cleansing_issue()
+```
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_get_safe_settings_issue():
+    # Setting up Django settings for the test
+    settings.configure(
+        MY_SETTING={
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ]
+        }
+    )
+
+    try:
+        # Get the sanitized settings
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        my_setting = safe_settings["MY_SETTING"]
+
+        # Expected output for comparison
+        expected_output = {
+            "foo": "value",
+            "secret": "********************",
+            "token": "********************",
+            "something": [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "********************"},
+                    {"token": "********************"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "********************"},
+                    {"token": "********************"},
+                ],
+            ],
+        }
+
+        # Check if the issue is reproduced
+        if my_setting != expected_output:
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_get_safe_settings_issue()
+```
+
+Explanation:
+1. **Necessary Imports**: `pprint`, `settings` from `django.conf`, `SafeExceptionReporterFilter` from `django.views.debug`.
+2. **Code to Reproduce**:
+   - Configures the Django settings with the problematic `MY_SETTING` value.
+   - Fetches the sanitized settings using `SafeExceptionReporterFilter().get_safe_settings()`.
+   - Compares the fetched `MY_SETTING` with the expected sanitized output.
+3. **Outcome Messages**:
+   - Prints "Issue reproduced" if the fetched settings are not as expected (indicating the issue exists).
+   - Prints "Issue resolved" if the fetched settings match the expected sanitized output.
+   - Prints "Other issues" if any other exception occurs during the execution.
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+import pprint
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_safe_settings_issue():
+    # Define the settings as per the issue description
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    # Mimic the process to capture the safe settings
+    settings = {
+        "MY_SETTING": MY_SETTING
+    }
+    
+    safe_settings = SafeExceptionReporterFilter().get_safe_settings(settings)
+    
+    expected_output = {
+        'else': [[{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}],
+                 [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}]],
+        'foo': 'value',
+        'secret': '********************',
+        'something': [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}],
+        'token': '********************'
+    }
+    
+    try:
+        # Check if the output matches the expected output to determine if the issue is resolved
+        assert safe_settings["MY_SETTING"] == expected_output
+        print("Issue resolved")
+    except AssertionError:
+        if safe_settings["MY_SETTING"] == MY_SETTING:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_safe_settings_issue()
+```
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+# Define the settings to be tested
+settings.configure(
+    MY_SETTING={
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+)
+
+def test_safe_settings():
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()["MY_SETTING"]
+    except Exception as e:
+        print("Other issues")
+        print(f"Exception occurred: {e}")
+        return
+
+    # Expected outcome if the issue is resolved
+    expected_safe_settings = {
+        "foo": "value",
+        "secret": "********************",
+        "token": "********************",
+        "something": [
+            {"foo": "value"},
+            {"secret": "********************"},
+            {"token": "********************"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+        ]
+    }
+
+    # Compare the safe settings with the expected outcome
+    if safe_settings == expected_safe_settings:
+        print("Issue resolved")
+    else:
+        uncleaned_values = [
+            {"foo": "value"}, {"secret": "value"}, {"token": "value"}
+        ]
+        if (safe_settings["something"] == uncleaned_values and
+            safe_settings["else"] == [uncleaned_values, uncleaned_values]):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_safe_settings()
+```
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+import pprint
+
+def test_safe_settings_cleansing():
+    settings.configure(
+        MY_SETTING={
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ]
+        }
+    )
+
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        my_setting = safe_settings["MY_SETTING"]
+        
+        if (
+            my_setting["secret"] == "********************" and
+            my_setting["token"] == "********************" and
+            my_setting["something"][1]["secret"] == "********************" and
+            my_setting["something"][2]["token"] == "********************" and
+            my_setting["else"][0][1]["secret"] == "********************" and
+            my_setting["else"][1][2]["token"] == "********************"
+        ):
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except:
+        print("Other issues")
+
+test_safe_settings_cleansing()
+```
+
+This script sets up a Django settings configuration that mimics the scenario described in the issue. It then extracts the safe settings using `SafeExceptionReporterFilter().get_safe_settings()`, and checks that all sensitive values are correctly cleansed. If the sensitive values are not properly cleansed, it prints "Issue reproduced". If they are, it prints "Issue resolved". If there are any other issues during execution, it prints "Other issues".
+2025-05-03 13:55:19,179 - INFO - raw output:
+Certainly! Below is the complete test that you can use to reproduce the issue described in the provided issue text. The test will also help verify if the issue has been fixed.
+
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+# Configure Django settings
+settings.configure(
+    MY_SETTING={
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+)
+
+def test_safe_settings_cleanse():
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        
+        # The expected output
+        expected_output = {
+            'else': [[{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}],
+                     [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}]],
+            'foo': 'value',
+            'secret': '********************',
+            'something': [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}],
+            'token': '********************'
+        }
+
+        # Print the settings for debugging
+        pprint.pprint(safe_settings["MY_SETTING"])
+
+        # Check if the settings match the expected output
+        if safe_settings["MY_SETTING"] == expected_output:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+
+    except Exception as e:
+        print("Other issues", str(e))
+
+test_safe_settings_cleanse()
+```
+
+### Explanation:
+1. **Necessary Imports**: We import `pprint`, `settings`, and `SafeExceptionReporterFilter`.
+2. **Configure Django Settings**: We configure the Django settings manually within the script, defining the potentially problematic `MY_SETTING`.
+3. **Test Function `test_safe_settings_cleanse`**:
+   - **Try Block**: 
+     - Fetches the safe settings using `SafeExceptionReporterFilter`.
+     - Defines the expected cleansed output.
+     - Uses `pprint` to print the actual settings for debugging.
+     - Compares the actual output with the expected output.
+     - Prints "Issue resolved" if they match, otherwise "Issue reproduced".
+   - **Except Block**: Catches any unexpected exceptions and prints "Other issues".
+
+This test should help you determine if the issue is reproduced or resolved after making changes to the source code.
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+from django.views.debug import SafeExceptionReporterFilter
+import pprint
+
+def test_safe_exception_reporter_filter() -> None:
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    filtered_settings = SafeExceptionReporterFilter().get_safe_settings(MY_SETTING)
+    expected_filtered_settings = {
+        "foo": "value",
+        "secret": "********************",
+        "token": "********************",
+        "something": [
+            {"foo": "value"},
+            {"secret": "********************"},
+            {"token": "********************"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+        ]
+    }
+
+    try:
+        assert filtered_settings == expected_filtered_settings
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_safe_exception_reporter_filter()
+```
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter, get_safe_settings
+import pprint
+
+# Temporary settings to simulate the issue
+settings.configure(
+    MY_SETTING={
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+)
+
+def test_safe_settings():
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        pprint.pprint(safe_settings["MY_SETTING"])
+
+        # Check for the issue described
+        if (safe_settings["MY_SETTING"]["something"][0]["secret"] == "value" or
+            safe_settings["MY_SETTING"]["else"][0][0]["secret"] == "value"):
+            print("Issue reproduced")
+        elif (safe_settings["MY_SETTING"]["something"][0]["secret"] == "********************" and
+            safe_settings["MY_SETTING"]["else"][0][0]["secret"] == "********************"):
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+        print(str(e))
+
+test_safe_settings()
+```
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+from django.views.debug import SafeExceptionReporterFilter
+import pprint
+
+def test_settings_cleansing_issue():
+    try:
+        # Simulate the settings as described in the issue
+        MY_SETTING = {
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ]
+        }
+        
+        # Create a SafeExceptionReporterFilter instance
+        reporter_filter = SafeExceptionReporterFilter()
+        
+        # Mock the settings retrieval
+        settings = {"MY_SETTING": MY_SETTING}
+        safe_settings = reporter_filter.get_safe_settings(settings)
+
+        # Check the cleansing of the settings
+        cleansed_setting = safe_settings["MY_SETTING"]
+        pprint.pprint(cleansed_setting)
+        
+        # Check if the issue is reproduced
+        if (
+            cleansed_setting["secret"] == "********************" and
+            cleansed_setting["token"] == "********************" and
+            all(i["secret"] == "value" for i in cleansed_setting["something"]) and
+            all(i["token"] == "value" for i in cleansed_setting["something"]) and
+            all(j["secret"] == "value" for sublist in cleansed_setting["else"] for j in sublist) and
+            all(j["token"] == "value" for sublist in cleansed_setting["else"] for j in sublist)
+        ):
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        print("Other issues", e)
+
+test_settings_cleansing_issue()
+```
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+import pprint
+from django.views.debug import SafeExceptionReporterFilter
+from django.conf import settings
+
+def test_settings_cleansing():
+    settings.configure(
+        MY_SETTING={
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ],
+        }
+    )
+
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        cleansed_setting = safe_settings["MY_SETTING"]
+        pprint.pprint(cleansed_setting)
+        
+        # Check for un-cleansed values
+        def check_cleansing(obj):
+            if isinstance(obj, dict):
+                for key, value in obj.items():
+                    if "secret" in key or "token" in key:
+                        if value != "********************":
+                            return False
+                    if isinstance(value, (dict, list)):
+                        if not check_cleansing(value):
+                            return False
+            elif isinstance(obj, list):
+                for item in obj:
+                    if not check_cleansing(item):
+                        return False
+            return True
+        
+        if not check_cleansing(cleansed_setting):
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+test_settings_cleansing()
+```
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_safe_settings_cleansing():
+    # Set up the test settings
+    settings.configure(
+        MY_SETTING={
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ]
+        }
+    )
+    
+    # Obtain the safe settings using Django's SafeExceptionReporterFilter
+    safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+    
+    # Extract MY_SETTING from the safe settings
+    my_setting = safe_settings.get("MY_SETTING", {})
+
+    # Expected cleansed MY_SETTING
+    expected_cleansed_setting = {
+        "foo": "value",
+        "secret": "********************",
+        "token": "********************",
+        "something": [
+            {"foo": "value"},
+            {"secret": "********************"},
+            {"token": "********************"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+        ]
+    }
+
+    # Compare the obtained safe settings to the expected cleansed settings
+    try:
+        assert my_setting == expected_cleansed_setting
+        print("Issue resolved")
+    except AssertionError:
+        if any(
+            my_setting[key] != expected_cleansed_setting[key]
+            for key in expected_cleansed_setting
+            if isinstance(my_setting[key], list) or isinstance(expected_cleansed_setting[key], list)
+        ):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+# Run the test
+test_safe_settings_cleansing()
+```
+This script:
+
+1. Configures a Django setting to reproduce the issue scenario.
+2. Uses Django's `SafeExceptionReporterFilter` to get the safe settings.
+3. Compares the sanitized settings against the expected sanitized version.
+4. Prints out whether the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+from django.views.debug import SafeExceptionReporterFilter
+import pprint
+
+def test_settings_cleaning_issue():
+    # Test settings
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    # Emulate Django's get_safe_settings by manually setting settings
+    class FakeSettings:
+        MY_SETTING = MY_SETTING
+
+    filter = SafeExceptionReporterFilter()
+    filter_settings = filter.get_safe_settings({'MY_SETTING': MY_SETTING})
+
+    expected_output = {
+        'else': [[{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}],
+                 [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}]],
+        'foo': 'value',
+        'secret': '********************',
+        'something': [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}],
+        'token': '********************'
+    }
+
+    result = filter_settings["MY_SETTING"]
+
+    if result == expected_output:
+        print("Issue resolved")
+    elif result['something'][1]['secret'] == 'value' or result['else'][0][1]['secret'] == 'value':
+        print("Issue reproduced")
+    else:
+        print("Other issues")
+
+test_settings_cleaning_issue()
+```
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+import pprint
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_safe_exception_reporter_filter():
+    # Define the settings to be tested
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    # Mock settings
+    settings = {
+        "MY_SETTING": MY_SETTING
+    }
+
+    # Override get_safe_settings to use our mock settings
+    def get_mock_safe_settings():
+        filter = SafeExceptionReporterFilter()
+        return filter.get_safe_settings(settings)
+
+    # Retrieve the sanitized settings
+    try:
+        safe_settings = get_mock_safe_settings()
+    except Exception:
+        print("Other issues")
+        return
+
+    # Check if sensitive information is properly cleaned
+    try:
+        assert safe_settings["MY_SETTING"]["secret"] == "********************"
+        assert safe_settings["MY_SETTING"]["token"] == "********************"
+
+        for item in safe_settings["MY_SETTING"]["something"]:
+            assert item["secret"] == "********************"
+            assert item["token"] == "********************"
+
+        for sublist in safe_settings["MY_SETTING"]["else"]:
+            for item in sublist:
+                assert item["secret"] == "********************"
+                assert item["token"] == "********************"
+
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+
+test_safe_exception_reporter_filter()
+```
+2025-05-03 13:55:19,179 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_safe_settings_cleaning():
+    # Define the sample settings as described in the issue
+    settings.configure(MY_SETTING={
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    })
+
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()["MY_SETTING"]
+        
+        # Check if sensitive values inside nested lists and dicts are cleansed
+        if (safe_settings["secret"] == "********************" and
+            safe_settings["token"] == "********************" and
+            all(nested_dict["secret"] == "********************" and nested_dict["token"] == "********************"
+                for nested_dict in safe_settings["something"]) and
+            all(all(inner_dict["secret"] == "********************" and inner_dict["token"] == "********************"
+                    for inner_dict in outer_list)
+                for outer_list in safe_settings["else"])):
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues:", e)
+
+test_safe_settings_cleaning()
+```
+
+This script sets up the `MY_SETTING` configuration as described in the issue, then attempts to retrieve and cleanse the settings using `SafeExceptionReporterFilter().get_safe_settings()`. The script checks if the sensitive values are properly cleansed and prints the appropriate message based on the result.
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+# Set up the Django settings for the test
+settings.configure(
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+)
+
+def test_settings_cleansing():
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        my_setting = safe_settings["MY_SETTING"]
+        pprint.pprint(my_setting)
+
+        # Check if the secret and token values are cleansed within nested structures
+        if (my_setting["secret"] == "********************" and
+            my_setting["token"] == "********************" and
+            all(isinstance(item, dict) and
+                item.get("secret") == "********************" and
+                item.get("token") == "********************"
+                for item in my_setting["something"]) and
+            all(all(isinstance(sub_item, dict) and
+                    sub_item.get("secret") == "********************" and
+                    sub_item.get("token") == "********************"
+                    for sub_item in sublist)
+                for sublist in my_setting["else"])):
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+test_settings_cleansing()
+```
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+import pprint
+
+def test_safe_settings_cleansing():
+    try:
+        # Setting up a Django-like environment for testing purposes
+        settings.configure()
+
+        # Define the problematic setting
+        MY_SETTING = {
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ]
+        }
+
+        # Add the setting to the Django settings
+        settings.MY_SETTING = MY_SETTING
+
+        # Get the safe settings using the SafeExceptionReporterFilter
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+
+        # Print the output
+        pprint.pprint(safe_settings["MY_SETTING"])
+
+        # Check if the issue is reproduced
+        if (safe_settings["MY_SETTING"]["secret"] == "********************" and
+            safe_settings["MY_SETTING"]["token"] == "********************" and
+            safe_settings["MY_SETTING"]["something"][1]["secret"] == "value" and
+            safe_settings["MY_SETTING"]["something"][1]["token"] == "value" and
+            isinstance(safe_settings["MY_SETTING"]["else"], list)):
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+
+    except Exception as e:
+        print("Other issues")
+        print(str(e))
+
+test_safe_settings_cleansing()
+```
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_settings_cleaned_insufficiently() -> None:
+    # Setup a sample settings dictionary similar to the one described in the issue
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    # Mocking Django settings
+    settings.configure(SECRET_KEY='dummy', MY_SETTING=MY_SETTING)
+
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        result = safe_settings["MY_SETTING"]
+        
+        # Check if the 'secret' and 'token' values are masked properly within nested structures
+        if (result['secret'] == '********************' and
+            result['token'] == '********************' and
+            all(item.get('secret') == '********************' and item.get('token') == '********************' for item in result['something']) and
+            all(all(inner_item.get('secret') == '********************' and inner_item.get('token') == '********************' for inner_item in outer_list) for outer_list in result['else'])):
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+        print(e)
+        return
+
+test_settings_cleaned_insufficiently()
+```
+2025-05-03 13:55:19,180 - INFO - raw output:
+Here is the complete test to reproduce and verify the issue described in the provided issue text:
+
+```python
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+import pprint
+
+def test_safe_settings_issue():
+    # Define the settings
+    settings.configure(
+        MY_SETTING={
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ]
+        }
+    )
+
+    try:
+        # Fetch the sanitized settings
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        my_setting = safe_settings["MY_SETTING"]
+        
+        # Expected sanitized settings
+        expected_setting = {
+            "foo": "value",
+            "secret": "********************",
+            "token": "********************",
+            "something": [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "********************"},
+                    {"token": "********************"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "********************"},
+                    {"token": "********************"},
+                ],
+            ]
+        }
+
+        # Print the current and expected settings for debugging
+        pprint.pprint(my_setting)
+        pprint.pprint(expected_setting)
+        
+        # Checks if the current settings match the expected sanitized settings
+        if my_setting == expected_setting:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+        pprint.pprint(e)
+
+# Run the test
+test_safe_settings_issue()
+```
+
+This test script sets up a Django settings configuration containing various nested structures as described in the issue text. After configuring the settings, it retrieves the safe settings using `SafeExceptionReporterFilter().get_safe_settings()` and compares the output against the expected sanitized settings. Depending on the outcome, it prints "Issue resolved," "Issue reproduced," or "Other issues," allowing you to determine if the issue is present or has been fixed.
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_settings_cleaned_insufficiently() -> None:
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    # Mocking the settings dictionary to simulate Django's settings
+    settings_dict = {
+        "MY_SETTING": MY_SETTING
+    }
+    
+    # Simulate the SafeExceptionReporterFilter's get_safe_settings() method
+    safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+
+    try:
+        # Check the cleansed settings for MY_SETTING
+        cleansed_setting = safe_settings.get("MY_SETTING")
+        if not cleansed_setting:
+            print("Other issues")
+            return
+        
+        # Comparison values
+        cleansed_value = "********************"
+
+        # Check if 'secret' and 'token' are cleansed at all levels
+        if (cleansed_setting["secret"] == cleansed_value and
+            cleansed_setting["token"] == cleansed_value and
+            all(d["secret"] == cleansed_value and d["token"] == cleansed_value for d in cleansed_setting["something"]) and
+            all(all(d["secret"] == cleansed_value and d["token"] == cleansed_value for d in lst) for lst in cleansed_setting["else"])):
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except KeyError:
+        print("Other issues")
+
+test_settings_cleaned_insufficiently()
+```
+
+This test code checks if the sensitive values within iterable structures (dictionaries and lists) are properly cleansed by the `SafeExceptionReporterFilter().get_safe_settings()` method. You can use this test to determine if the issue is still present or if it has been resolved. If the sensitive values are not properly cleansed, it prints "Issue reproduced". If the sensitive values are correctly cleansed, it prints "Issue resolved". If there are any other issues encountered during the execution, it prints "Other issues".
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+# Define the settings with sensitive information
+settings.configure(
+    MY_SETTING={
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+)
+
+def test_safe_settings_cleansing():
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        sanitized_setting = safe_settings["MY_SETTING"]
+        
+        # Check if the issue is reproduced
+        if (sanitized_setting["secret"] != "********************" or
+            sanitized_setting["token"] != "********************" or
+            sanitized_setting["something"][1]["secret"] != "********************" or
+            sanitized_setting["else"][0][1]["secret"] != "********************"):
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+        print(str(e))
+
+test_safe_settings_cleansing()
+```
+
+This test script checks if the settings are properly sanitized. It will print "Issue reproduced" if the sensitive information (`secret` or `token`) is not properly masked. If everything is properly sanitized, it prints "Issue resolved". If there is any other unexpected issue, it prints "Other issues".
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+# Define the settings as described in the issue
+settings.configure(
+    MY_SETTING={
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+)
+
+def test_settings_cleaned_sufficiently():
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        my_setting = safe_settings["MY_SETTING"]
+
+        # The expected cleaned settings
+        expected_output = {
+            'else': [
+                [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}],
+                [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}]
+            ],
+            'foo': 'value',
+            'secret': '********************',
+            'something': [
+                {'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}
+            ],
+            'token': '********************'
+        }
+
+        # Check if the settings match the expected output
+        if my_setting == expected_output:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+            
+    except Exception as e:
+        print("Other issues")
+        print(str(e))
+
+test_settings_cleaned_sufficiently()
+```
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+# Define a test function to encapsulate the reproduction logic
+def test_safe_settings_cleansing():
+    # Simulate the settings that would be in settings.py
+    settings.configure(
+        MY_SETTING={
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ],
+        }
+    )
+
+    # Use SafeExceptionReporterFilter to get the safe settings
+    safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+    
+    # Check the output for expected values
+    expected_output = {
+        'foo': 'value',
+        'secret': '********************',
+        'token': '********************',
+        'something': [
+            {'foo': 'value'},
+            {'secret': '********************'},
+            {'token': '********************'},
+        ],
+        'else': [
+            [
+                {'foo': 'value'},
+                {'secret': '********************'},
+                {'token': '********************'},
+            ],
+            [
+                {'foo': 'value'},
+                {'secret': '********************'},
+                {'token': '********************'},
+            ],
+        ]
+    }
+
+    # Extract the MY_SETTING part of the safe settings
+    actual_output = safe_settings.get("MY_SETTING")
+
+    if actual_output == expected_output:
+        print("Issue resolved")
+    else:
+        if any(
+            item.get("secret") == "value" or item.get("token") == "value"
+            for sublist in actual_output.get("else", [])
+            for item in sublist
+        ):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+# Invoke the test function
+test_safe_settings_cleansing()
+```
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_settings_cleaned_insufficiently():
+    # Define the problematic settings
+    settings.MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    try:
+        # Get the safe settings
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        result = safe_settings["MY_SETTING"]
+
+        # Print the result for debugging
+        pprint.pprint(result)
+
+        # Check if the issue is reproduced or resolved
+        if (
+            result["secret"] != "********************"
+            or result["token"] != "********************"
+            or any(item.get("secret") != "********************" for item in result["something"])
+            or any(item.get("token") != "********************" for item in result["something"])
+            or any(
+                item.get("secret") != "********************" or item.get("token") != "********************"
+                for sublist in result["else"] for item in sublist
+            )
+        ):
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        print("Other issues", e)
+
+test_settings_cleaned_insufficiently()
+```
+
+This test script will reproduce the issue described if the settings are not properly cleansed. It will print "Issue reproduced" if the issue is present, "Issue resolved" if the problem has been fixed, and "Other issues" if another exception occurs.
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_safe_exception_reporter_filter():
+    # Setting up the example settings as described in the issue
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    # Injecting the settings into the Django settings dictionary
+    settings_dict = {"MY_SETTING": MY_SETTING}
+
+    try:
+        # Fetching the safe settings using SafeExceptionReporterFilter
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings(settings_dict)["MY_SETTING"]
+
+        # Expected result after cleaning sensitive values
+        expected_result = {
+            'foo': 'value',
+            'secret': '********************',
+            'token': '********************',
+            'something': [
+                {'foo': 'value'},
+                {'secret': '********************'},
+                {'token': '********************'},
+            ],
+            'else': [
+                [
+                    {'foo': 'value'},
+                    {'secret': '********************'},
+                    {'token': '********************'},
+                ],
+                [
+                    {'foo': 'value'},
+                    {'secret': '********************'},
+                    {'token': '********************'},
+                ],
+            ]
+        }
+
+        # Comparing the expected result with the actual result
+        if safe_settings == expected_result:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+
+    except Exception as e:
+        print("Other issues")
+        print(str(e))
+
+test_safe_exception_reporter_filter()
+```
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+# Mock settings for the test
+settings.configure(
+    MY_SETTING={
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+)
+
+def test_settings_cleansing():
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        result = safe_settings["MY_SETTING"]
+
+        # Check if 'secret' and 'token' are cleansed at all levels
+        def is_cleansed(value):
+            if isinstance(value, dict):
+                for k, v in value.items():
+                    if k in ["secret", "token"] and v != "********************":
+                        return False
+                    if not is_cleansed(v):
+                        return False
+            elif isinstance(value, (list, tuple)):
+                for item in value:
+                    if not is_cleansed(item):
+                        return False
+            return True
+
+        if not is_cleansed(result):
+            print("Issue reproduced")
+            return
+
+        print("Issue resolved")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_settings_cleansing()
+```
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.views.debug import SafeExceptionReporterFilter, get_safe_settings
+
+def test_safe_exception_reporter_filter():
+    # Define the settings as described in the issue
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+    
+    # Mocking the settings to include our MY_SETTING
+    class MockSettings:
+        MY_SETTING = MY_SETTING
+
+    # Get safe settings using SafeExceptionReporterFilter
+    safe_settings = SafeExceptionReporterFilter().get_safe_settings(MockSettings)
+    
+    # Expected output if the issue is resolved (all sensitive data should be cleansed)
+    expected_output = {
+        'else': [
+            [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}],
+            [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}]
+        ],
+        'foo': 'value',
+        'secret': '********************',
+        'something': [
+            {'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}
+        ],
+        'token': '********************'
+    }
+
+    # Compare the safe settings with the expected output
+    try:
+        assert safe_settings["MY_SETTING"] == expected_output
+        print("Issue resolved")
+    except AssertionError:
+        # If the values do not match, it means the issue is reproduced
+        print("Issue reproduced")
+    except Exception as e:
+        # Catch any other issues
+        print("Other issues:", e)
+
+test_safe_exception_reporter_filter()
+```
+
+This test script:
+1. Defines a mock settings class with `MY_SETTING` as described in the issue text.
+2. Uses `SafeExceptionReporterFilter` to cleanse the settings.
+3. Compares the cleansed settings with the expected output to determine if the issue is reproduced or resolved.
+4. Prints appropriate messages based on the outcome.
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter, get_safe_settings
+
+def test_safe_settings_cleaning():
+    # Define a minimal settings configuration required for Django
+    settings.configure(
+        MY_SETTING={
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ]
+        },
+        SECRET_KEY="not_so_secret",
+    )
+
+    def reproduce_issue():
+        # Use SafeExceptionReporterFilter to get safe settings
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        return safe_settings["MY_SETTING"]
+
+    def verify_issue_resolution(safe_settings):
+        def is_sensitive(value):
+            # Check if the value is cleansed (i.e., replaced with asterisks)
+            return value == '********************'
+
+        # Check if all nested secrets and tokens are cleansed
+        if is_sensitive(safe_settings['secret']) and \
+           is_sensitive(safe_settings['token']) and \
+           all(is_sensitive(item['secret']) for item in safe_settings['something']) and \
+           all(is_sensitive(item['token']) for item in safe_settings['something']) and \
+           all(is_sensitive(sub_item['secret']) for sublist in safe_settings['else'] for sub_item in sublist) and \
+           all(is_sensitive(sub_item['token']) for sublist in safe_settings['else'] for sub_item in sublist):
+            return True
+        return False
+
+    try:
+        reproduced_settings = reproduce_issue()
+        pprint.pprint(reproduced_settings)
+
+        # Based on the issue text, check if the issue is reproduced
+        if not verify_issue_resolution(reproduced_settings):
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        print("Other issues:", str(e))
+
+test_safe_settings_cleaning()
+```
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_settings_cleaning_issue():
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    # Mocking the SafeExceptionReporterFilter get_safe_settings method
+    class MockedSafeExceptionReporterFilter(SafeExceptionReporterFilter):
+        def get_safe_settings(self):
+            return {"MY_SETTING": self.cleanse_setting(MY_SETTING)}
+
+    filter = MockedSafeExceptionReporterFilter()
+    safe_settings = filter.get_safe_settings()
+    
+    expected_output = {
+        "foo": "value",
+        "secret": "********************",
+        "token": "********************",
+        "something": [
+            {"foo": "value"},
+            {"secret": "********************"},
+            {"token": "********************"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+        ]
+    }
+
+    try:
+        assert safe_settings["MY_SETTING"] == expected_output
+        print("Issue resolved")
+    except AssertionError:
+        if safe_settings["MY_SETTING"] == MY_SETTING:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_settings_cleaning_issue()
+```
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_safe_exception_reporter_filter():
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    expected_output = {
+        'else': [
+            [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}],
+            [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}]
+        ],
+        'foo': 'value',
+        'secret': '********************',
+        'something': [
+            {'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}
+        ],
+        'token': '********************'
+    }
+
+    safefilt = SafeExceptionReporterFilter()
+    safe_settings = safefilt.get_safe_settings({"MY_SETTING": MY_SETTING})
+    
+    if safe_settings["MY_SETTING"] == expected_output:
+        print("Issue resolved")
+    elif safe_settings["MY_SETTING"] != expected_output:
+        if any("value" in v for v in pprint.pformat(safe_settings["MY_SETTING"])):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    
+    return
+
+test_safe_exception_reporter_filter()
+```
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_safe_settings_issue():
+    try:
+        # Define the settings as given in the issue text
+        MY_SETTING = {
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ]
+        }
+
+        # Patch the settings to use the MY_SETTING
+        from django.conf import settings
+        settings.configure()
+        settings.MY_SETTING = MY_SETTING
+
+        # Use SafeExceptionReporterFilter to get safe settings
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+
+        # Check the outcome
+        if safe_settings["MY_SETTING"] == {
+            'else': [[{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}],
+                     [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}]],
+            'foo': 'value',
+            'secret': '********************',
+            'something': [{'foo': 'value'}, {'secret': '********************'}, {'token': '********************'}],
+            'token': '********************'
+        }:
+            print("Issue resolved")
+        elif safe_settings["MY_SETTING"] == {
+            'else': [[{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}],
+                     [{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}]],
+            'foo': 'value',
+            'secret': '********************',
+            'something': [{'foo': 'value'}, {'secret': 'value'}, {'token': 'value'}],
+            'token': '********************'
+        }:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+        print(str(e))
+
+# Execute the test function
+test_safe_settings_issue()
+```
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+import pprint
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_settings_cleaned_insufficiently():
+    # Simulate settings.py
+    settings.configure(
+        MY_SETTING={
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ],
+        }
+    )
+
+    try:
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        result = safe_settings["MY_SETTING"]
+        
+        # Expected sanitized settings
+        expected_output = {
+            'foo': 'value',
+            'secret': '********************',
+            'token': '********************',
+            'something': [
+                {'foo': 'value'},
+                {'secret': '********************'},
+                {'token': '********************'}
+            ],
+            'else': [
+                [
+                    {'foo': 'value'},
+                    {'secret': '********************'},
+                    {'token': '********************'},
+                ],
+                [
+                    {'foo': 'value'},
+                    {'secret': '********************'},
+                    {'token': '********************'},
+                ]
+            ]
+        }
+
+        if result == expected_output:
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues", e)
+
+test_settings_cleaned_insufficiently()
+```
+
+Explanation:
+1. Imports necessary modules and functions.
+2. Configures a `settings` object with the specific `MY_SETTING` dictionary.
+3. Utilizes `SafeExceptionReporterFilter.get_safe_settings()` to retrieve the sanitized settings.
+4. Compares the returned settings dictionary against the expected sanitized output.
+5. Prints "Issue resolved" if the actual output matches the expected output, "Issue reproduced" if it doesn't, and "Other issues" if there's an exception.
+2025-05-03 13:55:19,180 - INFO - raw output:
+```python
+from django.views.debug import SafeExceptionReporterFilter, get_safe_settings
+import pprint
+
+def test_safe_exception_reporter_filter():
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    # Mock the settings in Django's settings
+    import django.conf
+    django.conf.settings.configure(MY_SETTING=MY_SETTING)
+
+    # For Django 3.0 and below
+    try:
+        safe_settings_pre_31 = get_safe_settings()["MY_SETTING"]
+        pprint.pprint(safe_settings_pre_31)
+    except Exception as ex:
+        print("Other issues")
+        return
+
+    if (
+        safe_settings_pre_31['secret'] == '********************' and
+        safe_settings_pre_31['token'] == '********************' and
+        safe_settings_pre_31['something'][1]['secret'] == 'value'
+    ):
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+        return
+
+    # For Django 3.1 and above
+    try:
+        safe_settings_31_and_up = SafeExceptionReporterFilter().get_safe_settings()["MY_SETTING"]
+        pprint.pprint(safe_settings_31_and_up)
+    except Exception as ex:
+        print("Other issues")
+        return
+
+    if (
+        safe_settings_31_and_up['secret'] == '********************' and
+        safe_settings_31_and_up['token'] == '********************' and
+        safe_settings_31_and_up['something'][1]['secret'] == 'value'
+    ):
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+
+    return
+
+test_safe_exception_reporter_filter()
+```
+2025-05-03 13:55:19,181 - INFO - raw output:
+```python
+from django.conf import settings
+from django.views.debug import SafeExceptionReporterFilter
+import pprint
+
+def test_safe_settings_cleansing():
+    # Set up the Django settings
+    settings.configure(
+        MY_SETTING={
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ],
+        },
+        DEBUG=True,
+    )
+
+    try:
+        # Get the safe settings using the SafeExceptionReporterFilter
+        safe_settings = SafeExceptionReporterFilter().get_safe_settings()
+        my_setting = safe_settings["MY_SETTING"]
+        
+        # Print the safely cleansed settings
+        pprint.pprint(my_setting)
+        
+        # Check the cleansing logic
+        if (my_setting["secret"] == "********************" and 
+            my_setting["token"] == "********************" and
+            all(isinstance(item, dict) and 
+                item.get("secret") == "********************" and 
+                item.get("token") == "********************"
+                for item in my_setting["something"]) and
+            all(isinstance(sublist, list) and 
+                all(isinstance(item, dict) and 
+                    item.get("secret") == "********************" and 
+                    item.get("token") == "********************"
+                    for item in sublist)
+                for sublist in my_setting["else"])):
+            print("Issue resolved")
+        else:
+            print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+        print(f"Exception occurred: {e}")
+
+test_safe_settings_cleansing()
+```
+
+This test script:
+1. Configures the Django settings with various sensitive values.
+2. Uses the `SafeExceptionReporterFilter` to get the cleansed settings.
+3. Prints the `MY_SETTING` content to visually inspect the output.
+4. Checks if the sensitive values (`secret`, `token`) are properly cleansed even within nested dictionaries and lists.
+5. Prints "Issue resolved" if all sensitive values are properly cleansed, "Issue reproduced" if they are not, and "Other issues" if an exception is encountered during the process.
+2025-05-03 13:55:19,181 - INFO - raw output:
+```python
+import pprint
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_settings_cleansing_issue():
+    # Simulate the settings
+    settings = {
+        "MY_SETTING": {
+            "foo": "value",
+            "secret": "value",
+            "token": "value",
+            "something": [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "value"},
+                    {"token": "value"},
+                ],
+            ]
+        }
+    }
+
+    # Apply the SafeExceptionReporterFilter to get safe settings
+    safe_settings = SafeExceptionReporterFilter().get_safe_settings(settings)
+    
+    # Expected output where secrets should be cleansed
+    expected_safe_settings = {
+        "MY_SETTING": {
+            "foo": "value",
+            "secret": "********************",
+            "token": "********************",
+            "something": [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            "else": [
+                [
+                    {"foo": "value"},
+                    {"secret": "********************"},
+                    {"token": "********************"},
+                ],
+                [
+                    {"foo": "value"},
+                    {"secret": "********************"},
+                    {"token": "********************"},
+                ],
+            ]
+        }
+    }
+
+    try:
+        assert safe_settings == expected_safe_settings
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+    except Exception as e:
+        print("Other issues", e)
+
+test_settings_cleansing_issue()
+```
+
+This test code attempts to reproduce the issue by creating a settings dictionary similar to the one described in the issue text and then using `SafeExceptionReporterFilter().get_safe_settings(settings)` to check if the sensitive values are cleansed as expected. It then compares the result with the expected output to determine if the issue is reproduced or resolved. If any other exception occurs, it will print "Other issues" along with the exception details.
+2025-05-03 13:55:19,181 - INFO - raw output:
+```python
+import pprint
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_settings_cleaning_issue():
+    # Define the settings as per the issue description
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    # Simulate storing the settings (In practice, this would be in settings.py)
+    settings = {"MY_SETTING": MY_SETTING}
+
+    # Use SafeExceptionReporterFilter to get safe settings
+    filter = SafeExceptionReporterFilter()
+    safe_settings = filter.get_safe_settings(settings)
+
+    # Fetch the specific setting to check
+    my_setting_safe = safe_settings["MY_SETTING"]
+
+    # Expected cleaned output
+    expected_safe_output = {
+        "foo": "value",
+        "secret": "********************",
+        "token": "********************",
+        "something": [
+            {"foo": "value"},
+            {"secret": "********************"},
+            {"token": "********************"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+        ]
+    }
+
+    try:
+        assert my_setting_safe == expected_safe_output
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+    except Exception as e:
+        print("Other issues")
+        print(e)
+
+test_settings_cleaning_issue()
+```
+
+This test script will help in determining whether the issue described is still present. If the output matches the `expected_safe_output`, it will print "Issue resolved". If not, it will print "Issue reproduced". If any other error occurs, it will print "Other issues" along with the error message.
+2025-05-03 13:55:19,181 - INFO - raw output:
+```python
+from django.views.debug import SafeExceptionReporterFilter
+
+def test_safe_exception_reporter_filter():
+    # Setup a mock settings dictionary to reproduce the issue
+    MY_SETTING = {
+        "foo": "value",
+        "secret": "value",
+        "token": "value",
+        "something": [
+            {"foo": "value"},
+            {"secret": "value"},
+            {"token": "value"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "value"},
+                {"token": "value"},
+            ],
+        ]
+    }
+
+    # Mock the settings retrieval for the SafeExceptionReporterFilter
+    class MockSafeExceptionReporterFilter(SafeExceptionReporterFilter):
+        def get_safe_settings(self):
+            return {'MY_SETTING': MY_SETTING}
+
+    # Instantiate the mock filter and get the processed settings
+    filter_instance = MockSafeExceptionReporterFilter()
+    safe_settings = filter_instance.get_safe_settings()["MY_SETTING"]
+
+    # Expected output should have 'secret' and 'token' values cleansed
+    expected_safe_settings = {
+        "foo": "value",
+        "secret": "********************",
+        "token": "********************",
+        "something": [
+            {"foo": "value"},
+            {"secret": "********************"},
+            {"token": "********************"},
+        ],
+        "else": [
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+            [
+                {"foo": "value"},
+                {"secret": "********************"},
+                {"token": "********************"},
+            ],
+        ]
+    }
+
+    try:
+        assert safe_settings == expected_safe_settings
+        print("Issue resolved")
+    except AssertionError:
+        if any("secret" in sub_dict and sub_dict["secret"] != "********************" for sublist in safe_settings["else"] for sub_dict in sublist):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+
+    return
+
+test_safe_exception_reporter_filter()
+```
+
+This test script sets up a mock settings dictionary that mirrors the structure provided in the issue text. It then uses a mock subclass of `SafeExceptionReporterFilter` to simulate retrieving the settings and checks if the sensitive information is properly cleansed. Based on the comparison of the actual output and the expected output, the script prints either "Issue resolved", "Issue reproduced", or "Other issues".

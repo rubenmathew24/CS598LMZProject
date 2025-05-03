@@ -1,0 +1,2539 @@
+2025-05-02 17:20:54,961 - INFO - ================ generating test for django__django-14672 ================
+2025-05-02 17:20:55,067 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+Missing call `make_hashable` on `through_fields` in `ManyToManyRel`
+Description
+	
+In 3.2 identity property has been added to all ForeignObjectRel to make it possible to compare them. A hash is derived from said identity and it's possible because identity is a tuple. To make limit_choices_to hashable (one of this tuple elements), ​there's a call to make_hashable.
+It happens that through_fields can be a list. In such case, this make_hashable call is missing in ​ManyToManyRel.
+For some reason it only fails on checking proxy model. I think proxy models have 29 checks and normal ones 24, hence the issue, but that's just a guess.
+Minimal repro:
+class Parent(models.Model):
+	name = models.CharField(max_length=256)
+class ProxyParent(Parent):
+	class Meta:
+		proxy = True
+class Child(models.Model):
+	parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+	many_to_many_field = models.ManyToManyField(
+		to=Parent,
+		through="ManyToManyModel",
+		through_fields=['child', 'parent'],
+		related_name="something"
+	)
+class ManyToManyModel(models.Model):
+	parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+	child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+	second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+Which will result in 
+ File "manage.py", line 23, in <module>
+	main()
+ File "manage.py", line 19, in main
+	execute_from_command_line(sys.argv)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/__init__.py", line 419, in execute_from_command_line
+	utility.execute()
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/__init__.py", line 413, in execute
+	self.fetch_command(subcommand).run_from_argv(self.argv)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/base.py", line 354, in run_from_argv
+	self.execute(*args, **cmd_options)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/base.py", line 393, in execute
+	self.check()
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/base.py", line 419, in check
+	all_issues = checks.run_checks(
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/checks/registry.py", line 76, in run_checks
+	new_errors = check(app_configs=app_configs, databases=databases)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/checks/model_checks.py", line 34, in check_all_models
+	errors.extend(model.check(**kwargs))
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/db/models/base.py", line 1277, in check
+	*cls._check_field_name_clashes(),
+ File "/home/tom/PycharmProjects/djangbroken_m2m_projectProject/venv/lib/python3.8/site-packages/django/db/models/base.py", line 1465, in _check_field_name_clashes
+	if f not in used_fields:
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/db/models/fields/reverse_related.py", line 140, in __hash__
+	return hash(self.identity)
+TypeError: unhashable type: 'list'
+Solution: Add missing make_hashable call on self.through_fields in ManyToManyRel.
+Missing call `make_hashable` on `through_fields` in `ManyToManyRel`
+Description
+	
+In 3.2 identity property has been added to all ForeignObjectRel to make it possible to compare them. A hash is derived from said identity and it's possible because identity is a tuple. To make limit_choices_to hashable (one of this tuple elements), ​there's a call to make_hashable.
+It happens that through_fields can be a list. In such case, this make_hashable call is missing in ​ManyToManyRel.
+For some reason it only fails on checking proxy model. I think proxy models have 29 checks and normal ones 24, hence the issue, but that's just a guess.
+Minimal repro:
+class Parent(models.Model):
+	name = models.CharField(max_length=256)
+class ProxyParent(Parent):
+	class Meta:
+		proxy = True
+class Child(models.Model):
+	parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+	many_to_many_field = models.ManyToManyField(
+		to=Parent,
+		through="ManyToManyModel",
+		through_fields=['child', 'parent'],
+		related_name="something"
+	)
+class ManyToManyModel(models.Model):
+	parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+	child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+	second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+Which will result in 
+ File "manage.py", line 23, in <module>
+	main()
+ File "manage.py", line 19, in main
+	execute_from_command_line(sys.argv)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/__init__.py", line 419, in execute_from_command_line
+	utility.execute()
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/__init__.py", line 413, in execute
+	self.fetch_command(subcommand).run_from_argv(self.argv)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/base.py", line 354, in run_from_argv
+	self.execute(*args, **cmd_options)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/base.py", line 393, in execute
+	self.check()
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/base.py", line 419, in check
+	all_issues = checks.run_checks(
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/checks/registry.py", line 76, in run_checks
+	new_errors = check(app_configs=app_configs, databases=databases)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/checks/model_checks.py", line 34, in check_all_models
+	errors.extend(model.check(**kwargs))
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/db/models/base.py", line 1277, in check
+	*cls._check_field_name_clashes(),
+ File "/home/tom/PycharmProjects/djangbroken_m2m_projectProject/venv/lib/python3.8/site-packages/django/db/models/base.py", line 1465, in _check_field_name_clashes
+	if f not in used_fields:
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/db/models/fields/reverse_related.py", line 140, in __hash__
+	return hash(self.identity)
+TypeError: unhashable type: 'list'
+Solution: Add missing make_hashable call on self.through_fields in ManyToManyRel.
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-02 17:20:55,084 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:06:32,431 - INFO - ================ generating test for django__django-14672 ================
+2025-05-03 14:06:32,448 - INFO - prompting with message:
+We are currently solving the following issue within our repository. Here is the issue text:
+--- BEGIN ISSUE ---
+Missing call `make_hashable` on `through_fields` in `ManyToManyRel`
+Description
+	
+In 3.2 identity property has been added to all ForeignObjectRel to make it possible to compare them. A hash is derived from said identity and it's possible because identity is a tuple. To make limit_choices_to hashable (one of this tuple elements), ​there's a call to make_hashable.
+It happens that through_fields can be a list. In such case, this make_hashable call is missing in ​ManyToManyRel.
+For some reason it only fails on checking proxy model. I think proxy models have 29 checks and normal ones 24, hence the issue, but that's just a guess.
+Minimal repro:
+class Parent(models.Model):
+	name = models.CharField(max_length=256)
+class ProxyParent(Parent):
+	class Meta:
+		proxy = True
+class Child(models.Model):
+	parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+	many_to_many_field = models.ManyToManyField(
+		to=Parent,
+		through="ManyToManyModel",
+		through_fields=['child', 'parent'],
+		related_name="something"
+	)
+class ManyToManyModel(models.Model):
+	parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+	child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+	second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+Which will result in 
+ File "manage.py", line 23, in <module>
+	main()
+ File "manage.py", line 19, in main
+	execute_from_command_line(sys.argv)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/__init__.py", line 419, in execute_from_command_line
+	utility.execute()
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/__init__.py", line 413, in execute
+	self.fetch_command(subcommand).run_from_argv(self.argv)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/base.py", line 354, in run_from_argv
+	self.execute(*args, **cmd_options)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/base.py", line 393, in execute
+	self.check()
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/base.py", line 419, in check
+	all_issues = checks.run_checks(
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/checks/registry.py", line 76, in run_checks
+	new_errors = check(app_configs=app_configs, databases=databases)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/checks/model_checks.py", line 34, in check_all_models
+	errors.extend(model.check(**kwargs))
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/db/models/base.py", line 1277, in check
+	*cls._check_field_name_clashes(),
+ File "/home/tom/PycharmProjects/djangbroken_m2m_projectProject/venv/lib/python3.8/site-packages/django/db/models/base.py", line 1465, in _check_field_name_clashes
+	if f not in used_fields:
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/db/models/fields/reverse_related.py", line 140, in __hash__
+	return hash(self.identity)
+TypeError: unhashable type: 'list'
+Solution: Add missing make_hashable call on self.through_fields in ManyToManyRel.
+Missing call `make_hashable` on `through_fields` in `ManyToManyRel`
+Description
+	
+In 3.2 identity property has been added to all ForeignObjectRel to make it possible to compare them. A hash is derived from said identity and it's possible because identity is a tuple. To make limit_choices_to hashable (one of this tuple elements), ​there's a call to make_hashable.
+It happens that through_fields can be a list. In such case, this make_hashable call is missing in ​ManyToManyRel.
+For some reason it only fails on checking proxy model. I think proxy models have 29 checks and normal ones 24, hence the issue, but that's just a guess.
+Minimal repro:
+class Parent(models.Model):
+	name = models.CharField(max_length=256)
+class ProxyParent(Parent):
+	class Meta:
+		proxy = True
+class Child(models.Model):
+	parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+	many_to_many_field = models.ManyToManyField(
+		to=Parent,
+		through="ManyToManyModel",
+		through_fields=['child', 'parent'],
+		related_name="something"
+	)
+class ManyToManyModel(models.Model):
+	parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+	child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+	second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+Which will result in 
+ File "manage.py", line 23, in <module>
+	main()
+ File "manage.py", line 19, in main
+	execute_from_command_line(sys.argv)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/__init__.py", line 419, in execute_from_command_line
+	utility.execute()
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/__init__.py", line 413, in execute
+	self.fetch_command(subcommand).run_from_argv(self.argv)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/base.py", line 354, in run_from_argv
+	self.execute(*args, **cmd_options)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/base.py", line 393, in execute
+	self.check()
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/management/base.py", line 419, in check
+	all_issues = checks.run_checks(
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/checks/registry.py", line 76, in run_checks
+	new_errors = check(app_configs=app_configs, databases=databases)
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/core/checks/model_checks.py", line 34, in check_all_models
+	errors.extend(model.check(**kwargs))
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/db/models/base.py", line 1277, in check
+	*cls._check_field_name_clashes(),
+ File "/home/tom/PycharmProjects/djangbroken_m2m_projectProject/venv/lib/python3.8/site-packages/django/db/models/base.py", line 1465, in _check_field_name_clashes
+	if f not in used_fields:
+ File "/home/tom/PycharmProjects/broken_m2m_project/venv/lib/python3.8/site-packages/django/db/models/fields/reverse_related.py", line 140, in __hash__
+	return hash(self.identity)
+TypeError: unhashable type: 'list'
+Solution: Add missing make_hashable call on self.through_fields in ManyToManyRel.
+
+--- END ISSUE ---
+
+Please generate a complete test that can be used to reproduce the issue.
+
+The complete test should contain the following:
+1. Necessary imports
+2. Code to reproduce the issue described in the issue text
+3. Print "Issue reproduced" if the outcome indicates that the issue is reproduced
+4. Print "Issue resolved" if the outcome indicates that the issue has been successfully resolved
+5. Print "Other issues" if the outcome indicates there are other issues with the source code
+
+Here is an example:
+
+```python
+from sqlfluff import lint
+
+def test__rules__std_L060_raised() -> None:
+    try:
+        sql = "SELECT   IFNULL(NULL, 100),
+            NVL(NULL,100);"
+        result = lint(sql, rules=["L060"])
+        assert len(result) == 2
+    except:
+        print("Other issues")
+        return
+
+    try:
+        assert result[0]["description"] == "Use 'COALESCE' instead of 'IFNULL'."
+        assert result[1]["description"] == "Use 'COALESCE' instead of 'NVL'."
+        print("Issue resolved")
+    except AssertionError:
+        print("Issue reproduced")
+        return
+
+    return
+
+test__rules__std_L060_raised()
+```
+
+Please ensure the generated test reflects the issue described in the provided issue text.
+The generated test should be able to be used to both reproduce the issue as well as to verify the issue has been fixed.
+Wrap the complete test in ```python...```.
+2025-05-03 14:06:32,448 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:06:32,455 - INFO - Creating API request
+2025-05-03 14:06:36,137 - INFO - API response ChatCompletion(id='chatcmpl-BTCTw3fNIPJa0HXoGmm8fSPbI8mPJ', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import SystemCheckError\nimport sys\nimport io\n\n# Define the models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_issue_reproduction():\n    # Redirect stdout to capture management command output\n    old_stdout = sys.stdout\n    new_stdout = io.StringIO()\n    sys.stdout = new_stdout\n\n    try:\n        # Run the Django check management command\n        call_command(\'check\')\n    except SystemCheckError as e:\n        output = new_stdout.getvalue()\n        if "unhashable type: \'list\'" in output:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    else:\n        print("Issue resolved")\n    finally:\n        # Reset stdout\n        sys.stdout = old_stdout\n\ntest_issue_reproduction()\n```\n\nThis test script sets up the models as described in the issue and runs the Django `check` management command to trigger the error. It captures the output and checks for the specific error message to determine if the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299192, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=386, prompt_tokens=2142, total_tokens=2528, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:06:36,137 - INFO - Initializing a decoder model: gpt-4o-2024-05-13 ...
+2025-05-03 14:06:36,144 - INFO - Creating API request
+2025-05-03 14:08:12,600 - INFO - API response ChatCompletion(id='chatcmpl-BTCU0oBjsMrUdzgbfArvz9EE9N5bz', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.conf import settings\nfrom django.db import models\nfrom django.core.management import call_command\n\n# Configure Django settings\nsettings.configure(\n    INSTALLED_APPS=[\n        \'django.contrib.contenttypes\',\n        \'django.contrib.auth\',\n        \'__main__\',  # Our main script is treated as an app\n    ],\n    DATABASES={\n        \'default\': {\n            \'ENGINE\': \'django.db.backends.sqlite3\',\n            \'NAME\': \':memory:\',\n        }\n    },\n)\n\n# Setup Django\ndjango.setup()\n\n# Models definition to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_issue():\n    try:\n        call_command(\'check\')\n        print("Issue resolved")\n    except TypeError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception:\n        print("Other issues")\n\ntest_issue()\n```\n\nThis script sets up a minimal Django environment with the models necessary to reproduce the issue described in your repository. It defines the models and runs the `check` management command to trigger the error. The script will print "Issue reproduced" if the specific issue with unhashable lists is encountered, "Issue resolved" if there are no errors, and "Other issues" for any other exceptions.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=1, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nimport sys\nimport os\n\n# Define models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n# Function to run management command and capture output\ndef run_management_command():\n    try:\n        call_command(\'check\')\n        print("Issue resolved")\n    except TypeError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\n# Create a test function\ndef test_many_to_many_rel_issue():\n    # First, run the management command to see if the issue is reproduced\n    run_management_command()\n\n# Ensure the script runs only in appropriate environments.\nif __name__ == "__main__":\n    # Run the test\n    test_many_to_many_rel_issue()\n```\n\nExplanation:\n1. The script starts by defining the models `Parent`, `ProxyParent`, `Child`, and `ManyToManyModel` as described in the issue text.\n\n2. The `run_management_command` function executes Django\'s `check` management command and captures its output. If a `TypeError` occurs with the message "unhashable type: \'list\'", it prints "Issue reproduced". If other exceptions or errors occur, it prints "Other issues". Otherwise, if no exceptions are caught, it prints "Issue resolved".\n\n3. The `test_many_to_many_rel_issue` function is a wrapper to run the `run_management_command` function and handle the test process.\n\n4. The script runs the test when executed directly, ensuring it can be used to verify the presence and resolution of the issue described.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=2, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import CommandError\n\n\ndef test_many_to_many_rel_issue():\n    class Parent(models.Model):\n        name = models.CharField(max_length=256)\n\n    class ProxyParent(Parent):\n        class Meta:\n            proxy = True\n\n    class Child(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n        many_to_many_field = models.ManyToManyField(\n            to=Parent,\n            through="ManyToManyModel",\n            through_fields=[\'child\', \'parent\'],\n            related_name="something"\n        )\n\n    class ManyToManyModel(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n    try:\n        call_command(\'check\')\n        print("Issue resolved")\n    except CommandError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_many_to_many_rel_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=3, logprobs=None, message=ChatCompletionMessage(content='```python\nimport sys\nfrom django.conf import settings\nfrom django.db import models\nfrom django.core.management import execute_from_command_line\n\n# Setup Django settings\nsettings.configure(\n    DEBUG=True,\n    USE_TZ=True,\n    DATABASES={\n        "default": {\n            "ENGINE": "django.db.backends.sqlite3",\n            "NAME": ":memory:",\n        }\n    },\n    INSTALLED_APPS=[\n        "django.contrib.contenttypes",\n        "django.contrib.auth",\n        "django.contrib.admin",\n        "django.contrib.sessions",\n        "django.contrib.messages",\n        "django.contrib.staticfiles",\n        "__main__",  # this current module\n    ],\n)\n\n# Define models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_issue_reproduction():\n    try:\n        execute_from_command_line([sys.argv[0], "check"])\n    except TypeError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n    else:\n        print("Issue resolved")\n\nif __name__ == "__main__":\n    test_issue_reproduction()\n```\n\nTo run this test, save the code in a Python file and execute it within a Django-enabled environment. It will check for the specific issue caused by the missing `make_hashable` call on `through_fields` in `ManyToManyRel`, and print the appropriate message based on the outcome.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=4, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nimport sys\nfrom io import StringIO\n\ndef test_many_to_many_through_fields_issue():\n    # Create the models\n    class Parent(models.Model):\n        name = models.CharField(max_length=256)\n\n    class ProxyParent(Parent):\n        class Meta:\n            proxy = True\n\n    class Child(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n        many_to_many_field = models.ManyToManyField(\n            to=Parent,\n            through="ManyToManyModel",\n            through_fields=[\'child\', \'parent\'],\n            related_name="something"\n        )\n\n    class ManyToManyModel(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n    \n    # Capture the output of the management command\n    out = StringIO()\n    sys.stdout = out\n    \n    try:\n        # Run the check command\n        call_command(\'check\')\n        output = out.getvalue()\n        \n        if "unhashable type: \'list\'" in output:\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except Exception as e:\n        print("Other issues")\n    finally:\n        # Reset stdout\n        sys.stdout = sys.__stdout__\n\ntest_many_to_many_through_fields_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=5, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.core.management import call_command\nfrom django.db import models\nfrom django.core.management.base import BaseCommand\n\n# Define the models in a way that reproduces the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n# Custom command to run Django checks\nclass Command(BaseCommand):\n    help = \'Run Django checks and verify the issue reproduction\'\n\n    def handle(self, *args, **kwargs):\n        try:\n            call_command(\'check\')\n            print("Issue resolved")\n        except TypeError as e:\n            if "unhashable type: \'list\'" in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n        except Exception as e:\n            print(f"Other issues: {e}")\n\n# Execute the custom command to test the issue\nif __name__ == "__main__":\n    command = Command()\n    command.handle()\n```\n\nIn this script, the models `Parent`, `ProxyParent`, `Child`, and `ManyToManyModel` are defined based on the provided issue description. A Django management command is created to run the `check` command and handle the potential outcomes:\n- "Issue reproduced" if the specific TypeError is raised,\n- "Issue resolved" if no exceptions are raised,\n- "Other issues" if any other exceptions are encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=6, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.core.management import call_command\nfrom django.core.management.base import CommandError\nfrom django.db import models\nfrom django.apps import apps\n\ndef test_many_to_many_through_fields():\n    class Parent(models.Model):\n        name = models.CharField(max_length=256)\n\n    class ProxyParent(Parent):\n        class Meta:\n            proxy = True\n\n    class Child(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n        many_to_many_field = models.ManyToManyField(\n            to=Parent,\n            through="ManyToManyModel",\n            through_fields=[\'child\', \'parent\'],\n            related_name="something"\n        )\n\n    class ManyToManyModel(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n    try:\n        # Run Django\'s system checks which should reproduce the issue\n        call_command(\'check\')\n    except CommandError as e:\n        if \'unhashable type: \\\'list\\\'\' in str(e):\n            print("Issue reproduced")\n            return\n        else:\n            print("Other issues")\n            return\n\n    print("Issue resolved")\n\ntest_many_to_many_through_fields()\n```\n\nThis script sets up the models described in the issue text and runs Django\'s system checks to reproduce the issue. If the issue with `unhashable type: \'list\'` is encountered, it prints "Issue reproduced". If the check completes without encountering the specific issue, it prints "Issue resolved". If any other issue is encountered, it prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=7, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import SystemCheckError\nimport sys\n\n# Define the models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_m2m_rel_issue():\n    # Try running Django checks to see if the issue can be reproduced\n    try:\n        call_command(\'check\')\n        print("Issue resolved")\n    except SystemCheckError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\n# Run the test\nif __name__ == "__main__":\n    test_m2m_rel_issue()\n```\n\nHere is an explanation of what the test does:\n1. It defines the necessary models (`Parent`, `ProxyParent`, `Child`, and `ManyToManyModel`) to reproduce the issue as described in the issue text.\n2. It defines a test function `test_m2m_rel_issue()` that tries to run Django\'s system checks using the `call_command(\'check\')`.\n3. If a `SystemCheckError` is raised and contains the message "unhashable type: \'list\'", it prints "Issue reproduced".\n4. If the `call_command(\'check\')` runs successfully without exceptions, it prints "Issue resolved".\n5. If any other exception or error is encountered, it prints "Other issues".\n\nThis test should help reproduce the issue and verify whether the issue has been resolved.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=8, logprobs=None, message=ChatCompletionMessage(content='```python\n# Necessary imports\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import SystemCheckError\n\n# Code to reproduce the issue described in the issue text\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_many_to_many_rel_through_fields():\n    try:\n        # Attempting to run Django system checks to reproduce the issue\n        call_command(\'check\')\n        print("Issue resolved")\n    except SystemCheckError as e:\n        # Check if the specific TypeError message is present\n        if "TypeError: unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_many_to_many_rel_through_fields()\n```\n\nThis script sets up the test models according to the provided example and then runs Django\'s system checks to trigger the error. It will print "Issue reproduced" if the specific TypeError is encountered, "Issue resolved" if no issues are found, and "Other issues" for any other errors. This allows you to determine whether the issue described is reproducible and whether it has been fixed after applying a potential solution.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=9, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.core.management import call_command\nfrom django.db import models\nfrom django.core.checks import run_checks\nimport sys\nimport io\n\n# Redirect stdout to capture Django management command output\nold_stdout = sys.stdout\nnew_stdout = io.StringIO()\nsys.stdout = new_stdout\n\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ntry:\n    # Run checks to reproduce the issue\n    run_checks()\n    output = new_stdout.getvalue()\n    if "unhashable type: \'list\'" in output:\n        print("Issue reproduced")\n    else:\n        print("Issue resolved")\nexcept Exception as e:\n    print("Other issues")\n\n# Reset stdout\nsys.stdout = old_stdout\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=10, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import SystemCheckError\n\ndef test_m2m_make_hashable_issue():\n    # Define the models to reproduce the issue\n    class Parent(models.Model):\n        name = models.CharField(max_length=256)\n\n    class ProxyParent(Parent):\n        class Meta:\n            proxy = True\n\n    class Child(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n        many_to_many_field = models.ManyToManyField(\n            to=Parent,\n            through="ManyToManyModel",\n            through_fields=[\'child\', \'parent\'],\n            related_name="something"\n        )\n\n    class ManyToManyModel(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n    try:\n        # This command will trigger the checks, running into the issue or not\n        call_command(\'check\')\n    except SystemCheckError as e:\n        error_message = str(e)\n        if "unhashable type: \'list\'" in error_message:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return\n\n    print("Issue resolved")\n\n# Run the test\ntest_m2m_make_hashable_issue()\n```\n\n### Explanation\n1. **Imports**:\n   - Import necessary modules and functions from `django.db`, `django.core.management`, and `django.core.management.base`.\n\n2. **Model Definitions**:\n   - Define the `Parent`, `ProxyParent`, `Child`, and `ManyToManyModel` models as per the issue description.\n\n3. **Test Function**:\n   - Define a test function `test_m2m_make_hashable_issue()` that includes the model definitions within it so they are scoped to the function (typically, in a real test, these would be in a separate test models file).\n   - Attempt to run Django\'s `check` command which would trigger the issue if it is present.\n   - Catch a `SystemCheckError` and verify if the error message contains "unhashable type: \'list\'" to confirm the issue has been reproduced.\n   - Print appropriate messages based on the outcome.\n\n4. **Run the Test**:\n   - Call the test function to execute the test.\n\nThis test setup will allow you to both reproduce the issue and verify if the issue has been fixed once the necessary changes are applied.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=11, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.core.management import call_command\nfrom django.db import models, connection\nfrom django.core.management.base import SystemCheckError\n\n# Models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_missing_make_hashable_issue():\n    try:\n        # Run checks to trigger the issue\n        call_command(\'check\')\n    except SystemCheckError as e:\n        error_message = str(e)\n        if \'unhashable type: \\\'list\\\'\' in error_message:\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    else:\n        print("Issue resolved")\n\n# Run the test\ntest_missing_make_hashable_issue()\n```\n\n### Explanation:\n1. **Necessary Imports**: Included Django\'s `models`, `call_command`, and `SystemCheckError` for managing models, running management commands, and handling system check errors respectively.\n2. **Code to Reproduce the Issue**: Defined the models `Parent`, `ProxyParent`, `Child`, and `ManyToManyModel` as described in the issue.\n3. **Print Messages**:\n   - "Issue reproduced" if the specific `TypeError: unhashable type: \'list\'` is raised.\n   - "Other issues" if any other error is raised.\n   - "Issue resolved" if no errors are raised.\n4. **Test Function**: Defined `test_missing_make_hashable_issue` function to encapsulate the test logic and print the appropriate message based on the outcome.\n5. **Run the Test**: Called the `test_missing_make_hashable_issue` function at the end to execute the test.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=12, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import SystemCheckError\n\ndef test_many_to_many_rel_through_fields_issue():\n    class Parent(models.Model):\n        name = models.CharField(max_length=256)\n\n    class ProxyParent(Parent):\n        class Meta:\n            proxy = True\n\n    class Child(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n        many_to_many_field = models.ManyToManyField(\n            to=Parent,\n            through="ManyToManyModel",\n            through_fields=[\'child\', \'parent\'],\n            related_name="something"\n        )\n\n    class ManyToManyModel(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n    \n    try:\n        call_command(\'check\')\n    except SystemCheckError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n\n    print("Issue resolved")\n\ntest_many_to_many_rel_through_fields_issue()\n```\n\nThis test script will help you determine whether the issue described in the issue text regarding the missing `make_hashable` call on `through_fields` in `ManyToManyRel` is present (i.e., "Issue reproduced") or has been resolved (i.e., "Issue resolved"). If any other issues are found, it will print "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=13, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import execute_from_command_line\nimport sys\nimport traceback\n\n# Define models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_issue_reproduction():\n    try:\n        # Simulate running Django management command to trigger the issue\n        execute_from_command_line(["manage.py", "check"])\n    except TypeError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n            return\n        else:\n            print("Other issues")\n            print(traceback.format_exc())\n            return\n    except Exception as e:\n        print("Other issues")\n        print(traceback.format_exc())\n        return\n\n    # If no error, the issue is resolved\n    print("Issue resolved")\n\n# Test the issue reproduction\nif __name__ == "__main__":\n    test_issue_reproduction()\n```\n\nIn this script:\n1. Necessary imports are included.\n2. Models are defined as per the issue description to reproduce the problem.\n3. The Django management command `check` is executed.\n4. The script prints "Issue reproduced" if a `TypeError` with "unhashable type: \'list\'" is raised.\n5. The script prints "Other issues" for any other exceptions.\n6. The script prints "Issue resolved" if no exceptions are raised.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=14, logprobs=None, message=ChatCompletionMessage(content='```python\n# Import necessary Django modules for testing\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import SystemCheckError\n\n# Define the models to reproduce the issue described in the issue text\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_issue():\n    try:\n        # Attempt to run Django checks that will trigger the issue\n        call_command(\'check\')\n    except SystemCheckError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    else:\n        print("Issue resolved")\n\n# Run the test function to verify if the issue is reproduced or resolved\ntest_issue()\n```\n\nIn this script:\n1. The necessary Django modules are imported.\n2. The models are defined to reproduce the issue described in the issue text.\n3. The `test_issue` function attempts to run `call_command(\'check\')` to trigger the issue.\n4. The function catches `SystemCheckError` and checks if the error message contains "unhashable type: \'list\'".\n5. Depending on the outcome, it prints "Issue reproduced", "Issue resolved", or "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=15, logprobs=None, message=ChatCompletionMessage(content='```python\nimport os\nimport django\nfrom django.conf import settings\nfrom django.core.management import call_command\nfrom django.db import models\n\n# Django settings for the test\nsettings.configure(\n    DEBUG=True,\n    USE_TZ=True,\n    DATABASES={\n        \'default\': {\n            \'ENGINE\': \'django.db.backends.sqlite3\',\n            \'NAME\': \':memory:\',\n        }\n    },\n    INSTALLED_APPS=[\n        __name__,  # Current module for models\n    ]\n)\ndjango.setup()\n\n# Models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_many_to_many_rel_issue():\n    try:\n        # Run Django checks to trigger the issue\n        call_command(\'check\')\n    except TypeError as e:\n        if \'unhashable type: \\\'list\\\'\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n    else:\n        print("Issue resolved")\n\nif __name__ == "__main__":\n    test_many_to_many_rel_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=16, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import BaseCommand\nfrom django.test import TestCase\nimport sys\nimport io\n\n\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n\nclass TestManyToManyRel(TestCase):\n\n    def test_issue_reproduction(self):\n        buffer = io.StringIO()\n        sys.stdout = buffer\n        try:\n            call_command(\'check\')\n            output = buffer.getvalue()\n            if "TypeError: unhashable type: \'list\'" in output:\n                print("Issue reproduced")\n            else:\n                print("Issue resolved")\n        except Exception as e:\n            print("Other issues")\n            print(e)\n        finally:\n            sys.stdout = sys.__stdout__\n\n\nif __name__ == "__main__":\n    TestManyToManyRel().test_issue_reproduction()\n```\n\nExplanation:\n1. The code defines the Django models `Parent`, `ProxyParent`, `Child`, and `ManyToManyModel` to reproduce the issue described in the issue text.\n2. The `TestManyToManyRel` class contains a test method `test_issue_reproduction` that uses Django\'s `call_command` function to run the `check` management command.\n3. Output is captured and checked for the specific `TypeError: unhashable type: \'list\'` to determine if the issue is reproduced.\n4. Appropriate messages ("Issue reproduced", "Issue resolved", "Other issues") are printed based on the outcome of the test.\n5. The test is executed when the script is run directly.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=17, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.checks import run_checks\nimport sys\n\ndef test_many_to_many_rel_issue():\n    class Parent(models.Model):\n        name = models.CharField(max_length=256)\n\n    class ProxyParent(Parent):\n        class Meta:\n            proxy = True\n\n    class Child(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n        many_to_many_field = models.ManyToManyField(\n            to=Parent,\n            through="ManyToManyModel",\n            through_fields=[\'child\', \'parent\'],\n            related_name="something"\n        )\n\n    class ManyToManyModel(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n    try:\n        # Mimic the Django management command to trigger the issue\n        call_command(\'check\')\n    except TypeError as e:\n        if \'unhashable type: \\\'list\\\'\' in str(e):\n            print("Issue reproduced")\n            return\n        else:\n            print("Other issues")\n            return\n    except Exception as e:\n        print("Other issues")\n        return\n\n    # If no exception is raised, assume the issue has been resolved\n    print("Issue resolved")\n\n# Execute the test function\ntest_many_to_many_rel_issue()\n```\n\nIn the provided test, the Django models are defined within the test function to mimic the issue environment. The `call_command(\'check\')` function is used to simulate running a management command and trigger the checks that would raise the `TypeError`. Depending on the outcome, appropriate messages are printed to indicate whether the issue is reproduced, resolved, or if other issues are present.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=18, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.conf import settings\nfrom django.core.management import call_command\nfrom django.core.management.base import CommandError\nfrom django.db import models\n\n# Configure Django settings programmatically\nsettings.configure(\n    DEBUG=True,\n    INSTALLED_APPS=[\n        \'django.contrib.contenttypes\',\n        \'__main__\',  # current module as an app\n    ],\n    DATABASES={\n        \'default\': {\n            \'ENGINE\': \'django.db.backends.sqlite3\',\n            \'NAME\': \':memory:\',\n        }\n    },\n)\n\n# Initialize Django\ndjango.setup()\n\n# Define models as described in the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_m2m_through_fields_issue():\n    try:\n        # Run Django\'s checks to trigger the issue\n        call_command(\'check\')\n        print("Issue resolved")\n    except CommandError as e:\n        if \'unhashable type: \\\'list\\\'\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_m2m_through_fields_issue()\n```\n\nThis test script sets up a Django environment, defines the models as described in the issue, and uses the `check` management command to reproduce the issue. It prints "Issue reproduced" if the specific `TypeError: unhashable type: \'list\'` is encountered, "Issue resolved" if no issues are found, and "Other issues" if any other issues are encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=19, logprobs=None, message=ChatCompletionMessage(content='```python\nimport sys\nfrom django.core.management import execute_from_command_line\nfrom django.db import models\n\n# Define models\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n    \nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_issue_reproduction():\n    try:\n        # Running Django management command to trigger the issue\n        execute_from_command_line([sys.argv[0], \'check\'])\n    except TypeError as e:\n        # Check if the error is the one we expect\n        if \'unhashable type: \\\'list\\\'\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues: ", str(e))\n    else:\n        print("Issue resolved")\n\n# Run the test\nif __name__ == "__main__":\n    test_issue_reproduction()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=20, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.checks import run_checks\nimport sys\n\ndef test_many_to_many_rel_issue():\n    class Parent(models.Model):\n        name = models.CharField(max_length=256)\n\n    class ProxyParent(Parent):\n        class Meta:\n            proxy = True\n\n    class Child(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n        many_to_many_field = models.ManyToManyField(\n            to=Parent,\n            through="ManyToManyModel",\n            through_fields=[\'child\', \'parent\'],\n            related_name="something"\n        )\n\n    class ManyToManyModel(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n    try:\n        # Run management check command\n        call_command(\'check\')\n        print("Issue resolved")\n    except TypeError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues:", e)\n\n# Run the test\ntest_many_to_many_rel_issue()\n```\n\nThis test function will attempt to reproduce the issue as described. It will print "Issue resolved" if the `check` command runs without encountering the `TypeError`. If it encounters the specific `TypeError` related to the unhashable list, it will print "Issue reproduced". Any other exceptions or issues will result in "Other issues" being printed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=21, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.core.management import call_command\nfrom django.db import models\nimport sys\nimport io\n\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_issue():\n    # Redirect stderr to capture error messages from the management command\n    stderr = io.StringIO()\n    sys.stderr = stderr\n\n    try:\n        call_command(\'check\')\n    except TypeError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n        return\n    finally:\n        # Reset stderr\n        sys.stderr = sys.__stderr__\n\n    # If no exception occurred, check the output for any error messages\n    stderr_output = stderr.getvalue()\n    if "TypeError: unhashable type: \'list\'" in stderr_output:\n        print("Issue reproduced")\n    elif len(stderr_output) == 0:\n        print("Issue resolved")\n    else:\n        print("Other issues")\n\ntest_issue()\n```\n\nThis test script will set up the required Django models and run the management command `check` to see if it reproduces the issue. It captures and analyzes any exceptions or error messages to determine if the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=22, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nimport sys\nimport io\n\ndef test_many_to_many_rel_through_fields():\n    class Parent(models.Model):\n        name = models.CharField(max_length=256)\n    \n    class ProxyParent(Parent):\n        class Meta:\n            proxy = True\n    \n    class Child(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n        many_to_many_field = models.ManyToManyField(\n            to=Parent,\n            through="ManyToManyModel",\n            through_fields=[\'child\', \'parent\'],\n            related_name="something"\n        )\n    \n    class ManyToManyModel(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n    # Redirect stdout to capture the management command output\n    old_stdout = sys.stdout\n    sys.stdout = mystdout = io.StringIO()\n\n    try:\n        call_command(\'check\')\n    except TypeError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    else:\n        print("Issue resolved")\n\n    # Reset stdout\n    sys.stdout = old_stdout\n    output = mystdout.getvalue()\n    print(output)\n\ntest_many_to_many_rel_through_fields()\n```\n\nThis script defines the models to reproduce the issue and runs Django\'s `check` management command, capturing its output. Depending on the result, it prints whether the issue has been reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=23, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import SystemCheckError\n\ndef test_missing_make_hashable_in_manytomanyrel():\n    try:\n        class Parent(models.Model):\n            name = models.CharField(max_length=256)\n        \n        class ProxyParent(Parent):\n            class Meta:\n                proxy = True\n        \n        class Child(models.Model):\n            parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n            many_to_many_field = models.ManyToManyField(\n                to=Parent,\n                through="ManyToManyModel",\n                through_fields=[\'child\', \'parent\'],\n                related_name="something"\n            )\n        \n        class ManyToManyModel(models.Model):\n            parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n            child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n            second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n        \n        # Attempting to run the check to see if the issue is reproduced\n        try:\n            call_command(\'check\')\n            print("Issue resolved")\n        except SystemCheckError as e:\n            if "TypeError: unhashable type: \'list\'" in str(e):\n                print("Issue reproduced")\n            else:\n                print("Other issues")\n    except Exception as ex:\n        print("Other issues", ex)\n\ntest_missing_make_hashable_in_manytomanyrel()\n```\n\nThis script will:\n1. Import the necessary modules from Django.\n2. Define the models as described in the issue text.\n3. Attempt to run Django\'s system check command.\n4. Print "Issue resolved" if the check passes without raising the specified `TypeError`.\n5. Print "Issue reproduced" if the `TypeError` indicating the missing `make_hashable` call is raised.\n6. Print "Other issues" if any other exception or error is encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=24, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the complete test that can be used to reproduce the issue described in the provided issue text:\n\n```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import SystemCheckError\n\n# Define the models as described in the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_many_to_many_rel_issue():\n    try:\n        # This would normally check for issues with the models\n        call_command(\'check\')\n        print("Issue resolved")\n    except SystemCheckError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_many_to_many_rel_issue()\n```\n\n### Explanation:\n1. **Imports and Model Definitions**: The necessary imports and model definitions are included to reproduce the issue.\n2. **Management Command Execution**: The `call_command(\'check\')` command is used to run Django\'s system checks, which would trigger the error described in the issue.\n3. **Error Handling**: The error is caught and inspected. If the specific `unhashable type: \'list\'` error is present, it prints "Issue reproduced".\n4. **Outcome Messages**: It prints "Issue resolved" if no errors occur, indicating the issue has been fixed. It prints "Other issues" if any other issues are encountered.\n\nThis test can be used both to reproduce the issue and verify if it has been fixed.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=25, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is the detailed test script that includes the necessary imports, code to reproduce the issue described in your issue text, and prints suitable messages based on the outcome.\n\n```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import CommandError\nimport sys\nimport io\n\ndef test_issue_with_many_to_many_rel():\n    class Parent(models.Model):\n        name = models.CharField(max_length=256)\n    \n    class ProxyParent(Parent):\n        class Meta:\n            proxy = True\n    \n    class Child(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n        many_to_many_field = models.ManyToManyField(\n            to=Parent,\n            through="ManyToManyModel",\n            through_fields=[\'child\', \'parent\'],\n            related_name="something"\n        )\n    \n    class ManyToManyModel(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n    \n    # Redirect stdout to capture manage.py check output\n    old_stdout = sys.stdout\n    sys.stdout = io.StringIO()\n    \n    try:\n        call_command(\'check\')\n        output = sys.stdout.getvalue()\n        if "unhashable type: \'list\'" in output:\n            print("Issue reproduced")\n        else:\n            print("Issue resolved")\n    except CommandError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    finally:\n        # Reset stdout\n        sys.stdout = old_stdout\n\ntest_issue_with_many_to_many_rel()\n```\n\nThis script does the following:\n1. Defines the models as specified in the issue text.\n2. Redirects the standard output to capture the `check` command output.\n3. Executes the `check` command.\n4. Analyzes the output to determine if the issue is reproduced, resolved, or if there are other issues.\n5. Resets the standard output back to its original state.\n\nThis test script should be able to reproduce the issue and validate if the issue has been resolved once the necessary fix is applied.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=26, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import SystemCheckError\n\ndef test_many_to_many_rel_through_fields():\n    try:\n        class Parent(models.Model):\n            name = models.CharField(max_length=256)\n\n        class ProxyParent(Parent):\n            class Meta:\n                proxy = True\n\n        class Child(models.Model):\n            parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n            many_to_many_field = models.ManyToManyField(\n                to=Parent,\n                through="ManyToManyModel",\n                through_fields=[\'child\', \'parent\'],\n                related_name="something"\n            )\n\n        class ManyToManyModel(models.Model):\n            parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n            child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n            second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n        \n        # Perform Django system check to see if the issue is reproduced\n        call_command(\'check\')\n        print("Issue resolved")\n    except SystemCheckError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_many_to_many_rel_through_fields()\n```\n\nThis test script follows the steps outlined in the issue description to reproduce the problem. Here\'s a brief explanation of the logic:\n\n1. **Necessary imports**: We import `models` from `django.db` and `call_command` and `SystemCheckError` from `django.core.management`.\n2. **Code to reproduce the issue**: Classes `Parent`, `ProxyParent`, `Child`, and `ManyToManyModel` are defined as described in the issue text.\n3. **Check for the issue**: Use `call_command(\'check\')` to execute the Django system check, which should trigger the issue.\n4. **Outcome checks**:\n   - If the issue is reproduced, it will catch a `SystemCheckError` with the message "unhashable type: \'list\'" and print "Issue reproduced".\n   - If `call_command(\'check\')` executes without raising the specific issue, it prints "Issue resolved".\n   - If any other error occurs, it prints "Other issues".\n\nThis test can be used both to confirm the presence of the issue and to verify that the issue has been resolved once the appropriate fix has been applied.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=27, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.db import models\nfrom django.core.management import execute_from_command_line\nimport sys\n\ndef test_missing_make_hashable_in_manytomanyrel():\n    try:\n        # Setup Django settings\n        django.setup()\n\n        # Define the models\n        class Parent(models.Model):\n            name = models.CharField(max_length=256)\n\n        class ProxyParent(Parent):\n            class Meta:\n                proxy = True\n\n        class Child(models.Model):\n            parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n            many_to_many_field = models.ManyToManyField(\n                to=Parent,\n                through="ManyToManyModel",\n                through_fields=[\'child\', \'parent\'],\n                related_name="something"\n            )\n\n        class ManyToManyModel(models.Model):\n            parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n            child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n            second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n        # Simulate Django management command execution to trigger the check\n        try:\n            execute_from_command_line([\'manage.py\', \'check\'])\n        except TypeError as e:\n            if \'unhashable type: \\\'list\\\'\' in str(e):\n                print("Issue reproduced")\n                return\n            else:\n                print("Other issues")\n                return\n        except Exception as e:\n            print(f"Other issues: {e}")\n            return\n\n        print("Issue resolved")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\n# Test the function\ntest_missing_make_hashable_in_manytomanyrel()\n```\n\nExplanation:\n1. The necessary imports are included.\n2. The models are defined as per the issue description.\n3. The `execute_from_command_line` function is used to simulate running a Django management command, which will invoke the checks that should reproduce the issue.\n4. Error handling is implemented to determine if the specific issue described (TypeError: unhashable type: \'list\') is reproduced.\n5. Appropriate print statements are provided to indicate the result of the test.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=28, logprobs=None, message=ChatCompletionMessage(content='```python\nimport django\nfrom django.conf import settings\nfrom django.core.management import call_command\nfrom django.db import models\n\n# Setting up a minimal Django environment\nsettings.configure(\n    INSTALLED_APPS=[\n        \'django.contrib.contenttypes\',\n        __name__,\n    ],\n    DATABASES={\n        \'default\': {\n            \'ENGINE\': \'django.db.backends.sqlite3\',\n            \'NAME\': \':memory:\',\n        }\n    },\n)\n\ndjango.setup()\n\n# Models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_reproduce_issue():\n    try:\n        # This will check the models and should fail if the issue is present\n        call_command(\'check\')\n        print("Issue resolved")\n    except TypeError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_reproduce_issue()\n```\n\nThis script sets up a minimal Django environment and defines the models as described in the issue text. It then runs Django\'s `check` management command to verify if the issue is present. The script captures the specific `TypeError` regarding the unhashable type and prints "Issue reproduced" if this error is encountered. If the `check` command passes without errors, it prints "Issue resolved". Any other exceptions are caught and the script prints "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=29, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import execute_from_command_line\nimport sys\nimport os\n\n# Define the models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n# Test function to reproduce the issue\ndef test_issue_reproduction():\n    try:\n        # Setup Django environment\n        os.environ[\'DJANGO_SETTINGS_MODULE\'] = \'__main__\'\n        sys.argv = [\'manage.py\', \'check\']\n        \n        # Define dummy settings\n        import django.conf\n        django.conf.settings.configure(\n            DEBUG=True,\n            DATABASES={\'default\': {\n                \'ENGINE\': \'django.db.backends.sqlite3\',\n                \'NAME\': \':memory:\',\n            }},\n            INSTALLED_APPS=[\'__main__\'],\n        )\n        \n        # Run management command to trigger the issue\n        execute_from_command_line(sys.argv)\n    except TypeError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n    else:\n        print("Issue resolved")\n\n# Execute the test\ntest_issue_reproduction()\n```\n\nThis test script sets up a Django environment in memory, defines the models that reproduce the issue, and runs the `check` management command to trigger the issue. Based on the outcome, it prints whether the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=30, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.conf import settings\nimport sys\nimport os\n\n# Create a temporary settings module\nsettings.configure(\n    DATABASES={\n        \'default\': {\n            \'ENGINE\': \'django.db.backends.sqlite3\',\n            \'NAME\': \':memory:\',\n        }\n    },\n    INSTALLED_APPS=[\n        \'django.contrib.contenttypes\',\n        # Add our test app\n        \'test_app\',\n    ]\n)\n\nimport django\ndjango.setup()\n\n# Create a new Django app called test_app\nif not os.path.exists(\'test_app\'):\n    os.makedirs(\'test_app\')\n\nwith open(\'test_app/models.py\', \'w\') as f:\n    f.write("""\nfrom django.db import models\n\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n""")\n\nwith open(\'test_app/__init__.py\', \'w\') as f:\n    f.write("")\n\ndef test_missing_make_hashable():\n    try:\n        call_command(\'makemigrations\', \'test_app\')\n        call_command(\'migrate\', \'test_app\')\n        call_command(\'check\')\n    except TypeError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n            return\n        else:\n            print("Other issues")\n            return\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return\n\n    print("Issue resolved")\n\ntest_missing_make_hashable()\n```\n\nThis script will:\n1. Set up a temporary Django settings module with a SQLite in-memory database.\n2. Create a new Django app called `test_app`.\n3. Define the models as described in the issue.\n4. Attempt to run Django management commands `makemigrations`, `migrate`, and `check`, catching any `TypeError` related to the unhashable list issue.\n5. Print the appropriate message based on whether the issue is reproduced, resolved, or if there are other issues.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=31, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is a complete test script that follows the provided structure to reproduce the issue described in your issue text. This script includes necessary imports, code to reproduce the issue, appropriate print statements, and assertions to verify if the issue has been resolved or is still present.\n\n```python\nimport django\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.conf import settings\n\n# Configure settings for Django\nsettings.configure(\n    DATABASES={\n        \'default\': {\n            \'ENGINE\': \'django.db.backends.sqlite3\',\n            \'NAME\': \':memory:\',\n        }\n    },\n    INSTALLED_APPS=[\n        __name__,\n    ],\n)\n\n# Initialize Django\ndjango.setup()\n\n# Define models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n# Test function to reproduce the issue\ndef test_many_to_many_rel_issue():\n    try:\n        call_command(\'check\')\n    except TypeError as e:\n        if \'unhashable type: \\\'list\\\'\' in str(e):\n            print("Issue reproduced")\n            return\n        else:\n            print("Other issues")\n            return\n    except Exception as e:\n        print(f"Other issues: {e}")\n        return\n\n    print("Issue resolved")\n\n# Run the test\ntest_many_to_many_rel_issue()\n```\n\nThis script sets up a minimal Django environment in-memory for testing purposes and defines the models as described in the issue. It then runs the `check` management command, which triggers the issue. Depending on the outcome, it prints "Issue reproduced", "Issue resolved", or "Other issues".', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=32, logprobs=None, message=ChatCompletionMessage(content='```python\nimport sys\nfrom django.core.management import execute_from_command_line\nfrom django.db import models\n\n# Define models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through=\'ManyToManyModel\',\n        through_fields=[\'child\', \'parent\'],\n        related_name=\'something\'\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_many_to_many_through_fields_issue():\n    try:\n        # Initialize Django settings\n        settings_config = {\n            \'INSTALLED_APPS\': [\'__main__\'],\n            \'DATABASES\': {\n                \'default\': {\n                    \'ENGINE\': \'django.db.backends.sqlite3\',\n                    \'NAME\': \':memory:\',\n                }\n            }\n        }\n        \n        import django\n        from django.conf import settings\n\n        settings.configure(**settings_config)\n        django.setup()\n\n        # Run Django checks to see if the issue is reproduced\n        execute_from_command_line([\'manage.py\', \'check\'])\n        print("Issue resolved")\n    except TypeError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print("Other issues")\n\ntest_many_to_many_through_fields_issue()\n```\n\nThis script sets up a minimal Django environment in memory, defines the models as described in the issue, and runs Django\'s system checks to determine if the `TypeError: unhashable type: \'list\'` issue is reproduced. It prints "Issue reproduced" if the specific error is encountered, "Issue resolved" if no errors occur, and "Other issues" if any other exceptions are raised.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=33, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nimport sys\nimport io\n\n# Define the models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_issue():\n    try:\n        # Redirect stdout to capture the management command output\n        old_stdout = sys.stdout\n        new_stdout = io.StringIO()\n        sys.stdout = new_stdout\n\n        # Run the check management command to trigger the issue\n        call_command(\'check\')\n\n        # Restore stdout\n        sys.stdout = old_stdout\n        output = new_stdout.getvalue()\n\n        if "unhashable type: \'list\'" in output:\n            print("Issue reproduced")\n        elif "System check identified no issues" in output:\n            print("Issue resolved")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {e}")\n\ntest_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=34, logprobs=None, message=ChatCompletionMessage(content='Certainly! Below is a Python script that tests the described issue in a Django environment. This script includes necessary imports, the code to reproduce the issue, and logic to determine if the issue is reproduced or resolved.\n\n```python\nimport os\nimport django\nfrom django.core.management import call_command\nfrom django.db import models, connection\n\n# Ensure settings are configured for Django\nos.environ[\'DJANGO_SETTINGS_MODULE\'] = \'test_project.settings\'\ndjango.setup()\n\n# Define models to reproduce the issue\nclass Parent(models.Model):\n    name = models.CharField(max_length=256)\n\nclass ProxyParent(Parent):\n    class Meta:\n        proxy = True\n\nclass Child(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n    many_to_many_field = models.ManyToManyField(\n        to=Parent,\n        through="ManyToManyModel",\n        through_fields=[\'child\', \'parent\'],\n        related_name="something"\n    )\n\nclass ManyToManyModel(models.Model):\n    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\ndef test_issue():\n    try:\n        # Call `makemigrations` and `migrate` to initialize the database\n        call_command(\'makemigrations\', interactive=False)\n        call_command(\'migrate\', interactive=False)\n\n        # If makemigrations and migrate pass without issues\n        print("Issue resolved")\n    except TypeError as e:\n        if \'unhashable type: \\\'list\\\'\' in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    except Exception as e:\n        print(f"Other issues: {str(e)}")\n\nif __name__ == "__main__":\n    test_issue()\n```\n\n### Explanation:\n1. **Imports:**\n   - `os`, `django`, `call_command`: Essential imports for setting up and managing Django.\n   - `models`, `connection`: Necessary for defining Django models and database interaction.\n\n2. **Django Settings and Setup:**\n   - Ensures that Django settings are properly configured and initialized.\n\n3. **Model Definitions:**\n   - `Parent`, `ProxyParent`, `Child`, `ManyToManyModel`: Models as described in the issue text.\n\n4. **Test Function:**\n   - `test_issue`: Function that attempts to run `makemigrations` and `migrate`. It catches errors to determine if the issue is reproduced or resolved.\n   - Prints "Issue resolved" if migrations succeed.\n   - Prints "Issue reproduced" if the specific TypeError is caught.\n   - Prints "Other issues" for any other exceptions.\n\n5. **Execution:**\n   - The script executes `test_issue` if run as the main module.\n\nMake sure to replace `\'test_project.settings\'` with the actual settings module path of your Django project when using this script. This script assumes that the Django environment is correctly configured and that the necessary settings for running Django are in place.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=35, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, connection\nfrom django.core.management import call_command\nimport sys\n\ndef test_many_to_many_through_fields_issue():\n    try:\n        # Define the models to reproduce the issue\n        class Parent(models.Model):\n            name = models.CharField(max_length=256)\n\n        class ProxyParent(Parent):\n            class Meta:\n                proxy = True\n\n        class Child(models.Model):\n            parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n            many_to_many_field = models.ManyToManyField(\n                to=Parent,\n                through="ManyToManyModel",\n                through_fields=[\'child\', \'parent\'],\n                related_name="something"\n            )\n\n        class ManyToManyModel(models.Model):\n            parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n            child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n            second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n        # Mock the sys.argv to avoid running the management command directly\n        sys.argv = [\'manage.py\', \'check\']\n\n        try:\n            # Run Django system checks to catch the issue\n            call_command(\'check\')\n        except TypeError as e:\n            if str(e) == "unhashable type: \'list\'":\n                print("Issue reproduced")\n                return\n            else:\n                print("Other issues")\n                return\n\n        print("Issue resolved")\n\n    except Exception as e:\n        print("Other issues")\n        return\n\ntest_many_to_many_through_fields_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=36, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import SystemCheckError\n\ndef test_many_to_many_rel_through_fields_issue():\n    class Parent(models.Model):\n        name = models.CharField(max_length=256)\n\n    class ProxyParent(Parent):\n        class Meta:\n            proxy = True\n\n    class Child(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n        many_to_many_field = models.ManyToManyField(\n            to=Parent,\n            through="ManyToManyModel",\n            through_fields=[\'child\', \'parent\'],\n            related_name="something"\n        )\n\n    class ManyToManyModel(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n    try:\n        call_command(\'check\')\n        print("Issue resolved")\n    except SystemCheckError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\ntest_many_to_many_rel_through_fields_issue()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=37, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models\nfrom django.core.management import call_command\nfrom django.core.management.base import SystemCheckError\n\ndef run_migration_check():\n    class Parent(models.Model):\n        name = models.CharField(max_length=256)\n\n    class ProxyParent(Parent):\n        class Meta:\n            proxy = True\n\n    class Child(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n        many_to_many_field = models.ManyToManyField(\n            to=Parent,\n            through="ManyToManyModel",\n            through_fields=[\'child\', \'parent\'],\n            related_name="something"\n        )\n\n    class ManyToManyModel(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n    try:\n        call_command(\'check\')\n        print("Issue resolved")\n    except SystemCheckError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n\nif __name__ == "__main__":\n    run_migration_check()\n```', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None)), Choice(finish_reason='stop', index=38, logprobs=None, message=ChatCompletionMessage(content='```python\nfrom django.db import models, connection\nfrom django.core.management import call_command\nfrom django.core.management.base import SystemCheckError\n\ndef test_missing_make_hashable_call():\n    class Parent(models.Model):\n        name = models.CharField(max_length=256)\n\n    class ProxyParent(Parent):\n        class Meta:\n            proxy = True\n\n    class Child(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)\n        many_to_many_field = models.ManyToManyField(\n            to=Parent,\n            through="ManyToManyModel",\n            through_fields=[\'child\', \'parent\'],\n            related_name="something"\n        )\n\n    class ManyToManyModel(models.Model):\n        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name=\'+\')\n        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name=\'+\')\n        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)\n\n    try:\n        call_command(\'check\')\n    except SystemCheckError as e:\n        if "unhashable type: \'list\'" in str(e):\n            print("Issue reproduced")\n        else:\n            print("Other issues")\n    else:\n        print("Issue resolved")\n\ntest_missing_make_hashable_call()\n```\nThis script tests for the issue described in the provided issue text. It sets up the models as defined in the minimal reproduction example and then calls Django\'s management command `check` to see if the issue is reproduced. Depending on the outcome, it prints the appropriate message:\n- "Issue reproduced" if the specific `TypeError: unhashable type: \'list\'` is encountered.\n- "Other issues" if other errors are encountered.\n- "Issue resolved" if no errors are encountered.', refusal=None, role='assistant', annotations=[], audio=None, function_call=None, tool_calls=None))], created=1746299196, model='gpt-4o-2024-05-13', object='chat.completion', service_tier='default', system_fingerprint='fp_b70b7e9c76', usage=CompletionUsage(completion_tokens=16087, prompt_tokens=2142, total_tokens=18229, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0)))
+2025-05-03 14:08:12,600 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import SystemCheckError
+import sys
+import io
+
+# Define the models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_issue_reproduction():
+    # Redirect stdout to capture management command output
+    old_stdout = sys.stdout
+    new_stdout = io.StringIO()
+    sys.stdout = new_stdout
+
+    try:
+        # Run the Django check management command
+        call_command('check')
+    except SystemCheckError as e:
+        output = new_stdout.getvalue()
+        if "unhashable type: 'list'" in output:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    else:
+        print("Issue resolved")
+    finally:
+        # Reset stdout
+        sys.stdout = old_stdout
+
+test_issue_reproduction()
+```
+
+This test script sets up the models as described in the issue and runs the Django `check` management command to trigger the error. It captures the output and checks for the specific error message to determine if the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+import django
+from django.conf import settings
+from django.db import models
+from django.core.management import call_command
+
+# Configure Django settings
+settings.configure(
+    INSTALLED_APPS=[
+        'django.contrib.contenttypes',
+        'django.contrib.auth',
+        '__main__',  # Our main script is treated as an app
+    ],
+    DATABASES={
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    },
+)
+
+# Setup Django
+django.setup()
+
+# Models definition to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_issue():
+    try:
+        call_command('check')
+        print("Issue resolved")
+    except TypeError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception:
+        print("Other issues")
+
+test_issue()
+```
+
+This script sets up a minimal Django environment with the models necessary to reproduce the issue described in your repository. It defines the models and runs the `check` management command to trigger the error. The script will print "Issue reproduced" if the specific issue with unhashable lists is encountered, "Issue resolved" if there are no errors, and "Other issues" for any other exceptions.
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+import sys
+import os
+
+# Define models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+# Function to run management command and capture output
+def run_management_command():
+    try:
+        call_command('check')
+        print("Issue resolved")
+    except TypeError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+# Create a test function
+def test_many_to_many_rel_issue():
+    # First, run the management command to see if the issue is reproduced
+    run_management_command()
+
+# Ensure the script runs only in appropriate environments.
+if __name__ == "__main__":
+    # Run the test
+    test_many_to_many_rel_issue()
+```
+
+Explanation:
+1. The script starts by defining the models `Parent`, `ProxyParent`, `Child`, and `ManyToManyModel` as described in the issue text.
+
+2. The `run_management_command` function executes Django's `check` management command and captures its output. If a `TypeError` occurs with the message "unhashable type: 'list'", it prints "Issue reproduced". If other exceptions or errors occur, it prints "Other issues". Otherwise, if no exceptions are caught, it prints "Issue resolved".
+
+3. The `test_many_to_many_rel_issue` function is a wrapper to run the `run_management_command` function and handle the test process.
+
+4. The script runs the test when executed directly, ensuring it can be used to verify the presence and resolution of the issue described.
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import CommandError
+
+
+def test_many_to_many_rel_issue():
+    class Parent(models.Model):
+        name = models.CharField(max_length=256)
+
+    class ProxyParent(Parent):
+        class Meta:
+            proxy = True
+
+    class Child(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+        many_to_many_field = models.ManyToManyField(
+            to=Parent,
+            through="ManyToManyModel",
+            through_fields=['child', 'parent'],
+            related_name="something"
+        )
+
+    class ManyToManyModel(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+    try:
+        call_command('check')
+        print("Issue resolved")
+    except CommandError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_many_to_many_rel_issue()
+```
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+import sys
+from django.conf import settings
+from django.db import models
+from django.core.management import execute_from_command_line
+
+# Setup Django settings
+settings.configure(
+    DEBUG=True,
+    USE_TZ=True,
+    DATABASES={
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
+    },
+    INSTALLED_APPS=[
+        "django.contrib.contenttypes",
+        "django.contrib.auth",
+        "django.contrib.admin",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
+        "__main__",  # this current module
+    ],
+)
+
+# Define models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_issue_reproduction():
+    try:
+        execute_from_command_line([sys.argv[0], "check"])
+    except TypeError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+    else:
+        print("Issue resolved")
+
+if __name__ == "__main__":
+    test_issue_reproduction()
+```
+
+To run this test, save the code in a Python file and execute it within a Django-enabled environment. It will check for the specific issue caused by the missing `make_hashable` call on `through_fields` in `ManyToManyRel`, and print the appropriate message based on the outcome.
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+import sys
+from io import StringIO
+
+def test_many_to_many_through_fields_issue():
+    # Create the models
+    class Parent(models.Model):
+        name = models.CharField(max_length=256)
+
+    class ProxyParent(Parent):
+        class Meta:
+            proxy = True
+
+    class Child(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+        many_to_many_field = models.ManyToManyField(
+            to=Parent,
+            through="ManyToManyModel",
+            through_fields=['child', 'parent'],
+            related_name="something"
+        )
+
+    class ManyToManyModel(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+    
+    # Capture the output of the management command
+    out = StringIO()
+    sys.stdout = out
+    
+    try:
+        # Run the check command
+        call_command('check')
+        output = out.getvalue()
+        
+        if "unhashable type: 'list'" in output:
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except Exception as e:
+        print("Other issues")
+    finally:
+        # Reset stdout
+        sys.stdout = sys.__stdout__
+
+test_many_to_many_through_fields_issue()
+```
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+from django.core.management import call_command
+from django.db import models
+from django.core.management.base import BaseCommand
+
+# Define the models in a way that reproduces the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+# Custom command to run Django checks
+class Command(BaseCommand):
+    help = 'Run Django checks and verify the issue reproduction'
+
+    def handle(self, *args, **kwargs):
+        try:
+            call_command('check')
+            print("Issue resolved")
+        except TypeError as e:
+            if "unhashable type: 'list'" in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+        except Exception as e:
+            print(f"Other issues: {e}")
+
+# Execute the custom command to test the issue
+if __name__ == "__main__":
+    command = Command()
+    command.handle()
+```
+
+In this script, the models `Parent`, `ProxyParent`, `Child`, and `ManyToManyModel` are defined based on the provided issue description. A Django management command is created to run the `check` command and handle the potential outcomes:
+- "Issue reproduced" if the specific TypeError is raised,
+- "Issue resolved" if no exceptions are raised,
+- "Other issues" if any other exceptions are encountered.
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+from django.core.management import call_command
+from django.core.management.base import CommandError
+from django.db import models
+from django.apps import apps
+
+def test_many_to_many_through_fields():
+    class Parent(models.Model):
+        name = models.CharField(max_length=256)
+
+    class ProxyParent(Parent):
+        class Meta:
+            proxy = True
+
+    class Child(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+        many_to_many_field = models.ManyToManyField(
+            to=Parent,
+            through="ManyToManyModel",
+            through_fields=['child', 'parent'],
+            related_name="something"
+        )
+
+    class ManyToManyModel(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+    try:
+        # Run Django's system checks which should reproduce the issue
+        call_command('check')
+    except CommandError as e:
+        if 'unhashable type: \'list\'' in str(e):
+            print("Issue reproduced")
+            return
+        else:
+            print("Other issues")
+            return
+
+    print("Issue resolved")
+
+test_many_to_many_through_fields()
+```
+
+This script sets up the models described in the issue text and runs Django's system checks to reproduce the issue. If the issue with `unhashable type: 'list'` is encountered, it prints "Issue reproduced". If the check completes without encountering the specific issue, it prints "Issue resolved". If any other issue is encountered, it prints "Other issues".
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import SystemCheckError
+import sys
+
+# Define the models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_m2m_rel_issue():
+    # Try running Django checks to see if the issue can be reproduced
+    try:
+        call_command('check')
+        print("Issue resolved")
+    except SystemCheckError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+# Run the test
+if __name__ == "__main__":
+    test_m2m_rel_issue()
+```
+
+Here is an explanation of what the test does:
+1. It defines the necessary models (`Parent`, `ProxyParent`, `Child`, and `ManyToManyModel`) to reproduce the issue as described in the issue text.
+2. It defines a test function `test_m2m_rel_issue()` that tries to run Django's system checks using the `call_command('check')`.
+3. If a `SystemCheckError` is raised and contains the message "unhashable type: 'list'", it prints "Issue reproduced".
+4. If the `call_command('check')` runs successfully without exceptions, it prints "Issue resolved".
+5. If any other exception or error is encountered, it prints "Other issues".
+
+This test should help reproduce the issue and verify whether the issue has been resolved.
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+# Necessary imports
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import SystemCheckError
+
+# Code to reproduce the issue described in the issue text
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_many_to_many_rel_through_fields():
+    try:
+        # Attempting to run Django system checks to reproduce the issue
+        call_command('check')
+        print("Issue resolved")
+    except SystemCheckError as e:
+        # Check if the specific TypeError message is present
+        if "TypeError: unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_many_to_many_rel_through_fields()
+```
+
+This script sets up the test models according to the provided example and then runs Django's system checks to trigger the error. It will print "Issue reproduced" if the specific TypeError is encountered, "Issue resolved" if no issues are found, and "Other issues" for any other errors. This allows you to determine whether the issue described is reproducible and whether it has been fixed after applying a potential solution.
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+from django.core.management import call_command
+from django.db import models
+from django.core.checks import run_checks
+import sys
+import io
+
+# Redirect stdout to capture Django management command output
+old_stdout = sys.stdout
+new_stdout = io.StringIO()
+sys.stdout = new_stdout
+
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+try:
+    # Run checks to reproduce the issue
+    run_checks()
+    output = new_stdout.getvalue()
+    if "unhashable type: 'list'" in output:
+        print("Issue reproduced")
+    else:
+        print("Issue resolved")
+except Exception as e:
+    print("Other issues")
+
+# Reset stdout
+sys.stdout = old_stdout
+```
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import SystemCheckError
+
+def test_m2m_make_hashable_issue():
+    # Define the models to reproduce the issue
+    class Parent(models.Model):
+        name = models.CharField(max_length=256)
+
+    class ProxyParent(Parent):
+        class Meta:
+            proxy = True
+
+    class Child(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+        many_to_many_field = models.ManyToManyField(
+            to=Parent,
+            through="ManyToManyModel",
+            through_fields=['child', 'parent'],
+            related_name="something"
+        )
+
+    class ManyToManyModel(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+    try:
+        # This command will trigger the checks, running into the issue or not
+        call_command('check')
+    except SystemCheckError as e:
+        error_message = str(e)
+        if "unhashable type: 'list'" in error_message:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return
+
+    print("Issue resolved")
+
+# Run the test
+test_m2m_make_hashable_issue()
+```
+
+### Explanation
+1. **Imports**:
+   - Import necessary modules and functions from `django.db`, `django.core.management`, and `django.core.management.base`.
+
+2. **Model Definitions**:
+   - Define the `Parent`, `ProxyParent`, `Child`, and `ManyToManyModel` models as per the issue description.
+
+3. **Test Function**:
+   - Define a test function `test_m2m_make_hashable_issue()` that includes the model definitions within it so they are scoped to the function (typically, in a real test, these would be in a separate test models file).
+   - Attempt to run Django's `check` command which would trigger the issue if it is present.
+   - Catch a `SystemCheckError` and verify if the error message contains "unhashable type: 'list'" to confirm the issue has been reproduced.
+   - Print appropriate messages based on the outcome.
+
+4. **Run the Test**:
+   - Call the test function to execute the test.
+
+This test setup will allow you to both reproduce the issue and verify if the issue has been fixed once the necessary changes are applied.
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+from django.core.management import call_command
+from django.db import models, connection
+from django.core.management.base import SystemCheckError
+
+# Models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_missing_make_hashable_issue():
+    try:
+        # Run checks to trigger the issue
+        call_command('check')
+    except SystemCheckError as e:
+        error_message = str(e)
+        if 'unhashable type: \'list\'' in error_message:
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    else:
+        print("Issue resolved")
+
+# Run the test
+test_missing_make_hashable_issue()
+```
+
+### Explanation:
+1. **Necessary Imports**: Included Django's `models`, `call_command`, and `SystemCheckError` for managing models, running management commands, and handling system check errors respectively.
+2. **Code to Reproduce the Issue**: Defined the models `Parent`, `ProxyParent`, `Child`, and `ManyToManyModel` as described in the issue.
+3. **Print Messages**:
+   - "Issue reproduced" if the specific `TypeError: unhashable type: 'list'` is raised.
+   - "Other issues" if any other error is raised.
+   - "Issue resolved" if no errors are raised.
+4. **Test Function**: Defined `test_missing_make_hashable_issue` function to encapsulate the test logic and print the appropriate message based on the outcome.
+5. **Run the Test**: Called the `test_missing_make_hashable_issue` function at the end to execute the test.
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import SystemCheckError
+
+def test_many_to_many_rel_through_fields_issue():
+    class Parent(models.Model):
+        name = models.CharField(max_length=256)
+
+    class ProxyParent(Parent):
+        class Meta:
+            proxy = True
+
+    class Child(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+        many_to_many_field = models.ManyToManyField(
+            to=Parent,
+            through="ManyToManyModel",
+            through_fields=['child', 'parent'],
+            related_name="something"
+        )
+
+    class ManyToManyModel(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+    
+    try:
+        call_command('check')
+    except SystemCheckError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+
+    print("Issue resolved")
+
+test_many_to_many_rel_through_fields_issue()
+```
+
+This test script will help you determine whether the issue described in the issue text regarding the missing `make_hashable` call on `through_fields` in `ManyToManyRel` is present (i.e., "Issue reproduced") or has been resolved (i.e., "Issue resolved"). If any other issues are found, it will print "Other issues".
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import execute_from_command_line
+import sys
+import traceback
+
+# Define models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_issue_reproduction():
+    try:
+        # Simulate running Django management command to trigger the issue
+        execute_from_command_line(["manage.py", "check"])
+    except TypeError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+            return
+        else:
+            print("Other issues")
+            print(traceback.format_exc())
+            return
+    except Exception as e:
+        print("Other issues")
+        print(traceback.format_exc())
+        return
+
+    # If no error, the issue is resolved
+    print("Issue resolved")
+
+# Test the issue reproduction
+if __name__ == "__main__":
+    test_issue_reproduction()
+```
+
+In this script:
+1. Necessary imports are included.
+2. Models are defined as per the issue description to reproduce the problem.
+3. The Django management command `check` is executed.
+4. The script prints "Issue reproduced" if a `TypeError` with "unhashable type: 'list'" is raised.
+5. The script prints "Other issues" for any other exceptions.
+6. The script prints "Issue resolved" if no exceptions are raised.
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+# Import necessary Django modules for testing
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import SystemCheckError
+
+# Define the models to reproduce the issue described in the issue text
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_issue():
+    try:
+        # Attempt to run Django checks that will trigger the issue
+        call_command('check')
+    except SystemCheckError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    else:
+        print("Issue resolved")
+
+# Run the test function to verify if the issue is reproduced or resolved
+test_issue()
+```
+
+In this script:
+1. The necessary Django modules are imported.
+2. The models are defined to reproduce the issue described in the issue text.
+3. The `test_issue` function attempts to run `call_command('check')` to trigger the issue.
+4. The function catches `SystemCheckError` and checks if the error message contains "unhashable type: 'list'".
+5. Depending on the outcome, it prints "Issue reproduced", "Issue resolved", or "Other issues".
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+import os
+import django
+from django.conf import settings
+from django.core.management import call_command
+from django.db import models
+
+# Django settings for the test
+settings.configure(
+    DEBUG=True,
+    USE_TZ=True,
+    DATABASES={
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    },
+    INSTALLED_APPS=[
+        __name__,  # Current module for models
+    ]
+)
+django.setup()
+
+# Models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_many_to_many_rel_issue():
+    try:
+        # Run Django checks to trigger the issue
+        call_command('check')
+    except TypeError as e:
+        if 'unhashable type: \'list\'' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+    else:
+        print("Issue resolved")
+
+if __name__ == "__main__":
+    test_many_to_many_rel_issue()
+```
+2025-05-03 14:08:12,601 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import BaseCommand
+from django.test import TestCase
+import sys
+import io
+
+
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+
+class TestManyToManyRel(TestCase):
+
+    def test_issue_reproduction(self):
+        buffer = io.StringIO()
+        sys.stdout = buffer
+        try:
+            call_command('check')
+            output = buffer.getvalue()
+            if "TypeError: unhashable type: 'list'" in output:
+                print("Issue reproduced")
+            else:
+                print("Issue resolved")
+        except Exception as e:
+            print("Other issues")
+            print(e)
+        finally:
+            sys.stdout = sys.__stdout__
+
+
+if __name__ == "__main__":
+    TestManyToManyRel().test_issue_reproduction()
+```
+
+Explanation:
+1. The code defines the Django models `Parent`, `ProxyParent`, `Child`, and `ManyToManyModel` to reproduce the issue described in the issue text.
+2. The `TestManyToManyRel` class contains a test method `test_issue_reproduction` that uses Django's `call_command` function to run the `check` management command.
+3. Output is captured and checked for the specific `TypeError: unhashable type: 'list'` to determine if the issue is reproduced.
+4. Appropriate messages ("Issue reproduced", "Issue resolved", "Other issues") are printed based on the outcome of the test.
+5. The test is executed when the script is run directly.
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.checks import run_checks
+import sys
+
+def test_many_to_many_rel_issue():
+    class Parent(models.Model):
+        name = models.CharField(max_length=256)
+
+    class ProxyParent(Parent):
+        class Meta:
+            proxy = True
+
+    class Child(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+        many_to_many_field = models.ManyToManyField(
+            to=Parent,
+            through="ManyToManyModel",
+            through_fields=['child', 'parent'],
+            related_name="something"
+        )
+
+    class ManyToManyModel(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+    try:
+        # Mimic the Django management command to trigger the issue
+        call_command('check')
+    except TypeError as e:
+        if 'unhashable type: \'list\'' in str(e):
+            print("Issue reproduced")
+            return
+        else:
+            print("Other issues")
+            return
+    except Exception as e:
+        print("Other issues")
+        return
+
+    # If no exception is raised, assume the issue has been resolved
+    print("Issue resolved")
+
+# Execute the test function
+test_many_to_many_rel_issue()
+```
+
+In the provided test, the Django models are defined within the test function to mimic the issue environment. The `call_command('check')` function is used to simulate running a management command and trigger the checks that would raise the `TypeError`. Depending on the outcome, appropriate messages are printed to indicate whether the issue is reproduced, resolved, or if other issues are present.
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+import django
+from django.conf import settings
+from django.core.management import call_command
+from django.core.management.base import CommandError
+from django.db import models
+
+# Configure Django settings programmatically
+settings.configure(
+    DEBUG=True,
+    INSTALLED_APPS=[
+        'django.contrib.contenttypes',
+        '__main__',  # current module as an app
+    ],
+    DATABASES={
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    },
+)
+
+# Initialize Django
+django.setup()
+
+# Define models as described in the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_m2m_through_fields_issue():
+    try:
+        # Run Django's checks to trigger the issue
+        call_command('check')
+        print("Issue resolved")
+    except CommandError as e:
+        if 'unhashable type: \'list\'' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_m2m_through_fields_issue()
+```
+
+This test script sets up a Django environment, defines the models as described in the issue, and uses the `check` management command to reproduce the issue. It prints "Issue reproduced" if the specific `TypeError: unhashable type: 'list'` is encountered, "Issue resolved" if no issues are found, and "Other issues" if any other issues are encountered.
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+import sys
+from django.core.management import execute_from_command_line
+from django.db import models
+
+# Define models
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+    
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_issue_reproduction():
+    try:
+        # Running Django management command to trigger the issue
+        execute_from_command_line([sys.argv[0], 'check'])
+    except TypeError as e:
+        # Check if the error is the one we expect
+        if 'unhashable type: \'list\'' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues: ", str(e))
+    else:
+        print("Issue resolved")
+
+# Run the test
+if __name__ == "__main__":
+    test_issue_reproduction()
+```
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.checks import run_checks
+import sys
+
+def test_many_to_many_rel_issue():
+    class Parent(models.Model):
+        name = models.CharField(max_length=256)
+
+    class ProxyParent(Parent):
+        class Meta:
+            proxy = True
+
+    class Child(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+        many_to_many_field = models.ManyToManyField(
+            to=Parent,
+            through="ManyToManyModel",
+            through_fields=['child', 'parent'],
+            related_name="something"
+        )
+
+    class ManyToManyModel(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+    try:
+        # Run management check command
+        call_command('check')
+        print("Issue resolved")
+    except TypeError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues:", e)
+
+# Run the test
+test_many_to_many_rel_issue()
+```
+
+This test function will attempt to reproduce the issue as described. It will print "Issue resolved" if the `check` command runs without encountering the `TypeError`. If it encounters the specific `TypeError` related to the unhashable list, it will print "Issue reproduced". Any other exceptions or issues will result in "Other issues" being printed.
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+from django.core.management import call_command
+from django.db import models
+import sys
+import io
+
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_issue():
+    # Redirect stderr to capture error messages from the management command
+    stderr = io.StringIO()
+    sys.stderr = stderr
+
+    try:
+        call_command('check')
+    except TypeError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+        return
+    finally:
+        # Reset stderr
+        sys.stderr = sys.__stderr__
+
+    # If no exception occurred, check the output for any error messages
+    stderr_output = stderr.getvalue()
+    if "TypeError: unhashable type: 'list'" in stderr_output:
+        print("Issue reproduced")
+    elif len(stderr_output) == 0:
+        print("Issue resolved")
+    else:
+        print("Other issues")
+
+test_issue()
+```
+
+This test script will set up the required Django models and run the management command `check` to see if it reproduces the issue. It captures and analyzes any exceptions or error messages to determine if the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+import sys
+import io
+
+def test_many_to_many_rel_through_fields():
+    class Parent(models.Model):
+        name = models.CharField(max_length=256)
+    
+    class ProxyParent(Parent):
+        class Meta:
+            proxy = True
+    
+    class Child(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+        many_to_many_field = models.ManyToManyField(
+            to=Parent,
+            through="ManyToManyModel",
+            through_fields=['child', 'parent'],
+            related_name="something"
+        )
+    
+    class ManyToManyModel(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+    # Redirect stdout to capture the management command output
+    old_stdout = sys.stdout
+    sys.stdout = mystdout = io.StringIO()
+
+    try:
+        call_command('check')
+    except TypeError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    else:
+        print("Issue resolved")
+
+    # Reset stdout
+    sys.stdout = old_stdout
+    output = mystdout.getvalue()
+    print(output)
+
+test_many_to_many_rel_through_fields()
+```
+
+This script defines the models to reproduce the issue and runs Django's `check` management command, capturing its output. Depending on the result, it prints whether the issue has been reproduced, resolved, or if there are other issues.
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import SystemCheckError
+
+def test_missing_make_hashable_in_manytomanyrel():
+    try:
+        class Parent(models.Model):
+            name = models.CharField(max_length=256)
+        
+        class ProxyParent(Parent):
+            class Meta:
+                proxy = True
+        
+        class Child(models.Model):
+            parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+            many_to_many_field = models.ManyToManyField(
+                to=Parent,
+                through="ManyToManyModel",
+                through_fields=['child', 'parent'],
+                related_name="something"
+            )
+        
+        class ManyToManyModel(models.Model):
+            parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+            child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+            second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+        
+        # Attempting to run the check to see if the issue is reproduced
+        try:
+            call_command('check')
+            print("Issue resolved")
+        except SystemCheckError as e:
+            if "TypeError: unhashable type: 'list'" in str(e):
+                print("Issue reproduced")
+            else:
+                print("Other issues")
+    except Exception as ex:
+        print("Other issues", ex)
+
+test_missing_make_hashable_in_manytomanyrel()
+```
+
+This script will:
+1. Import the necessary modules from Django.
+2. Define the models as described in the issue text.
+3. Attempt to run Django's system check command.
+4. Print "Issue resolved" if the check passes without raising the specified `TypeError`.
+5. Print "Issue reproduced" if the `TypeError` indicating the missing `make_hashable` call is raised.
+6. Print "Other issues" if any other exception or error is encountered.
+2025-05-03 14:08:12,602 - INFO - raw output:
+Certainly! Below is the complete test that can be used to reproduce the issue described in the provided issue text:
+
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import SystemCheckError
+
+# Define the models as described in the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_many_to_many_rel_issue():
+    try:
+        # This would normally check for issues with the models
+        call_command('check')
+        print("Issue resolved")
+    except SystemCheckError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_many_to_many_rel_issue()
+```
+
+### Explanation:
+1. **Imports and Model Definitions**: The necessary imports and model definitions are included to reproduce the issue.
+2. **Management Command Execution**: The `call_command('check')` command is used to run Django's system checks, which would trigger the error described in the issue.
+3. **Error Handling**: The error is caught and inspected. If the specific `unhashable type: 'list'` error is present, it prints "Issue reproduced".
+4. **Outcome Messages**: It prints "Issue resolved" if no errors occur, indicating the issue has been fixed. It prints "Other issues" if any other issues are encountered.
+
+This test can be used both to reproduce the issue and verify if it has been fixed.
+2025-05-03 14:08:12,602 - INFO - raw output:
+Certainly! Below is the detailed test script that includes the necessary imports, code to reproduce the issue described in your issue text, and prints suitable messages based on the outcome.
+
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import CommandError
+import sys
+import io
+
+def test_issue_with_many_to_many_rel():
+    class Parent(models.Model):
+        name = models.CharField(max_length=256)
+    
+    class ProxyParent(Parent):
+        class Meta:
+            proxy = True
+    
+    class Child(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+        many_to_many_field = models.ManyToManyField(
+            to=Parent,
+            through="ManyToManyModel",
+            through_fields=['child', 'parent'],
+            related_name="something"
+        )
+    
+    class ManyToManyModel(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+    
+    # Redirect stdout to capture manage.py check output
+    old_stdout = sys.stdout
+    sys.stdout = io.StringIO()
+    
+    try:
+        call_command('check')
+        output = sys.stdout.getvalue()
+        if "unhashable type: 'list'" in output:
+            print("Issue reproduced")
+        else:
+            print("Issue resolved")
+    except CommandError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    finally:
+        # Reset stdout
+        sys.stdout = old_stdout
+
+test_issue_with_many_to_many_rel()
+```
+
+This script does the following:
+1. Defines the models as specified in the issue text.
+2. Redirects the standard output to capture the `check` command output.
+3. Executes the `check` command.
+4. Analyzes the output to determine if the issue is reproduced, resolved, or if there are other issues.
+5. Resets the standard output back to its original state.
+
+This test script should be able to reproduce the issue and validate if the issue has been resolved once the necessary fix is applied.
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import SystemCheckError
+
+def test_many_to_many_rel_through_fields():
+    try:
+        class Parent(models.Model):
+            name = models.CharField(max_length=256)
+
+        class ProxyParent(Parent):
+            class Meta:
+                proxy = True
+
+        class Child(models.Model):
+            parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+            many_to_many_field = models.ManyToManyField(
+                to=Parent,
+                through="ManyToManyModel",
+                through_fields=['child', 'parent'],
+                related_name="something"
+            )
+
+        class ManyToManyModel(models.Model):
+            parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+            child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+            second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+        
+        # Perform Django system check to see if the issue is reproduced
+        call_command('check')
+        print("Issue resolved")
+    except SystemCheckError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_many_to_many_rel_through_fields()
+```
+
+This test script follows the steps outlined in the issue description to reproduce the problem. Here's a brief explanation of the logic:
+
+1. **Necessary imports**: We import `models` from `django.db` and `call_command` and `SystemCheckError` from `django.core.management`.
+2. **Code to reproduce the issue**: Classes `Parent`, `ProxyParent`, `Child`, and `ManyToManyModel` are defined as described in the issue text.
+3. **Check for the issue**: Use `call_command('check')` to execute the Django system check, which should trigger the issue.
+4. **Outcome checks**:
+   - If the issue is reproduced, it will catch a `SystemCheckError` with the message "unhashable type: 'list'" and print "Issue reproduced".
+   - If `call_command('check')` executes without raising the specific issue, it prints "Issue resolved".
+   - If any other error occurs, it prints "Other issues".
+
+This test can be used both to confirm the presence of the issue and to verify that the issue has been resolved once the appropriate fix has been applied.
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+import django
+from django.db import models
+from django.core.management import execute_from_command_line
+import sys
+
+def test_missing_make_hashable_in_manytomanyrel():
+    try:
+        # Setup Django settings
+        django.setup()
+
+        # Define the models
+        class Parent(models.Model):
+            name = models.CharField(max_length=256)
+
+        class ProxyParent(Parent):
+            class Meta:
+                proxy = True
+
+        class Child(models.Model):
+            parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+            many_to_many_field = models.ManyToManyField(
+                to=Parent,
+                through="ManyToManyModel",
+                through_fields=['child', 'parent'],
+                related_name="something"
+            )
+
+        class ManyToManyModel(models.Model):
+            parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+            child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+            second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+        # Simulate Django management command execution to trigger the check
+        try:
+            execute_from_command_line(['manage.py', 'check'])
+        except TypeError as e:
+            if 'unhashable type: \'list\'' in str(e):
+                print("Issue reproduced")
+                return
+            else:
+                print("Other issues")
+                return
+        except Exception as e:
+            print(f"Other issues: {e}")
+            return
+
+        print("Issue resolved")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+# Test the function
+test_missing_make_hashable_in_manytomanyrel()
+```
+
+Explanation:
+1. The necessary imports are included.
+2. The models are defined as per the issue description.
+3. The `execute_from_command_line` function is used to simulate running a Django management command, which will invoke the checks that should reproduce the issue.
+4. Error handling is implemented to determine if the specific issue described (TypeError: unhashable type: 'list') is reproduced.
+5. Appropriate print statements are provided to indicate the result of the test.
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+import django
+from django.conf import settings
+from django.core.management import call_command
+from django.db import models
+
+# Setting up a minimal Django environment
+settings.configure(
+    INSTALLED_APPS=[
+        'django.contrib.contenttypes',
+        __name__,
+    ],
+    DATABASES={
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    },
+)
+
+django.setup()
+
+# Models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_reproduce_issue():
+    try:
+        # This will check the models and should fail if the issue is present
+        call_command('check')
+        print("Issue resolved")
+    except TypeError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_reproduce_issue()
+```
+
+This script sets up a minimal Django environment and defines the models as described in the issue text. It then runs Django's `check` management command to verify if the issue is present. The script captures the specific `TypeError` regarding the unhashable type and prints "Issue reproduced" if this error is encountered. If the `check` command passes without errors, it prints "Issue resolved". Any other exceptions are caught and the script prints "Other issues".
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import execute_from_command_line
+import sys
+import os
+
+# Define the models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+# Test function to reproduce the issue
+def test_issue_reproduction():
+    try:
+        # Setup Django environment
+        os.environ['DJANGO_SETTINGS_MODULE'] = '__main__'
+        sys.argv = ['manage.py', 'check']
+        
+        # Define dummy settings
+        import django.conf
+        django.conf.settings.configure(
+            DEBUG=True,
+            DATABASES={'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }},
+            INSTALLED_APPS=['__main__'],
+        )
+        
+        # Run management command to trigger the issue
+        execute_from_command_line(sys.argv)
+    except TypeError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+    else:
+        print("Issue resolved")
+
+# Execute the test
+test_issue_reproduction()
+```
+
+This test script sets up a Django environment in memory, defines the models that reproduce the issue, and runs the `check` management command to trigger the issue. Based on the outcome, it prints whether the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.conf import settings
+import sys
+import os
+
+# Create a temporary settings module
+settings.configure(
+    DATABASES={
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    },
+    INSTALLED_APPS=[
+        'django.contrib.contenttypes',
+        # Add our test app
+        'test_app',
+    ]
+)
+
+import django
+django.setup()
+
+# Create a new Django app called test_app
+if not os.path.exists('test_app'):
+    os.makedirs('test_app')
+
+with open('test_app/models.py', 'w') as f:
+    f.write("""
+from django.db import models
+
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+""")
+
+with open('test_app/__init__.py', 'w') as f:
+    f.write("")
+
+def test_missing_make_hashable():
+    try:
+        call_command('makemigrations', 'test_app')
+        call_command('migrate', 'test_app')
+        call_command('check')
+    except TypeError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+            return
+        else:
+            print("Other issues")
+            return
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return
+
+    print("Issue resolved")
+
+test_missing_make_hashable()
+```
+
+This script will:
+1. Set up a temporary Django settings module with a SQLite in-memory database.
+2. Create a new Django app called `test_app`.
+3. Define the models as described in the issue.
+4. Attempt to run Django management commands `makemigrations`, `migrate`, and `check`, catching any `TypeError` related to the unhashable list issue.
+5. Print the appropriate message based on whether the issue is reproduced, resolved, or if there are other issues.
+2025-05-03 14:08:12,602 - INFO - raw output:
+Certainly! Below is a complete test script that follows the provided structure to reproduce the issue described in your issue text. This script includes necessary imports, code to reproduce the issue, appropriate print statements, and assertions to verify if the issue has been resolved or is still present.
+
+```python
+import django
+from django.db import models
+from django.core.management import call_command
+from django.conf import settings
+
+# Configure settings for Django
+settings.configure(
+    DATABASES={
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    },
+    INSTALLED_APPS=[
+        __name__,
+    ],
+)
+
+# Initialize Django
+django.setup()
+
+# Define models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+# Test function to reproduce the issue
+def test_many_to_many_rel_issue():
+    try:
+        call_command('check')
+    except TypeError as e:
+        if 'unhashable type: \'list\'' in str(e):
+            print("Issue reproduced")
+            return
+        else:
+            print("Other issues")
+            return
+    except Exception as e:
+        print(f"Other issues: {e}")
+        return
+
+    print("Issue resolved")
+
+# Run the test
+test_many_to_many_rel_issue()
+```
+
+This script sets up a minimal Django environment in-memory for testing purposes and defines the models as described in the issue. It then runs the `check` management command, which triggers the issue. Depending on the outcome, it prints "Issue reproduced", "Issue resolved", or "Other issues".
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+import sys
+from django.core.management import execute_from_command_line
+from django.db import models
+
+# Define models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through='ManyToManyModel',
+        through_fields=['child', 'parent'],
+        related_name='something'
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_many_to_many_through_fields_issue():
+    try:
+        # Initialize Django settings
+        settings_config = {
+            'INSTALLED_APPS': ['__main__'],
+            'DATABASES': {
+                'default': {
+                    'ENGINE': 'django.db.backends.sqlite3',
+                    'NAME': ':memory:',
+                }
+            }
+        }
+        
+        import django
+        from django.conf import settings
+
+        settings.configure(**settings_config)
+        django.setup()
+
+        # Run Django checks to see if the issue is reproduced
+        execute_from_command_line(['manage.py', 'check'])
+        print("Issue resolved")
+    except TypeError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print("Other issues")
+
+test_many_to_many_through_fields_issue()
+```
+
+This script sets up a minimal Django environment in memory, defines the models as described in the issue, and runs Django's system checks to determine if the `TypeError: unhashable type: 'list'` issue is reproduced. It prints "Issue reproduced" if the specific error is encountered, "Issue resolved" if no errors occur, and "Other issues" if any other exceptions are raised.
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+import sys
+import io
+
+# Define the models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_issue():
+    try:
+        # Redirect stdout to capture the management command output
+        old_stdout = sys.stdout
+        new_stdout = io.StringIO()
+        sys.stdout = new_stdout
+
+        # Run the check management command to trigger the issue
+        call_command('check')
+
+        # Restore stdout
+        sys.stdout = old_stdout
+        output = new_stdout.getvalue()
+
+        if "unhashable type: 'list'" in output:
+            print("Issue reproduced")
+        elif "System check identified no issues" in output:
+            print("Issue resolved")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {e}")
+
+test_issue()
+```
+2025-05-03 14:08:12,602 - INFO - raw output:
+Certainly! Below is a Python script that tests the described issue in a Django environment. This script includes necessary imports, the code to reproduce the issue, and logic to determine if the issue is reproduced or resolved.
+
+```python
+import os
+import django
+from django.core.management import call_command
+from django.db import models, connection
+
+# Ensure settings are configured for Django
+os.environ['DJANGO_SETTINGS_MODULE'] = 'test_project.settings'
+django.setup()
+
+# Define models to reproduce the issue
+class Parent(models.Model):
+    name = models.CharField(max_length=256)
+
+class ProxyParent(Parent):
+    class Meta:
+        proxy = True
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    many_to_many_field = models.ManyToManyField(
+        to=Parent,
+        through="ManyToManyModel",
+        through_fields=['child', 'parent'],
+        related_name="something"
+    )
+
+class ManyToManyModel(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+    second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+def test_issue():
+    try:
+        # Call `makemigrations` and `migrate` to initialize the database
+        call_command('makemigrations', interactive=False)
+        call_command('migrate', interactive=False)
+
+        # If makemigrations and migrate pass without issues
+        print("Issue resolved")
+    except TypeError as e:
+        if 'unhashable type: \'list\'' in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    except Exception as e:
+        print(f"Other issues: {str(e)}")
+
+if __name__ == "__main__":
+    test_issue()
+```
+
+### Explanation:
+1. **Imports:**
+   - `os`, `django`, `call_command`: Essential imports for setting up and managing Django.
+   - `models`, `connection`: Necessary for defining Django models and database interaction.
+
+2. **Django Settings and Setup:**
+   - Ensures that Django settings are properly configured and initialized.
+
+3. **Model Definitions:**
+   - `Parent`, `ProxyParent`, `Child`, `ManyToManyModel`: Models as described in the issue text.
+
+4. **Test Function:**
+   - `test_issue`: Function that attempts to run `makemigrations` and `migrate`. It catches errors to determine if the issue is reproduced or resolved.
+   - Prints "Issue resolved" if migrations succeed.
+   - Prints "Issue reproduced" if the specific TypeError is caught.
+   - Prints "Other issues" for any other exceptions.
+
+5. **Execution:**
+   - The script executes `test_issue` if run as the main module.
+
+Make sure to replace `'test_project.settings'` with the actual settings module path of your Django project when using this script. This script assumes that the Django environment is correctly configured and that the necessary settings for running Django are in place.
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+from django.db import models, connection
+from django.core.management import call_command
+import sys
+
+def test_many_to_many_through_fields_issue():
+    try:
+        # Define the models to reproduce the issue
+        class Parent(models.Model):
+            name = models.CharField(max_length=256)
+
+        class ProxyParent(Parent):
+            class Meta:
+                proxy = True
+
+        class Child(models.Model):
+            parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+            many_to_many_field = models.ManyToManyField(
+                to=Parent,
+                through="ManyToManyModel",
+                through_fields=['child', 'parent'],
+                related_name="something"
+            )
+
+        class ManyToManyModel(models.Model):
+            parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+            child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+            second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+        # Mock the sys.argv to avoid running the management command directly
+        sys.argv = ['manage.py', 'check']
+
+        try:
+            # Run Django system checks to catch the issue
+            call_command('check')
+        except TypeError as e:
+            if str(e) == "unhashable type: 'list'":
+                print("Issue reproduced")
+                return
+            else:
+                print("Other issues")
+                return
+
+        print("Issue resolved")
+
+    except Exception as e:
+        print("Other issues")
+        return
+
+test_many_to_many_through_fields_issue()
+```
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import SystemCheckError
+
+def test_many_to_many_rel_through_fields_issue():
+    class Parent(models.Model):
+        name = models.CharField(max_length=256)
+
+    class ProxyParent(Parent):
+        class Meta:
+            proxy = True
+
+    class Child(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+        many_to_many_field = models.ManyToManyField(
+            to=Parent,
+            through="ManyToManyModel",
+            through_fields=['child', 'parent'],
+            related_name="something"
+        )
+
+    class ManyToManyModel(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+    try:
+        call_command('check')
+        print("Issue resolved")
+    except SystemCheckError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+test_many_to_many_rel_through_fields_issue()
+```
+2025-05-03 14:08:12,602 - INFO - raw output:
+```python
+from django.db import models
+from django.core.management import call_command
+from django.core.management.base import SystemCheckError
+
+def run_migration_check():
+    class Parent(models.Model):
+        name = models.CharField(max_length=256)
+
+    class ProxyParent(Parent):
+        class Meta:
+            proxy = True
+
+    class Child(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+        many_to_many_field = models.ManyToManyField(
+            to=Parent,
+            through="ManyToManyModel",
+            through_fields=['child', 'parent'],
+            related_name="something"
+        )
+
+    class ManyToManyModel(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+    try:
+        call_command('check')
+        print("Issue resolved")
+    except SystemCheckError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+
+if __name__ == "__main__":
+    run_migration_check()
+```
+2025-05-03 14:08:12,603 - INFO - raw output:
+```python
+from django.db import models, connection
+from django.core.management import call_command
+from django.core.management.base import SystemCheckError
+
+def test_missing_make_hashable_call():
+    class Parent(models.Model):
+        name = models.CharField(max_length=256)
+
+    class ProxyParent(Parent):
+        class Meta:
+            proxy = True
+
+    class Child(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+        many_to_many_field = models.ManyToManyField(
+            to=Parent,
+            through="ManyToManyModel",
+            through_fields=['child', 'parent'],
+            related_name="something"
+        )
+
+    class ManyToManyModel(models.Model):
+        parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='+')
+        child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='+')
+        second_child = models.ForeignKey(Child, on_delete=models.CASCADE, null=True, default=None)
+
+    try:
+        call_command('check')
+    except SystemCheckError as e:
+        if "unhashable type: 'list'" in str(e):
+            print("Issue reproduced")
+        else:
+            print("Other issues")
+    else:
+        print("Issue resolved")
+
+test_missing_make_hashable_call()
+```
+This script tests for the issue described in the provided issue text. It sets up the models as defined in the minimal reproduction example and then calls Django's management command `check` to see if the issue is reproduced. Depending on the outcome, it prints the appropriate message:
+- "Issue reproduced" if the specific `TypeError: unhashable type: 'list'` is encountered.
+- "Other issues" if other errors are encountered.
+- "Issue resolved" if no errors are encountered.
