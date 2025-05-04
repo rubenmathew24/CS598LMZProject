@@ -173,19 +173,20 @@ def main():
     parser.add_argument(
         "--model",
         type=str,
-        default="gpt-4o-2024-05-13",
+        default="gemini-2.5-pro-preview-03-25",
         choices=[
             "gpt-4o-2024-05-13",
             "deepseek-coder",
             "gpt-4o-mini-2024-07-18",
             "claude-3-5-sonnet-20241022",
+            "gemini-2.5-pro-preview-03-25",
         ],
     )
     parser.add_argument(
         "--backend",
         type=str,
-        default="openai",
-        choices=["openai", "deepseek", "anthropic"],
+        default="gemini",
+        choices=["openai", "deepseek", "anthropic", "gemini"],
     )
     parser.add_argument("--output_folder", type=str, required=True)
     parser.add_argument("--target_id", type=str)
