@@ -22,12 +22,12 @@ def find_domain(url:str) -> str:
 	return domain
 
 
-def grab_stackoverflow_urls(topic:str, num_results=50, max_results=50):
+def grab_stackoverflow_urls(topic:str, num_results=10, max_results=5):
 	urls = []
 
 	# Grab all StackOverflow URLs in the first 50 results from google
 	try:
-		for url in tqdm(search(topic, stop=num_results, pause=2), desc=f"Getting top {num_results} results", total=num_results, colour="YELLOW", leave=False):
+		for url in tqdm(search(topic, num_results=num_results, sleep_interval=2), desc=f"Getting top {num_results} results", total=num_results, colour="YELLOW", leave=False):
 			domain = find_domain(url)
 			if domain == "stackoverflow":
 				urls.append(url)
@@ -125,6 +125,8 @@ if __name__ == "__main__":
 		os.mkdir(LOG_FOLDER)
 
 	for topic_id, topic in tqdm(topics.items(), desc="Topics Completed", colour="green", total=len(topics)):
+         # Augment Search Query
+		topic = "site:stackoverflow.com " + topic	
 		urls = grab_stackoverflow_urls(topic)
 		# print(*urls, sep="\n")
 
