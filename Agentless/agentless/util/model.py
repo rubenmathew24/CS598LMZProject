@@ -170,7 +170,7 @@ Notes for using the `str_replace` command:
             response_content = []
 
             for json_message in json_response["content"]:
-                if json_message["type"] == "tool_use":
+                if (json_message["type"] == "tool_use"):
                     contains_tool = True
                     # each tool use requires a response
                     response_content.append(
@@ -406,48 +406,78 @@ class GeminiChatDecoder(DecoderBase):
         else:
             self.real_model = self.name
 
+    def _send_message_safely(self, message):
+        """Thread-safe wrapper for sending messages to Gemini API"""
+        try:
+            # Create a new event loop for this thread
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            # Create a chat session
+            chat = self.client.aio.chats.create(
+                model=self.real_model,
+                config=types.GenerateContentConfig(
+                    temperature=self.temperature,
+                ),
+            )
+            
+            try:
+                # Run the async call in this new loop
+                response = loop.run_until_complete(chat.send_message([message]))
+                return response
+            finally:
+                # Clean up
+                loop.close()
+        except Exception as e:
+            self.logger.error(f"Error in Gemini API call: {str(e)}")
+            return None
+
     def codegen(self, message: str, num_samples: int = 1, prompt_cache: bool = False) -> List[dict]:
         """
         Generates content using Gemini and returns a list of trajectories.
         Each trajectory is a dict with keys "response" and "usage".
-        Mimics the behavior of other decoders by appending responses.
         """
         if self.temperature == 0:
             assert num_samples == 1
 
         self.logger.info(f"Gemini codegen: {num_samples} sample(s) at temperature {self.temperature}")
 
-        # Create the chat session using the Gemini API.
-        chat = self.client.aio.chats.create(
-            model=self.real_model,
-            config=types.GenerateContentConfig(
-                temperature=self.temperature,
-                # Include tools if needed; otherwise, leave it out.
-                # tools=[types.Tool(function_declarations=[...])]  # optional
-            ),
-        )
-
-        # Collect responses from Gemini.
+        # Collect responses from Gemini
         responses = []
         for i in range(num_samples):
             self.logger.info(f"Gemini generation {i+1}/{num_samples}")
-            # Here, chat.send_message([message]) might be asynchronous.
-            # If needed, wrap it with asyncio.run() or use the synchronous API.
-            reply = asyncio.run(chat.send_message([message]))
-            text_out = reply.text if reply else ""
-            responses.append(text_out)
+            
+            # Use thread-safe wrapper
+            reply = self._send_message_safely(message)
+            
+            if reply and hasattr(reply, 'text'):
+                responses.append(reply.text)
+            else:
+                self.logger.warning("Failed to get valid response from Gemini")
+                responses.append("")
 
-        # Build trajectory list similar to OpenAIChatDecoder.
+        # Build trajectory list similar to other decoders
         trajs = []
         if responses:
-            # First sample: include actual usage info (here, defaulting to zeros)
+            # First sample includes estimated token usage
+            if responses[0]:
+                # Estimate token counts (approx 1.3 tokens per word)
+                input_words = len(message.split())
+                output_words = len(responses[0].split())
+                prompt_tokens = max(1, int(input_words * 1.3))
+                completion_tokens = max(1, int(output_words * 1.3))
+            else:
+                prompt_tokens = 0
+                completion_tokens = 0
+                
             trajs.append({
                 "response": responses[0],
                 "usage": {
-                    "completion_tokens": 0,  # Update if Gemini returns actual values
-                    "prompt_tokens": 0,
+                    "completion_tokens": completion_tokens,
+                    "prompt_tokens": prompt_tokens,
                 },
             })
+            
             # Subsequent samples have zero usage (assuming cost is charged only once)
             for resp in responses[1:]:
                 trajs.append({
@@ -457,6 +487,16 @@ class GeminiChatDecoder(DecoderBase):
                         "prompt_tokens": 0,
                     },
                 })
+        else:
+            # Return empty response if all attempts failed
+            trajs.append({
+                "response": "",
+                "usage": {
+                    "completion_tokens": 0,
+                    "prompt_tokens": 0,
+                },
+            })
+            
         return trajs
 
     def is_direct_completion(self) -> bool:

@@ -506,6 +506,8 @@ def run_tests(
     print(f"Using run_id: {run_id}")
 
     split = "test"
+    print("HERE")
+    print(os.getenv("DOCKER_HOST"))
     client = docker.from_env()
     force_rebuild = False
 
@@ -523,7 +525,7 @@ def run_tests(
         }
 
     instances = get_dataset_from_preds(
-        dataset_name, split, instance_ids, predictions, run_id
+        dataset_name, split, instance_ids, predictions, run_id, True
     )
 
     print(f"Running {len(instances)} unevaluated instances...")
