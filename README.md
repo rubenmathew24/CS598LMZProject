@@ -86,3 +86,6 @@ These commands generate 5 samples each (1 greedy and 4 via temperature sampling)
 The above commands will combine to generate 20 samples in total for each bug.
 
 Follow the setup from the original Agentless github repository for the remaining steps to evaluate these patches using the regression and reproduction tests. The rerank command will generate a new preds.json, which can be test on SWE-Bench Lite. 
+
+# RAG
+Rag is set up in such a fashion as to allow the user to add arbitrary information (such as documentation) to the database and allow for it to be retrieved by the repair script when in the process of repair. The user must run the rag script `Agentless/agentless/repair/rag.py` with proper API keys for Gemini models. There are some urls there as a place holder, but the user can edit this to add more by changing the `target_urls` variable. Note, that due to how Gemini API is set up, it may run into rate limiting issues. 
