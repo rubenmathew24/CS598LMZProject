@@ -18,12 +18,12 @@ from swebench.harness.constants import (
 )
 from swebench.harness.docker_build import build_env_images
 from swebench.harness.run_evaluation import get_dataset_from_preds, run_instance
-from swebench.harness.test_spec.test_spec import (
+from swebench.harness.test_spec import (
     TestSpec,
     make_env_script_list,
     make_repo_script_list,
 )
-from swebench.harness.test_spec.python import get_test_directives
+from swebench.harness.utils import get_test_directives
 from tqdm import tqdm
 
 OPEN_FILE_LIMIT = 4096
@@ -525,7 +525,7 @@ def run_tests(
         }
 
     instances = get_dataset_from_preds(
-        dataset_name, split, instance_ids, predictions, run_id
+        dataset_name, split, instance_ids, predictions, run_id, True
     )
 
     print(f"Running {len(instances)} unevaluated instances...")

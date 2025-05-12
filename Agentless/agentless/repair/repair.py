@@ -29,6 +29,11 @@ from agentless.util.preprocess_data import (
 )
 from agentless.util.utils import cleanup_logger, load_jsonl, setup_logger
 
+from agentless.repair.rag import (
+    load_rag_index,
+    get_context_for_query
+)
+
 repair_relevant_file_instruction = """
 Below are some code segments, each from a relevant file. One or more of these files may contain bugs.
 """
@@ -44,6 +49,11 @@ We are currently solving the following issue within our repository. Here is the 
 {content}
 ```
 --- END FILE ---
+
+Here is some information from the documentation that might be useful:
+--- BEGIN DOCS ---
+{rag_information}
+--- END DOCS ---
 
 Please generate `edit_file` commands to fix the issue.
 
@@ -75,6 +85,11 @@ We are currently solving the following issue within our repository. Here is the 
 ```
 --- END FILE ---
 
+Here is some information from the documentation that might be useful:
+--- BEGIN DOCS ---
+{rag_information}
+--- END DOCS ---
+
 Please first localize the bug based on the issue statement, and then generate `edit_file` commands to fix the issue.
 
 The `edit_file` command takes four arguments:
@@ -104,6 +119,11 @@ We are currently solving the following issue within our repository. Here is the 
 {content}
 ```
 --- END FILE ---
+
+Here is some information from the documentation that might be useful:
+--- BEGIN DOCS ---
+{rag_information}
+--- END DOCS ---
 
 Please first localize the bug based on the issue statement, and then generate *SEARCH/REPLACE* edits to fix the issue.
 
@@ -143,6 +163,11 @@ We are currently solving the following issue within our repository. Here is the 
 {content}
 ```
 --- END FILE ---
+
+Here is some information from the documentation that might be useful:
+--- BEGIN DOCS ---
+{rag_information}
+--- END DOCS ---
 
 Please first localize the bug based on the issue statement, and then generate editing commands to fix the issue.
 """
@@ -391,10 +416,22 @@ def process_loc(loc, args, swe_bench_data, prev_o, write_lock=None):
         else repair_prompt_combine_topn
     )
     file_instruction = repair_relevant_file_instruction
+    
+    # !TODO
+    vector_index = load_rag_index()
+
+    rag_content = get_context_for_query(
+        query_text=problem_statement,
+        index=vector_index,
+        similarity_top_k=3 # Get 3 most relevant chunks
+    )
+    #! END TODO
+    
     message = prompt_template.format(
         repair_relevant_file_instruction=file_instruction,
         problem_statement=problem_statement,
         content=topn_content.rstrip(),
+        extra_context = rag_content #! CHANGED
     ).strip()
     logger.info(f"prompting with message:\n{message}")
 
